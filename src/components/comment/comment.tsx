@@ -1,8 +1,7 @@
 ﻿import { RootState } from "@/store";
 import { Comment } from "@ant-design/compatible";
-import { createSelector } from "@reduxjs/toolkit";
 import { Button, Form, FormInstance, Input, List, message } from "antd";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { commentCreate, commentDelete, commentType } from "../../api/comment";
@@ -151,20 +150,6 @@ const CommentForm = ({
   );
 };
 
-// 将选择器移到组件外部，并确保它是一个单例
-const makeSelectCommentData = () => {
-  return createSelector(
-    [(comments: commentType[]) => comments],
-    (comments) => ({
-      total: comments.length,
-      items: comments.map((comment) => ({
-        ...comment,
-        key: comment.id,
-      })),
-    })
-  );
-};
-
 /**
  * 评论区组件
  * 提供评论列表展示、发表评论、回复评论、删除评论等功能
@@ -187,10 +172,10 @@ export const CommentArea = ({
   const articleId = propArticleId || routeArticleId;
 
   // 4. 从 Redux 获取用户状态
-  const { isLoggedIn, userRole } = useSelector((state: RootState) => ({
-    isLoggedIn: state.web.user.isLogin,
-    userRole: state.web.user.userInfo?.role,
-  }));
+  const isLoggedIn = useSelector((state: RootState) => state.web.user.isLogin);
+  const userRole = useSelector(
+    (state: RootState) => state.web.user.userInfo?.role
+  );
   const isAdmin = userRole === "admin";
 
   // 5. 使用 useCallback 优化方法
@@ -278,21 +263,16 @@ export const CommentArea = ({
     [checkLogin, onCommentSuccess]
   );
 
-  // 在组件内创建记忆化的选择器实例
-  const selectCommentData = useMemo(makeSelectCommentData, []);
-
-  // 使用记忆化的选择器处理数据
-  const commentData = useMemo(
-    () => selectCommentData(comments),
-    [selectCommentData, comments]
-  );
-
-  // 记忆化评论列表渲染函数
-  const renderComments = useCallback(() => {
-    return commentData.items.map((comment) => (
+  // 6. 使用 useCallback 优化渲染评论方法
+  const renderComment = useCallback(
+    (comment: commentType, index: number) => (
       <Comment
-        key={comment.key}
-        author={comment.user.nick_name}
+        key={`${comment.id}-${index}`}
+        author={
+          <span className="text-slate-800 font-semibold text-base">
+            {comment.user.nick_name}
+          </span>
+        }
         content={
           <CommentContent
             comment={comment}
@@ -301,16 +281,27 @@ export const CommentArea = ({
             onDelete={() => articleId && handleDelete(comment.id, articleId)}
           />
         }
-        datetime={comment.created_at}
-      />
-    ));
-  }, [commentData.items, isAdmin, handleReply, handleDelete, articleId]);
+        datetime={
+          <span className="text-slate-500 text-sm">{comment.created_at}</span>
+        }
+        className="bg-slate-50 hover:bg-indigo-50/50 transition-colors duration-200 p-4 border-2 border-slate-300">
+        {comment.sub_comments?.map((subComment, subIndex) => (
+          <div
+            key={subComment.id}
+            className="pl-6 mt-4 border-l-2 border-indigo-200">
+            {renderComment(subComment, subIndex)}
+          </div>
+        ))}
+      </Comment>
+    ),
+    [handleDelete, handleReply, isAdmin]
+  );
 
   return (
     <div className={`bg-white border-2 border-slate-300 ${className}`}>
-      <div className="p-6 border-b-2 border-slate-300">
+      <div className="p-6 border-b-2 border-slate-300 bg-gradient-to-b from-white to-slate-50">
         <h3 className="text-xl font-bold text-slate-800 mb-4">
-          {`共 ${commentData.total} 条评论`}
+          {state.replyTo ? `回复 ${state.replyTo.name}` : "发表评论"}
         </h3>
         <CommentForm
           form={form}
@@ -326,13 +317,16 @@ export const CommentArea = ({
       </div>
       <List
         className="divide-y-2 divide-slate-300"
-        dataSource={commentData.items}
+        dataSource={comments || []}
+        header={
+          <div className="px-6 py-4 bg-slate-50 text-base font-semibold text-slate-800 border-b-2 border-slate-300">
+            {`${comments?.length || 0} 条评论`}
+          </div>
+        }
         itemLayout="horizontal"
-        renderItem={(item, index) => (
-          <div
-            key={item.key}
-            className="px-6 py-4 hover:bg-slate-50/50 transition-colors">
-            {renderComments()}
+        renderItem={(comment, index) => (
+          <div className="px-6 py-4 hover:bg-slate-50/50 transition-colors">
+            {renderComment(comment, index)}
           </div>
         )}
       />
