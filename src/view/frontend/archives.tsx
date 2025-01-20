@@ -46,7 +46,9 @@ const MonthGroup = ({
   articles: articleType[];
 }) => (
   <div className="border-l-2 border-blue-500 pl-4">
-    <h3 className="text-xl font-medium text-gray-600 mb-4">{month}月</h3>
+    <h3 className="text-xl font-medium text-gray-600 mb-4">
+      {year}年{month}月
+    </h3>
     <div className="space-y-3">
       {articles.map((article) => (
         <ArticleItem key={article.id} article={article} />
