@@ -7,7 +7,7 @@ import {
   EditOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { BackTop, Col, Empty, message, Row, Spin } from "antd";
+import { Col, Empty, FloatButton, message, Row, Spin } from "antd";
 import hljs from "highlight.js";
 import "highlight.js/styles/github.css";
 import MarkdownIt from "markdown-it";
@@ -39,9 +39,11 @@ const mdParser = new MarkdownIt({
     }
   },
 }).use(anchor, {
-  permalink: true,
-  permalinkBefore: true,
-  permalinkSymbol: "",
+  permalink: anchor.permalink.ariaHidden({
+    placement: "before",
+    symbol: "",
+    class: "header-anchor",
+  }),
   slugify: (s: string) =>
     `heading-${s
       .toLowerCase()
@@ -218,33 +220,18 @@ const MarkdownViewer = React.memo(({ content }: { content: string }) => {
 // 返回顶部按钮组件
 const BackToTop = () => {
   return (
-    <BackTop visibilityHeight={100}>
-      <div
-        className="fixed bottom-8 right-8 bg-blue-500 hover:bg-blue-600 
-                          text-white w-10 h-10 rounded-full flex items-center 
-                          justify-center cursor-pointer shadow-lg 
-                          transition-all duration-300 ease-in-out">
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 10l7-7m0 0l7 7m-7-7v18"
-          />
-        </svg>
-      </div>
-    </BackTop>
+    <FloatButton.BackTop
+      visibilityHeight={100}
+      className="!fixed !bottom-8 !right-8"
+      type="primary"
+    />
   );
 };
 
-// 添加加载状态组件
+// 修改加载状态组件
 const LoadingState = () => (
   <div className="flex justify-center items-center min-h-screen">
-    <Spin size="large" tip="正在加载文章..." />
+    <Spin size="large"></Spin>
   </div>
 );
 
@@ -256,17 +243,17 @@ export const ArticleDetail = () => {
   const [comments, setComments] = useState<commentType[]>([]);
   const [activeHeading, setActiveHeading] = useState<string>("");
 
-  // 优化数据获取逻辑
+  // 添加请求状态标记，避免重复请求
   const fetchData = useCallback(async () => {
     if (!id) {
       message.error("文章ID不存在");
       return;
     }
 
+    if (article) return;
+
     try {
       setLoading(true);
-
-      // 并行请求文章详情和评论
       const [articleRes, commentsRes] = await Promise.all([
         articleDetail(id),
         commentList({ article_id: id }),
@@ -288,7 +275,7 @@ export const ArticleDetail = () => {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, article]); // 添加 article 作为依赖项
 
   const fetchComments = useCallback(async () => {
     if (!id) return;

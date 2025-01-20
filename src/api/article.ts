@@ -37,6 +37,7 @@ export function articleList(
 
 // 获取文章详情
 export function articleDetail(id: string): Promise<baseResponse<articleType>> {
+  console.log("articleDetail", id);
   return useAxios.get(`/api/article/${id}`);
 }
 
