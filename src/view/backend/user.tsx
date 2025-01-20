@@ -40,12 +40,6 @@ const getUserColumns = (
   onDelete: (id: number) => void
 ): ColumnsType<userInfoType> => [
   {
-    title: "用户ID",
-    dataIndex: "id",
-    key: "id",
-    width: "8%",
-  },
-  {
     title: "昵称",
     dataIndex: "nick_name",
     key: "nick_name",

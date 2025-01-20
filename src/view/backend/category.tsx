@@ -48,11 +48,6 @@ const getCategoryColumns = (
   handleDelete: (id: number) => void
 ): ColumnsType<categoryType> => [
   {
-    title: "ID",
-    dataIndex: "id",
-    key: "id",
-  },
-  {
     title: "分类名称",
     dataIndex: "name",
     key: "name",

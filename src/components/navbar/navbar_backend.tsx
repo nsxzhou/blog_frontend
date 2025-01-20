@@ -1,8 +1,10 @@
-﻿import { Layout, Button } from "antd";
-import { LogoutOutlined, HomeOutlined } from "@ant-design/icons";
+﻿import { logout } from "@/store/slice";
+import { HomeOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Button, Layout, Modal } from "antd";
 import { useDispatch } from "react-redux";
-import { logout } from "@/store/slice";
 import { useNavigate } from "react-router-dom";
+import { message } from "antd";
+import { Logout } from "@/api/user";
 
 const { Header } = Layout;
 
@@ -11,7 +13,24 @@ export const NavbarBackend = () => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    dispatch(logout());
+    navigate("/");
+    setTimeout(async () => {
+      const res = await Logout();
+      if (res.code === 0) {
+        dispatch(logout());
+        message.success("注销成功");
+      } else {
+        message.error(res.message);
+      }
+    }, 100);
+  };
+
+  const confirmLogout = () => {
+    Modal.confirm({
+      title: "确认注销",
+      content: "您确定要注销登录吗？",
+      onOk: handleLogout,
+    });
   };
 
   return (
@@ -25,8 +44,7 @@ export const NavbarBackend = () => {
         backgroundColor: "#fff",
         borderBottom: "2px solid #f0f0f0",
         height: "64px",
-      }}
-    >
+      }}>
       <div
         style={{
           height: "100%",
@@ -34,15 +52,13 @@ export const NavbarBackend = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-        }}
-      >
+        }}>
         <div
           style={{
             fontSize: "20px",
             fontWeight: "500",
             color: "#001529",
-          }}
-        >
+          }}>
           <a href="/admin" style={{ color: "inherit" }}>
             NSXZ 后台管理
           </a>
@@ -56,19 +72,19 @@ export const NavbarBackend = () => {
             style={{
               color: "#001529",
               marginRight: "16px",
-            }}
-          >
+            }}>
             返回首页
           </Button>
           <Button
             type="link"
             icon={<LogoutOutlined />}
-            onClick={handleLogout}
+            onClick={() => {
+              confirmLogout();
+            }}
             style={{
               color: "#001529",
               marginRight: "16px",
-            }}
-          >
+            }}>
             注销
           </Button>
         </div>

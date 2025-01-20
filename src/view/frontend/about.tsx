@@ -17,7 +17,7 @@ const CONTACT_ITEMS = [
   {
     icon: <GithubOutlined />,
     text: "Github",
-    action: "https://github.com/nsxz",
+    action: "https://github.com/nsxzhou",
   },
   {
     icon: <BilibiliOutlined />,

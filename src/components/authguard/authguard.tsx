@@ -1,6 +1,6 @@
 ﻿import { RootState } from "@/store";
 import { message } from "antd";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
 
@@ -23,17 +23,22 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   // 从 Redux store 中获取用户登录状态
   const isLoggedIn = useSelector((state: RootState) => state.web.user.isLogin);
 
-  // 使用 useMemo 缓存渲染结果，避免不必要的重渲染
-  const redirectComponent = useMemo(() => {
-    // 如果用户未登录且尝试访问 /admin 路径
-    if (!isLoggedIn && location.pathname.startsWith("/admin")) {
-      // 重定向到登录页面，并保存原始访问路径
-      message.warning("请先登录");
-      return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-    // 正常情况下渲染子组件
-    return <>{children}</>;
-  }, [isLoggedIn, location, children]);
+  // 使用 useMemo 缓存判断结果
+  const needRedirect = useMemo(() => {
+    return !isLoggedIn && location.pathname.startsWith("/admin");
+  }, [isLoggedIn, location.pathname]);
 
-  return redirectComponent;
+  // 在渲染过程中不直接显示消息提示
+  useEffect(() => {
+    if (needRedirect) {
+      message.warning("请先登录");
+    }
+  }, [needRedirect]);
+
+  // 根据判断结果返回相应组件
+  if (needRedirect) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
 };

@@ -65,11 +65,6 @@ const getImageColumns = (
   handleDelete: (id: number) => void
 ): ColumnsType<imageType> => [
   {
-    title: "ID",
-    dataIndex: "id",
-    key: "id",
-  },
-  {
     title: "预览",
     key: "preview",
     render: (_, record) => <ImagePreview src={record.path} alt={record.name} />,
@@ -161,8 +156,12 @@ export const AdminImage = () => {
         setState((prev) => ({ ...prev, loading: false }));
       }
     },
-    [pagination]
+    [pagination.page, pagination.page_size]
   );
+
+  useEffect(() => {
+    fetchData(pagination.page, pagination.page_size);
+  }, [pagination.page, pagination.page_size]);
 
   const handleDelete = useCallback(
     (id: number) => {
@@ -209,10 +208,6 @@ export const AdminImage = () => {
   );
 
   const columns = useMemo(() => getImageColumns(handleDelete), [handleDelete]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   if (state.loading) {
     return (

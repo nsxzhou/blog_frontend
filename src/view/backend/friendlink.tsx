@@ -47,11 +47,6 @@ const getFriendlinkColumns = (
   handleDelete: (id: number) => void
 ): ColumnsType<friendlinkType> => [
   {
-    title: "ID",
-    dataIndex: "id",
-    key: "id",
-  },
-  {
     title: "名称",
     dataIndex: "name",
     key: "name",

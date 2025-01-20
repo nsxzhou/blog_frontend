@@ -99,7 +99,7 @@ export const ArticleList = memo(
           showQuickJumper: true,
           showTotal: (total) => `共 ${total} 条`,
           position: "bottom",
-          className: "flex justify-center",
+          className: "flex justify-center py-4",
         }}
         renderItem={(item) => <ArticleItem item={item} />}
       />
