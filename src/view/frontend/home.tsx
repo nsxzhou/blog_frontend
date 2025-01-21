@@ -38,7 +38,6 @@ export const WebHome = () => {
       };
       const res = await articleList(params);
       if (res.code === 0) {
-        console.log(res.data.list);
         setArticles(res.data.list);
         setPagination((prev) => ({ ...prev, total: res.data.total, category }));
       }
