@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { commentCreate, commentDelete, commentType } from "../../api/comment";
+import { QQLoginUrl } from "../../api/user";
 
 const { TextArea } = Input;
 
@@ -93,7 +94,6 @@ const CommentForm = ({
   submitting,
   onSubmit,
   onCancelReply,
-  onLogin,
 }: {
   form: FormInstance;
   replyTo: ReplyTo | null;
@@ -101,18 +101,46 @@ const CommentForm = ({
   submitting: boolean;
   onSubmit: (values: { content: string }) => void;
   onCancelReply: () => void;
-  onLogin: () => void;
 }) => {
+  const navigate = useNavigate();
+
+  const handleQQLogin = async () => {
+    try {
+      localStorage.setItem("prevPath", window.location.pathname);
+      const response = await QQLoginUrl();
+      if (response.code === 0 && response.data.loginURL) {
+        window.location.href = response.data.loginURL;
+      } else {
+        message.error("获取QQ登录链接失败");
+      }
+    } catch (error) {
+      console.error("QQ登录请求失败:", error);
+      message.error("获取QQ登录链接失败");
+    }
+  };
+
+  const handleLogin = () => {
+    navigate("/login", { state: { from: location.pathname } });
+  };
+
   if (!isLoggedIn) {
     return (
       <div className="text-center py-8 bg-slate-50 border-2 border-dashed border-slate-200">
         <p className="text-slate-700 mb-4 font-medium">登录后才能发表评论</p>
-        <Button
-          type="primary"
-          onClick={onLogin}
-          className="bg-indigo-600 hover:bg-indigo-700 border-indigo-600 hover:border-indigo-700 shadow-sm transition-all">
-          去登录
-        </Button>
+        <div className="space-x-4">
+          <Button
+            type="primary"
+            onClick={handleLogin}
+            className="bg-indigo-600 hover:bg-indigo-700 border-indigo-600 hover:border-indigo-700 shadow-sm transition-all">
+            账号密码登录
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleQQLogin}
+            className="bg-indigo-600 hover:bg-indigo-700 border-indigo-600 hover:border-indigo-700 shadow-sm transition-all">
+            QQ登录
+          </Button>
+        </div>
       </div>
     );
   }
@@ -310,9 +338,6 @@ export const CommentArea = ({
           submitting={state.submitting}
           onSubmit={handleSubmit}
           onCancelReply={() => setState((prev) => ({ ...prev, replyTo: null }))}
-          onLogin={() =>
-            navigate("/login", { state: { from: location.pathname } })
-          }
         />
       </div>
       <List

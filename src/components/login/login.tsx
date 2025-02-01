@@ -38,8 +38,6 @@ export const AdminLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
-  // 获取重定向地址，默认为管理后台首页
-  const from = (location.state as any)?.from?.pathname || "/admin";
 
   // 验证码相关状态
   const [captchaId, setCaptchaId] = useState<string>("");
@@ -81,7 +79,12 @@ export const AdminLogin = () => {
         });
         dispatch(login(userRes.data));
         message.success("登录成功！");
-        navigate(from);
+        // 获取重定向地址，默认为管理后台首页
+        const from = (location.state as any)?.from?.pathname;
+        const prevPath = localStorage.getItem("prevPath");
+        const redirectPath = from || prevPath || "/admin";
+        localStorage.removeItem("prevPath");
+        navigate(redirectPath, { replace: true });
       } else {
         message.error(res.message);
         refreshCaptcha();
@@ -103,26 +106,22 @@ export const AdminLogin = () => {
           name="login"
           onFinish={handleLogin}
           autoComplete="off"
-          size="large"
-        >
+          size="large">
           <Form.Item
             name="account"
-            rules={[{ required: true, message: "请输入用户名！" }]}
-          >
+            rules={[{ required: true, message: "请输入用户名！" }]}>
             <Input prefix={<UserOutlined />} placeholder="用户名" />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "请输入密码！" }]}
-          >
+            rules={[{ required: true, message: "请输入密码！" }]}>
             <Input.Password prefix={<LockOutlined />} placeholder="密码" />
           </Form.Item>
 
           <Form.Item
             name="captcha"
-            rules={[{ required: true, message: "请输入验证码！" }]}
-          >
+            rules={[{ required: true, message: "请输入验证码！" }]}>
             <div style={{ display: "flex", gap: "8px" }}>
               <Input placeholder="验证码" />
               <img

@@ -11,6 +11,18 @@ export function Login(req: loginType): Promise<baseResponse<string>> {
   return useAxios.post("/api/user/login", req);
 }
 
+export interface QQLoginUrlType {
+  loginURL: string;
+}
+
+export function QQLoginUrl(): Promise<baseResponse<QQLoginUrlType>> {
+  return useAxios.get("/api/user/qq/login-url");
+}
+
+export function QQLogin(code: string): Promise<baseResponse<string>> {
+  return useAxios.post("/api/user/qq/callback", { params: { code } });
+}
+
 export function Logout(): Promise<baseResponse<string>> {
   return useAxios.post("/api/user/logout");
 }
