@@ -2,9 +2,10 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router/index";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { initializeFromStorage } from "./store/slice";
+import { initializeFromStorage, logout } from "./store/slice";
 import { Spin } from "antd";
 import { RootState } from "./store/index";
+import { checkAuth } from "./utils/auth";
 
 export const App = () => {
   const isInitialized = useSelector(
@@ -23,6 +24,14 @@ export const App = () => {
       </div>
     );
   }
+
+  useEffect(() => {
+    if (!checkAuth()) {
+      console.log("请重新登录");
+      dispatch(logout());
+      router.navigate("/login");
+    }
+  }, []);
 
   return (
     <div className="app">
