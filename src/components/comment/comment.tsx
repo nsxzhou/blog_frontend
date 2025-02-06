@@ -106,10 +106,10 @@ const CommentForm = ({
 
   const handleQQLogin = async () => {
     try {
-      localStorage.setItem("prevPath", window.location.pathname);
+      sessionStorage.setItem("prevPath", window.location.pathname);
       const response = await QQLoginUrl();
-      if (response.code === 0 && response.data.loginURL) {
-        window.location.href = response.data.loginURL;
+      if (response.code == 0) {
+        window.location.href = response.data.url;
       } else {
         message.error("获取QQ登录链接失败");
       }

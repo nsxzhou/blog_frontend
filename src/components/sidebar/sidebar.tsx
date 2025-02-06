@@ -4,13 +4,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  DashboardOutlined,
   SettingOutlined,
+  DashboardOutlined,
   UserOutlined,
   FileOutlined,
   PictureOutlined,
   CommentOutlined,
   FolderOutlined,
+  EyeOutlined,
   LinkOutlined,
 } from "@ant-design/icons";
 
@@ -67,9 +68,14 @@ export const Sidebar: React.FC = () => {
         label: "友情链接",
       },
       {
-        key: "/admin/settings",
+        key: "/admin/logs",
         icon: <SettingOutlined />,
-        label: "设置",
+        label: "日志管理",
+      },
+      {
+        key: "/admin/visits",
+        icon: <EyeOutlined />,
+        label: "访问管理",
       },
     ];
   };
@@ -93,8 +99,7 @@ export const Sidebar: React.FC = () => {
         borderRight: "2px solid #f0f0f0",
         backgroundColor: "#fff",
       }}
-      width={200}
-    >
+      width={200}>
       <div
         style={{
           padding: "12px",
@@ -107,8 +112,7 @@ export const Sidebar: React.FC = () => {
           alignItems: "center",
           justifyContent: "center",
         }}
-        onClick={() => setCollapsed(!collapsed)}
-      >
+        onClick={() => setCollapsed(!collapsed)}>
         {collapsed ? (
           <MenuUnfoldOutlined style={{ fontSize: "16px", color: "#595959" }} />
         ) : (

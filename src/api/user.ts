@@ -12,7 +12,7 @@ export function Login(req: loginType): Promise<baseResponse<string>> {
 }
 
 export interface QQLoginUrlType {
-  loginURL: string;
+  url: string;
 }
 
 export function QQLoginUrl(): Promise<baseResponse<QQLoginUrlType>> {

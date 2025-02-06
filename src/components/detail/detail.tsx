@@ -321,7 +321,13 @@ export const ArticleDetail = () => {
   }, [article]);
 
   if (loading) return <LoadingState />;
-  if (!article) return <Empty description="文章不存在" />;
+  if (!article)
+    return (
+      <Empty
+        className="min-h-[80vh] flex justify-center items-center"
+        description="文章不存在"
+      />
+    );
 
   const headings = extractHeadings(article.content);
 

@@ -1,16 +1,13 @@
-import { message } from "antd";
+import { message, Spin } from "antd";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { QQLogin, userInfo } from "../../api/user";
 import { login } from "../../store/slice";
-import { useState } from "react";
-import { Spin } from "antd";
 
 export const QQCallback = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     handleQQCallback();
@@ -18,7 +15,6 @@ export const QQCallback = () => {
 
   const handleQQCallback = async () => {
     try {
-      setLoading(true);
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get("code");
       if (!code) {
@@ -37,6 +33,7 @@ export const QQCallback = () => {
 
         // 返回之前的页面或首页
         const prevPath = sessionStorage.getItem("prevPath") || "/";
+        sessionStorage.removeItem("prevPath"); // 使用完毕后清除
         navigate(prevPath, { replace: true });
       } else {
         message.error(response.message || "QQ登录失败");
@@ -46,18 +43,8 @@ export const QQCallback = () => {
       console.error("QQ登录回调处理失败:", error);
       message.error("QQ登录失败");
       navigate("/login", { replace: true });
-    } finally {
-      setLoading(false);
     }
   };
-  if (loading) {
-    return (
-      <Spin
-        size="large"
-        className="flex justify-center min-h-[80vh] items-center"
-      />
-    );
-  }
 
   return (
     <Spin

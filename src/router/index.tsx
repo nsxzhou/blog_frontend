@@ -11,10 +11,11 @@ import { AdminFriendlink } from "@/view/backend/friendlink";
 import { AdminHome } from "@/view/backend/home";
 import { AdminImage } from "@/view/backend/image";
 import { AdminIndex } from "@/view/backend/index";
-import { AdminSetting } from "@/view/backend/setting";
+import { AdminLog } from "@/view/backend/log";
 import { AdminUser } from "@/view/backend/user";
 import { WebAbout } from "@/view/frontend/about";
 import { WebArchives } from "@/view/frontend/archives";
+import { AdminVisit } from "@/view/backend/visit";
 import { WebHome } from "@/view/frontend/home";
 import { WebIndex } from "@/view/frontend/index";
 import { createBrowserRouter, RouteObject } from "react-router-dom";
@@ -64,7 +65,8 @@ export const routerObj: RouteType[] = [
       { path: "users", element: <AdminUser /> }, // 用户管理
       { path: "categories", element: <AdminCategory /> }, // 分类管理
       { path: "friendlinks", element: <AdminFriendlink /> }, // 友情链接管理
-      { path: "settings", element: <AdminSetting /> }, // 系统设置
+      { path: "logs", element: <AdminLog /> }, // 系统设置
+      { path: "visits", element: <AdminVisit /> }, // 访问管理
     ],
   },
   { path: "*", element: <NotFound /> }, // 404页面

@@ -47,7 +47,7 @@ export const NavbarFrontend = () => {
             color: "#262626",
           }}>
           <a href="/" style={{ color: "inherit" }}>
-            NSXZ 溺水寻舟的博客
+            溺水寻舟
           </a>
         </div>
 
