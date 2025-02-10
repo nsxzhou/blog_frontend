@@ -17,8 +17,8 @@ export const WebHome = () => {
     page_size: 10,
     total: 0,
     category: undefined,
-    sort_field: undefined,
-    sort_order: undefined,
+    sort_field: "created_at",
+    sort_order: "desc",
     key: undefined,
   });
   const [selectedCategory, setSelectedCategory] = useState<string>("All");

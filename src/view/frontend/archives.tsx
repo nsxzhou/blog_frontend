@@ -1,6 +1,6 @@
 import { articleList, articleType } from "@/api/article";
 import { CalendarOutlined, EyeOutlined } from "@ant-design/icons";
-import { Empty, Spin } from "antd";
+import { Empty, Spin, message } from "antd";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -37,6 +37,7 @@ const ArticleItem = ({ article }: { article: articleType }) => (
 
 // 月份组件
 const MonthGroup = ({
+
   year,
   month,
   articles,
@@ -69,44 +70,50 @@ export const WebArchives = () => {
           sort_field: "created_at",
           sort_order: "desc",
           page_size: 999,
+          page: 1
         });
 
-        // 按年月组织文章
-        const groupedArticles = response.data.list.reduce(
-          (groups: ArchiveGroup[], article) => {
-            const date = new Date(article.created_at);
-            const year = date.getFullYear().toString();
-            const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        if (response.code === 0 && response.data && response.data.list) {
+          // 按年月组织文章
+          const groupedArticles = response.data.list.reduce(
+            (groups: ArchiveGroup[], article) => {
+              const date = new Date(article.created_at);
+              const year = date.getFullYear().toString();
+              const month = (date.getMonth() + 1).toString().padStart(2, "0");
 
-            const yearGroup = groups.find((g) => g.year === year) || {
-              year,
-              months: [],
-            };
+              const yearGroup = groups.find((g) => g.year === year) || {
+                year,
+                months: [],
+              };
 
-            if (!groups.includes(yearGroup)) {
-              groups.push(yearGroup);
-            }
+              if (!groups.includes(yearGroup)) {
+                groups.push(yearGroup);
+              }
 
-            const monthGroup = yearGroup.months.find(
-              (m) => m.month === month
-            ) || {
-              month,
-              articles: [],
-            };
+              const monthGroup = yearGroup.months.find(
+                (m) => m.month === month
+              ) || {
+                month,
+                articles: [],
+              };
 
-            if (!yearGroup.months.includes(monthGroup)) {
-              yearGroup.months.push(monthGroup);
-            }
+              if (!yearGroup.months.includes(monthGroup)) {
+                yearGroup.months.push(monthGroup);
+              }
 
-            monthGroup.articles.push(article);
-            return groups;
-          },
-          []
-        );
-
-        setArchives(groupedArticles);
+              monthGroup.articles.push(article);
+              return groups;
+            },
+            []
+          );
+          setArchives(groupedArticles);
+        } else {
+          console.error("获取文章列表失败:", response.message);
+          message.error(response.message || "获取文章列表失败");
+        }
       } catch (error) {
         console.error("获取文章列表失败:", error);
+        message.error("获取文章列表失败");
       } finally {
         setLoading(false);
       }

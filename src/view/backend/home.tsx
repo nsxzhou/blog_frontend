@@ -1,4 +1,11 @@
-﻿import { getStatistics, getUserDistribution, getVisitTrend } from "@/api/data";
+﻿import {
+  dataType,
+  getStatistics,
+  getUserDistribution,
+  getVisitTrend,
+  userDistributionType,
+  visitTrendType,
+} from "@/api/data";
 import {
   CommentOutlined,
   EyeOutlined,
@@ -8,7 +15,6 @@ import {
 import { Card, Col, Row, Statistic } from "antd";
 import ReactECharts from "echarts-for-react";
 import { useEffect, useMemo, useState } from "react";
-import { dataType, visitTrendType, userDistributionType } from "@/api/data";
 
 // 1. 抽取统计卡片组件
 const StatisticCard = ({
@@ -18,6 +24,7 @@ const StatisticCard = ({
   suffix,
   icon,
   color,
+  loading,
 }: {
   title: string;
   value: number;
@@ -25,6 +32,7 @@ const StatisticCard = ({
   suffix?: string;
   icon: React.ReactNode;
   color: string;
+  loading: boolean;
 }) => (
   <Card bordered={false}>
     <Statistic
@@ -34,7 +42,7 @@ const StatisticCard = ({
           <span>{title}</span>
         </div>
       }
-      value={value}
+      value={loading ? "Loading..." : value}
       prefix={prefix}
       suffix={suffix}
       valueStyle={{ color: `var(--ant-${color}-6)` }}
@@ -57,10 +65,12 @@ export const AdminHome = () => {
   const [distributionData, setDistributionData] = useState<
     userDistributionType[]
   >([]);
+  const [loading, setLoading] = useState(true);
 
   // 获取数据
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const [statistics, visitTrend, distribution] = await Promise.all([
           getStatistics(),
@@ -72,6 +82,8 @@ export const AdminHome = () => {
         setDistributionData(distribution.data);
       } catch (error) {
         console.error("获取数据失败:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -189,7 +201,7 @@ export const AdminHome = () => {
       <Row gutter={[16, 16]} className="mb-6">
         {statistics.map((stat, index) => (
           <Col xs={24} sm={12} md={6} key={index}>
-            <StatisticCard {...stat} />
+            <StatisticCard {...stat} loading={loading} />
           </Col>
         ))}
       </Row>

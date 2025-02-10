@@ -1,12 +1,5 @@
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-
 // 创建认证工具函数
-export const checkAuth = () => {
-  const token = useSelector(
-    (state: RootState) => state.web.user.userInfo?.token
-  );
-
+export const checkAuth = (token?: string) => {
   if (!token) {
     return false;
   }

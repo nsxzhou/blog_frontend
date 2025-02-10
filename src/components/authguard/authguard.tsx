@@ -20,24 +20,40 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   // 获取当前路由信息
   const location = useLocation();
 
-  // 从 Redux store 中获取用户登录状态
+  // 从 Redux store 中获取用户登录状态和角色信息
   const isLoggedIn = useSelector((state: RootState) => state.web.user.isLogin);
+  const userRole = useSelector(
+    (state: RootState) => state.web.user.userInfo?.role
+  );
 
-  // 使用 useMemo 缓存判断结果
+  // 使用 useMemo 缓存判断结果，增加对用户角色的判断
   const needRedirect = useMemo(() => {
-    return !isLoggedIn && location.pathname.startsWith("/admin");
-  }, [isLoggedIn, location.pathname]);
+    const isAdminRoute = location.pathname.startsWith("/admin");
+    if (!isAdminRoute) return false;
+    if (!isLoggedIn) return true;
+    return userRole !== "admin";
+  }, [isLoggedIn, location.pathname, userRole]);
 
   // 在渲染过程中不直接显示消息提示
   useEffect(() => {
     if (needRedirect) {
-      message.warning("请先登录");
+      // 根据不同情况显示不同的提示信息
+      if (!isLoggedIn) {
+        message.warning("请先登录");
+      } else if (userRole !== "admin") {
+        message.error("您没有权限访问该页面");
+      }
     }
-  }, [needRedirect]);
+  }, [needRedirect, isLoggedIn, userRole]);
 
   // 根据判断结果返回相应组件
   if (needRedirect) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // 根据不同情况跳转到不同页面
+    if (!isLoggedIn) {
+      return <Navigate to="/login" state={{ from: location }} replace />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;

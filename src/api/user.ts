@@ -20,7 +20,7 @@ export function QQLoginUrl(): Promise<baseResponse<QQLoginUrlType>> {
 }
 
 export function QQLogin(code: string): Promise<baseResponse<string>> {
-  return useAxios.post("/api/user/qq/callback", { params: { code } });
+  return useAxios.get(`/api/user/qq/callback?code=${code}`);
 }
 
 export function Logout(): Promise<baseResponse<string>> {
