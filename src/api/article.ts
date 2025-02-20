@@ -15,24 +15,30 @@ export interface articleType {
   collects_count: number; // 收藏数量
   user_id: number; // 作者ID
   user_name: string; // 作者名称
-  category: string; // 文章分类
+  category: string[]; // 文章分类
   cover_id: number; // 封面图片ID
   cover_url: string; // 封面图片URL
   version: number; // 版本号
 }
 
+export interface dateType {
+  start: string;
+  end: string;
+}
+
 // 文章列表查询参数接口，继承自基础查询参数
 export interface articleParamsType extends paramsType {
-  category?: string; // 可选的分类筛选
+  category?: string[]; // 可选的分类筛选
   sort_field?: string; // 排序字段
   sort_order?: string; // 排序方式（升序/降序）
+  date?: dateType; // 日期筛选
 }
 
 // 获取文章列表
 export function articleList(
-  params?: articleParamsType
+  params: articleParamsType
 ): Promise<baseResponse<listDataType<articleType>>> {
-  return useAxios.get("/api/article/list", { params: { ...params } });
+  return useAxios.post("/api/article/list", params);
 }
 
 // 获取文章详情
@@ -44,7 +50,7 @@ export function articleDetail(id: string): Promise<baseResponse<articleType>> {
 export interface articleCreateType {
   title: string; // 文章标题
   abstract: string; // 文章摘要
-  category: string; // 文章分类
+  category: string[]; // 文章分类
   content: string; // 文章内容
   cover_id: number; // 封面图片ID
 }
@@ -62,7 +68,7 @@ export interface articleUpdateType {
   title: string; // 文章标题
   abstract: string; // 文章摘要
   content: string; // 文章内容
-  category: string; // 文章分类
+  category: string[]; // 文章分类
   cover_id: number; // 封面图片ID
 }
 

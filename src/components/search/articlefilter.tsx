@@ -6,8 +6,8 @@ import { categoryList, categoryType } from "../../api/category";
 
 interface ArticleFilterProps {
   onSearch?: (params: articleParamsType) => void;
-  selectedCategory: string;
-  onCategorySelect: (category: string) => void;
+  selectedCategory: string[];
+  onCategorySelect: (category: string[]) => void;
 }
 
 // 搜索建议下拉框样式
@@ -55,7 +55,7 @@ export const ArticleFilter = memo(
           page: 1,
           page_size: 5,
           key: value,
-          category: selectedCategory === "All" ? undefined : selectedCategory,
+          category: selectedCategory.includes("All") ? undefined : selectedCategory,
         });
         if (res.code === 0) {
           setSearchSuggestions(res.data.list);
@@ -67,11 +67,32 @@ export const ArticleFilter = memo(
 
     // 分类选择处理
     const handleCategorySelect = (category: string) => {
-      onCategorySelect(category);
+      let newCategories: string[];
+
+      if (category === "All") {
+        // 如果选择 All，清除其他所有选择
+        newCategories = ["All"];
+      } else {
+        if (selectedCategory.includes(category)) {
+          // 如果已选中，则移除
+          newCategories = selectedCategory.filter(c => c !== category);
+          if (newCategories.length === 0) {
+            // 如果没有选中任何分类，默认选中 All
+            newCategories = ["All"];
+          }
+        } else {
+          // 如果未选中，则添加，并移除 All
+          newCategories = selectedCategory.includes("All")
+            ? [category]
+            : [...selectedCategory, category];
+        }
+      }
+
+      onCategorySelect(newCategories);
       onSearch?.({
         page: 1,
         page_size: 10,
-        category: category === "All" ? undefined : category,
+        category: newCategories.includes("All") ? undefined : newCategories,
       });
     };
 
@@ -113,12 +134,17 @@ export const ArticleFilter = memo(
             <span className="mr-2">📑</span>分类
           </h5>
           <div className="space-y-2">
-            <CategoryItem name="All" onClick={handleCategorySelect} />
+            <CategoryItem
+              name="All"
+              onClick={handleCategorySelect}
+              isSelected={selectedCategory.includes("All")}
+            />
             {categories.map((category) => (
               <CategoryItem
                 key={category.id}
                 name={category.name}
                 onClick={handleCategorySelect}
+                isSelected={selectedCategory.includes(category.name)}
               />
             ))}
           </div>
@@ -132,12 +158,17 @@ export const ArticleFilter = memo(
 const CategoryItem = ({
   name,
   onClick,
+  isSelected,
 }: {
   name: string;
   onClick: (name: string) => void;
+  isSelected: boolean;
 }) => (
   <div
-    className="px-6 py-3 cursor-pointer transition-all duration-300 text-gray-600 hover:bg-gray-50"
+    className={`px-6 py-3 cursor-pointer transition-all duration-300 ${isSelected
+      ? 'bg-blue-50 text-blue-600'
+      : 'text-gray-600 hover:bg-gray-50'
+      }`}
     onClick={() => onClick(name)}>
     <span className="text-base font-medium">{name}</span>
   </div>

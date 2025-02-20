@@ -28,9 +28,21 @@ const ArticleItem = ({ item }: { item: articleType }) => (
               {item.title}
             </Title>
           </a>
-          <Tag className="text-base px-3 py-0.5 bg-blue-50 text-blue-600 border-blue-200 rounded-full">
-            {item.category}
-          </Tag>
+          <div className="flex gap-2 flex-wrap">
+            {Array.isArray(item.category) ? (
+              item.category.map((cat, index) => (
+                <Tag
+                  key={index}
+                  className="text-base px-3 py-0.5 bg-blue-50 text-blue-600 border-blue-200 rounded-full">
+                  {cat}
+                </Tag>
+              ))
+            ) : (
+              <Tag className="text-base px-3 py-0.5 bg-blue-50 text-blue-600 border-blue-200 rounded-full">
+                {item.category}
+              </Tag>
+            )}
+          </div>
         </div>
 
         <Paragraph

@@ -21,25 +21,29 @@ export const WebHome = () => {
     sort_order: "desc",
     key: undefined,
   });
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedCategory, setSelectedCategory] = useState<string[]>(["All"]);
 
   const fetchArticles = async (
     page = pagination.page,
     pageSize = pagination.page_size,
-    category?: string
+    categories?: string[]
   ) => {
     setLoading(true);
     try {
-      const params = {
+      const params: articleParamsType = {
         ...pagination,
         page,
         page_size: pageSize,
-        category: category === "All" ? undefined : category,
+        category: categories?.includes("All") ? undefined : categories,
       };
       const res = await articleList(params);
       if (res.code === 0) {
         setArticles(res.data.list);
-        setPagination((prev) => ({ ...prev, total: res.data.total, category }));
+        setPagination((prev) => ({
+          ...prev,
+          total: res.data.total,
+          category: categories?.includes("All") ? undefined : categories
+        }));
       }
     } catch (error) {
       console.error("获取文章列表失败:", error);

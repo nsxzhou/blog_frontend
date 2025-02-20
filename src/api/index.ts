@@ -29,8 +29,8 @@ export interface listDataType<T> {
 
 // 定义分页参数接口
 export interface paramsType {
-  page?: number; // 页码（可选）
-  page_size?: number; // 每页数量（可选）
+  page: number; // 页码
+  page_size: number; // 每页数量
   key?: string; // 搜索关键字（可选）
 }
 
