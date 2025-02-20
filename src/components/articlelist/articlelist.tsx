@@ -2,6 +2,7 @@ import { EyeOutlined, MessageOutlined } from "@ant-design/icons";
 import { Empty, List, Spin, Tag, Typography } from "antd";
 import { memo } from "react";
 import { articleType } from "../../api/article";
+import { Image } from "antd";
 
 const { Title, Paragraph } = Typography;
 
@@ -67,11 +68,12 @@ const ArticleItem = ({ item }: { item: articleType }) => (
 
       {item.cover_url && (
         <div className="overflow-hidden  flex-shrink-0">
-          <img
-            loading="lazy"
+          <Image
             src={item.cover_url}
             alt={item.title}
-            className="w-48 h-36 object-cover hover:scale-110 transition-transform duration-500"
+            width={195}
+            height={128}
+            style={{ objectFit: "cover" }}
           />
         </div>
       )}

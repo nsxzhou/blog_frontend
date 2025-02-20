@@ -1,33 +1,42 @@
 ﻿import { Col, message, Row } from "antd";
 import { useEffect, useMemo, useState } from "react";
-import { articleList, articleParamsType, articleType } from "../../api/article";
+import { articleList, articleParamsType, articleType, dateType } from "../../api/article";
 import { ArticleList } from "../../components/articlelist/articlelist";
 import { FriendLinkList } from "../../components/friendlink/friendlink";
 import { ArticleFilter } from "../../components/search/articlefilter";
 
+// 定义分页状态接口
 interface PaginationState extends articleParamsType {
   total: number;
 }
 
-export const WebHome = () => {
+// 默认分页配置
+const DEFAULT_PAGINATION: PaginationState = {
+  page: 1,
+  page_size: 10,
+  total: 0,
+  category: undefined,
+  sort_field: "created_at",
+  sort_order: "desc",
+  key: undefined,
+  date: undefined,
+};
+
+export const WebHome: React.FC = () => {
+  // 状态定义
   const [articles, setArticles] = useState<articleType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState<PaginationState>({
-    page: 1,
-    page_size: 10,
-    total: 0,
-    category: undefined,
-    sort_field: "created_at",
-    sort_order: "desc",
-    key: undefined,
-  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [pagination, setPagination] = useState<PaginationState>(DEFAULT_PAGINATION);
   const [selectedCategory, setSelectedCategory] = useState<string[]>(["All"]);
 
   const fetchArticles = async (
     page = pagination.page,
     pageSize = pagination.page_size,
-    categories?: string[]
-  ) => {
+    categories?: string[],
+    sortField?: string,
+    sortOrder?: string,
+    date?: dateType
+  ): Promise<void> => {
     setLoading(true);
     try {
       const params: articleParamsType = {
@@ -35,28 +44,34 @@ export const WebHome = () => {
         page,
         page_size: pageSize,
         category: categories?.includes("All") ? undefined : categories,
+        sort_field: sortField || pagination.sort_field,
+        sort_order: sortOrder || pagination.sort_order,
+        date,
       };
+
       const res = await articleList(params);
       if (res.code === 0) {
         setArticles(res.data.list);
         setPagination((prev) => ({
           ...prev,
           total: res.data.total,
-          category: categories?.includes("All") ? undefined : categories
+          page,
+          category: categories?.includes("All") ? undefined : categories,
+          sort_field: sortField || prev.sort_field,
+          sort_order: sortOrder || prev.sort_order,
+          date,
         }));
       }
     } catch (error) {
-      console.error("获取文章列表失败:", error);
+      console.error("Failed to fetch articles:", error);
       message.error("获取文章列表失败");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePageChange = (
-    page: number,
-    pageSize: number = pagination.page_size || 10
-  ) => {
+
+  const handlePageChange = (page: number, pageSize: number = pagination.page_size): void => {
     setPagination((prev) => ({
       ...prev,
       page,
@@ -65,10 +80,12 @@ export const WebHome = () => {
     fetchArticles(page, pageSize);
   };
 
+  // 初始化加载
   useEffect(() => {
     fetchArticles();
   }, []);
 
+  // 侧边栏组件
   const sidebar = useMemo(
     () => (
       <div className="space-y-8">
@@ -76,13 +93,8 @@ export const WebHome = () => {
           <ArticleFilter
             selectedCategory={selectedCategory}
             onCategorySelect={setSelectedCategory}
-            onSearch={(params) => {
-              setPagination((prev) => ({
-                ...prev,
-                ...params,
-                page: 1,
-              }));
-              fetchArticles(1, pagination.page_size, params.category);
+            onSearch={({ category, sort_field, sort_order, date }) => {
+              fetchArticles(1, pagination.page_size, category, sort_field, sort_order, date);
             }}
           />
         </div>

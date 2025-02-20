@@ -60,3 +60,9 @@
 .square-search-input .ant-input-affix-wrapper-focused {
   border-radius: 0 !important;
 }
+
+.highlight {
+  color: #1890ff;
+  font-weight: bold;
+  background-color: rgba(24, 144, 255, 0.1);
+}

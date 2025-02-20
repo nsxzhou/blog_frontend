@@ -64,6 +64,7 @@ const getArticleColumns = (
       title: "分类",
       dataIndex: "category",
       key: "category",
+      render: (categories: string[]) => categories?.join(", ") || "-",
     },
     {
       title: "浏览量",
@@ -162,7 +163,7 @@ export const AdminArticle = () => {
       if (record) {
         form.setFieldsValue({
           title: record.title,
-          category: record.category,
+          categories: record.category,
           cover_id: record.cover_id,
         });
         setImageState((prev) => ({
@@ -399,13 +400,13 @@ export const AdminArticle = () => {
             ]}>
             <Input placeholder="请输入文章标题" maxLength={100} showCount />
           </Form.Item>
-
           <Form.Item
             label="文章分类"
             name="category"
             rules={[{ required: true, message: "请选择文章分类" }]}>
             <Select
               placeholder="请选择文章分类"
+              mode="multiple"
               options={categories.map((cat) => ({
                 label: cat.name,
                 value: cat.name,
