@@ -71,7 +71,7 @@ export const WebHome: React.FC = () => {
   };
 
 
-  const handlePageChange = (page: number, pageSize: number = pagination.page_size): void => {
+  const handlePageChange = (page: number, pageSize: number = pagination.page_size || 10): void => {
     setPagination((prev) => ({
       ...prev,
       page,

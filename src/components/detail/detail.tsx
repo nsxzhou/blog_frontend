@@ -39,8 +39,21 @@ const ArticleHeader = ({ article }: { article: articleType }) => (
     {/* 元信息区域 */}
     <div className="px-8 pb-6 flex flex-wrap items-center gap-6">
       {/* 分类标签 */}
-      <div className="px-4 py-1.5 bg-blue-500 text-white rounded-full font-medium">
-        {article.category}
+      <div className="flex gap-2">
+        {Array.isArray(article.category) ? (
+          article.category.map((cat, index) => (
+            <div
+              key={index}
+              className="px-4 py-1.5 bg-blue-500 text-white rounded-full font-medium"
+            >
+              {cat}
+            </div>
+          ))
+        ) : (
+          <div className="px-4 py-1.5 bg-blue-500 text-white rounded-full font-medium">
+            {article.category}
+          </div>
+        )}
       </div>
 
       {/* 时间信息 */}
@@ -305,7 +318,7 @@ export const ArticleDetail = () => {
       setLoading(true);
       const [articleRes, commentsRes] = await Promise.all([
         articleDetail(id),
-        commentList({ article_id: id }),
+        commentList({ article_id: id, }),
       ]);
 
       if (articleRes.code === 0) {
