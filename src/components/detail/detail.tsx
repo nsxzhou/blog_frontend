@@ -208,6 +208,7 @@ const extractHeadings = (content: string) => {
   const headings: HeadingType[] = [];
   let isInCodeBlock = false;
   let isInFrontMatter = false;
+  const titleCounts = new Map<string, number>();
 
   lines.forEach((line) => {
     // 处理 frontmatter
@@ -232,18 +233,33 @@ const extractHeadings = (content: string) => {
 
       // 移除标题中的内联代码和链接
       const cleanTitle = title
-        .replace(/`[^`]+`/g, '') // 移除内联代码
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // 提取链接文本
-        .replace(/[!@#$%^&*()]/g, '') // 移除特殊字符
+        .replace(/`[^`]+`/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/[!@#$%^&*()]/g, '')
         .trim();
 
-      // 生成与 rehype-slug 兼容的 ID
-      const key = cleanTitle
+      // 移除标题开头的序号（比如 "1." 或 "1.2.3."）
+      const titleWithoutNumber = cleanTitle.replace(/^[\d.]+\s*/, '');
+
+      // 生成基础 ID，确保以字母开头
+      let baseKey = titleWithoutNumber
         .toLowerCase()
-        .replace(/[\s,.]+/g, '-') // 将空格和标点转换为连字符
-        .replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '') // 保留数字、字母、中文和连字符
-        .replace(/^-+|-+$/g, '') // 移除首尾连字符
-        .replace(/-+/g, '-'); // 将多个连字符合并为一个
+        .replace(/[\s,.]+/g, '-')
+        .replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-+/g, '-');
+
+      // 如果生成的 key 以数字开头，添加前缀
+      if (/^\d/.test(baseKey)) {
+        baseKey = `heading-${baseKey}`;
+      }
+
+      // 处理重复标题
+      const count = titleCounts.get(baseKey) || 0;
+      titleCounts.set(baseKey, count + 1);
+
+      // 如果是重复标题，添加数字后缀
+      const key = count > 0 ? `${baseKey}-${count}` : baseKey;
 
       if (key) {
         headings.push({

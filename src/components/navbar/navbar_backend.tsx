@@ -12,6 +12,13 @@ export const NavbarBackend = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const handleHome = () => {
+    navigate("/");
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+
   const handleLogout = () => {
     navigate("/");
     setTimeout(async () => {
@@ -68,10 +75,7 @@ export const NavbarBackend = () => {
           <Button
             type="link"
             icon={<HomeOutlined />}
-            onClick={() => {
-              navigate("/");
-              window.location.reload();
-            }}
+            onClick={handleHome}
             style={{
               color: "#001529",
               marginRight: "16px",
@@ -81,9 +85,7 @@ export const NavbarBackend = () => {
           <Button
             type="link"
             icon={<LogoutOutlined />}
-            onClick={() => {
-              confirmLogout();
-            }}
+            onClick={confirmLogout}
             style={{
               color: "#001529",
               marginRight: "16px",
