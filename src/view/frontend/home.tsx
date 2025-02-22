@@ -85,6 +85,21 @@ export const WebHome: React.FC = () => {
     fetchArticles();
   }, []);
 
+  // 添加滚动状态重置
+  useEffect(() => {
+    // 重置滚动位置
+    window.scrollTo(0, 0);
+    // 确保body和html的overflow样式正确
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.overflow = 'auto';
+
+    return () => {
+      // 组件卸载时清理
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
   // 侧边栏组件
   const sidebar = useMemo(
     () => (
