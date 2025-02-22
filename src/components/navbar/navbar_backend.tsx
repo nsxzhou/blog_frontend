@@ -68,7 +68,10 @@ export const NavbarBackend = () => {
           <Button
             type="link"
             icon={<HomeOutlined />}
-            onClick={() => navigate("/")}
+            onClick={() => {
+              navigate("/");
+              window.location.reload();
+            }}
             style={{
               color: "#001529",
               marginRight: "16px",

@@ -243,10 +243,6 @@ export const AdminArticle = () => {
   };
 
   const handleCancel = () => {
-    // 重置滚动状态
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-    
     setArticleState((prev) => ({
       ...prev,
       isModalVisible: false,
@@ -380,7 +376,6 @@ export const AdminArticle = () => {
         onCancel={handleCancel}
         width={1000}
         className="article-modal"
-        destroyOnClose={true}
         footer={[
           <Button key="cancel" onClick={handleCancel}>
             取消
