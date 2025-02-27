@@ -31,56 +31,56 @@ const usePagination = (defaultPageSize = 10) => {
 const getVisitColumns = (
   handleDelete: (id: number) => void
 ): ColumnsType<visitType> => [
-  {
-    title: "访问者ID",
-    dataIndex: "visitor_id",
-    key: "visitor_id",
-  },
-  {
-    title: "公网IP",
-    dataIndex: "public_ip",
-    key: "public_ip",
-  },
-  {
-    title: "内网IP",
-    dataIndex: "internal_ip",
-    key: "internal_ip",
-  },
-  {
-    title: "User Agent",
-    dataIndex: "user_agent",
-    key: "user_agent",
-    ellipsis: true,
-    width: 200,
-    render: (text: string) => (
-      <Tooltip placement="topLeft" title={text}>
-        <span>{text}</span>
-      </Tooltip>
-    ),
-  },
-  {
-    title: "地区",
-    dataIndex: "distribution",
-    key: "distribution",
-  },
+    {
+      title: "访问者ID",
+      dataIndex: "visitor_id",
+      key: "visitor_id",
+    },
+    {
+      title: "公网IP",
+      dataIndex: "public_ip",
+      key: "public_ip",
+    },
+    {
+      title: "内网IP",
+      dataIndex: "internal_ip",
+      key: "internal_ip",
+    },
+    {
+      title: "User Agent",
+      dataIndex: "user_agent",
+      key: "user_agent",
+      ellipsis: true,
+      width: 200,
+      render: (text: string) => (
+        <Tooltip placement="topLeft" title={text}>
+          <span>{text}</span>
+        </Tooltip>
+      ),
+    },
+    {
+      title: "地区",
+      dataIndex: "distribution",
+      key: "distribution",
+    },
 
-  {
-    title: "访问时间",
-    dataIndex: "created_at",
-    key: "created_at",
-  },
-  {
-    title: "操作",
-    key: "action",
-    render: (_, record) => (
-      <Space size="middle">
-        <Button type="link" danger onClick={() => handleDelete(record.id)}>
-          删除
-        </Button>
-      </Space>
-    ),
-  },
-];
+    {
+      title: "访问时间",
+      dataIndex: "created_at",
+      key: "created_at",
+    },
+    {
+      title: "操作",
+      key: "action",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button type="link" danger onClick={() => handleDelete(record.id)}>
+            删除
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
 export const AdminVisit = () => {
   // 状态管理
@@ -111,7 +111,7 @@ export const AdminVisit = () => {
         setState((prev) => ({ ...prev, loading: false }));
       }
     },
-    [pagination]
+    []
   );
 
   // 删除记录
@@ -144,8 +144,8 @@ export const AdminVisit = () => {
   const columns = useMemo(() => getVisitColumns(handleDelete), [handleDelete]);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(pagination.page, pagination.page_size);
+  }, [pagination.page, pagination.page_size, fetchData]);
 
   if (state.loading) {
     return (
