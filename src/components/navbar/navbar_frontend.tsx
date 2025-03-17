@@ -1,11 +1,24 @@
-﻿import { Layout, Menu } from "antd";
+﻿import { Layout, Menu, Button } from "antd";
 import { useEffect, useState } from "react";
+import { message } from "antd";
+import { QQLoginUrl } from "../../api/user";
+import { QqOutlined } from "@ant-design/icons";
+import { Logout } from "../../api/user";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "@/store/slice";
+import { useSelector } from "react-redux";
+import { LogoutOutlined } from "@ant-design/icons";
+import { RootState } from '@/store/index';
 
 const { Header } = Layout;
 
 export const NavbarFrontend = () => {
   const [scrolled, setScrolled] = useState(false);
   const [time, setTime] = useState(new Date());
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state: RootState) => state.web.user.isLogin);
 
   // 监听滚动事件，实现导航栏滚动效果
   useEffect(() => {
@@ -31,6 +44,7 @@ export const NavbarFrontend = () => {
 
   const navItems = [
     { label: "首页", key: "/", path: "/" },
+    { label: "聊天室", key: "/chatroom", path: "/chatroom" },
     { label: "归档", key: "/archives", path: "/archives" },
     { label: "关于", key: "/about", path: "/about" },
   ];
@@ -40,13 +54,41 @@ export const NavbarFrontend = () => {
     label: (
       <a
         href={item.path}
-        className={`relative group overflow-hidden px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors duration-300`}>
+        className={`relative group overflow-hidden px-2 py-1 text-gray-600 hover:text-blue-600 transition-colors duration-300`}>
         <span className="relative z-10 font-mono tracking-wider font-semibold">{item.label}</span>
         <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-blue-500 group-hover:w-full transition-all duration-300"></span>
         <span className="absolute top-0 right-0 w-0 h-[1px] bg-blue-500 group-hover:w-full transition-all duration-300 delay-100"></span>
       </a>
     ),
   }));
+
+  const handleQQLogin = async () => {
+    try {
+      sessionStorage.setItem("prevPath", window.location.pathname);
+      const response = await QQLoginUrl();
+      if (response.code == 0) {
+        window.location.href = response.data.url;
+      } else {
+        message.error("获取QQ登录链接失败");
+      }
+    } catch (error) {
+      console.error("QQ登录请求失败:", error);
+      message.error("获取QQ登录链接失败");
+    }
+  };
+
+  const handleLogout = () => {
+    navigate("/");
+    setTimeout(async () => {
+      const res = await Logout();
+      if (res.code === 0) {
+        dispatch(logout());
+        message.success("注销成功");
+      } else {
+        message.error(res.message);
+      }
+    }, 100);
+  };
 
   return (
     <Header
@@ -120,23 +162,63 @@ export const NavbarFrontend = () => {
 
         <div style={{ display: "flex", alignItems: "center" }}>
           {/* 数字时钟 */}
-          <div className="hidden md:flex mr-6 text-blue-600 font-mono text-sm border border-blue-500/20 px-3 py-1 rounded-sm bg-blue-500/5 font-semibold">
+          <div className="hidden md:flex mr-4 text-blue-600 font-mono text-sm border border-blue-500/20 px-2 py-1 rounded-sm bg-blue-500/5 font-semibold">
             {time.toLocaleTimeString('zh-CN', { hour12: false })}
           </div>
 
-          <Menu
-            mode="horizontal"
-            selectedKeys={[window.location.pathname]}
-            items={menuItems}
-            style={{
-              border: "none",
-              backgroundColor: "transparent",
-              fontSize: "16px",
-              fontFamily: "monospace",
-              fontWeight: "600",
-            }}
-            theme="light"
-          />
+          {/* 在大屏幕上显示菜单 */}
+          <div className="hidden md:block">
+            <Menu
+              mode="horizontal"
+              selectedKeys={[window.location.pathname]}
+              items={menuItems}
+              style={{
+                border: "none",
+                backgroundColor: "transparent",
+                fontSize: "16px",
+                fontFamily: "monospace",
+                fontWeight: "600",
+                minWidth: "360px",
+              }}
+              theme="light"
+            />
+          </div>
+
+          {isLoggedIn ? (
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+              className="ml-2 text-blue-600 hover:text-blue-800 transition-colors duration-300 flex items-center"
+              style={{
+                border: "1px solid rgba(59, 130, 246, 0.2)",
+                borderRadius: "4px",
+                padding: "4px 12px",
+                background: "rgba(59, 130, 246, 0.05)",
+                fontFamily: "monospace",
+                fontWeight: "600",
+              }}
+            >
+              注销
+            </Button>
+          ) : (
+            <Button
+              type="text"
+              icon={<QqOutlined />}
+              onClick={handleQQLogin}
+              className="ml-2 text-blue-600 hover:text-blue-800 transition-colors duration-300 flex items-center"
+              style={{
+                border: "1px solid rgba(59, 130, 246, 0.2)",
+                borderRadius: "4px",
+                padding: "4px 12px",
+                background: "rgba(59, 130, 246, 0.05)",
+                fontFamily: "monospace",
+                fontWeight: "600",
+              }}
+            >
+              登录
+            </Button>
+          )}
         </div>
       </div>
     </Header>

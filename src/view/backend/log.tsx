@@ -42,67 +42,67 @@ const getLevelColor = (level: string) => {
 const getLogColumns = (
   handleDelete: (id: number) => void
 ): ColumnsType<logType> => [
-  {
-    title: "时间",
-    dataIndex: "created_at",
-    key: "created_at",
-  },
-  {
-    title: "级别",
-    dataIndex: "level",
-    key: "level",
-    render: (level) => <Tag color={getLevelColor(level)}>{level}</Tag>,
-  },
-  {
-    title: "调用位置",
-    dataIndex: "caller",
-    key: "caller",
-    ellipsis: true,
-    render: (text: string) => (
-      <Tooltip placement="topLeft" title={text}>
-        <span>{text}</span>
-      </Tooltip>
-    ),
-  },
-
-  {
-    title: "消息",
-    dataIndex: "message",
-    key: "message",
-    ellipsis: true,
-    render: (text: string) => (
-      <Tooltip placement="topLeft" title={text}>
-        <span>{text}</span>
-      </Tooltip>
-    ),
-  },
-  {
-    title: "错误详情",
-    key: "error",
-    render: (_, record) => {
-      if (!record.error_msg) return "-";
-      return (
-        <Tooltip
-          title={
-            <div>
-              <div>错误信息: {record.error_msg}</div>
-            </div>
-          }>
-          <Button type="link">查看详情</Button>
-        </Tooltip>
-      );
+    {
+      title: "时间",
+      dataIndex: "created_at",
+      key: "created_at",
     },
-  },
-  {
-    title: "操作",
-    key: "action",
-    render: (_, record) => (
-      <Button type="link" danger onClick={() => handleDelete(record.id)}>
-        删除
-      </Button>
-    ),
-  },
-];
+    {
+      title: "级别",
+      dataIndex: "level",
+      key: "level",
+      render: (level) => <Tag color={getLevelColor(level)}>{level}</Tag>,
+    },
+    {
+      title: "调用位置",
+      dataIndex: "caller",
+      key: "caller",
+      ellipsis: true,
+      render: (text: string) => (
+        <Tooltip placement="topLeft" title={text}>
+          <span>{text}</span>
+        </Tooltip>
+      ),
+    },
+
+    {
+      title: "消息",
+      dataIndex: "message",
+      key: "message",
+      ellipsis: true,
+      render: (text: string) => (
+        <Tooltip placement="topLeft" title={text}>
+          <span>{text}</span>
+        </Tooltip>
+      ),
+    },
+    {
+      title: "错误详情",
+      key: "error",
+      render: (_, record) => {
+        if (!record.error_msg) return "-";
+        return (
+          <Tooltip
+            title={
+              <div>
+                <div>错误信息: {record.error_msg}</div>
+              </div>
+            }>
+            <Button type="link">查看详情</Button>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: "操作",
+      key: "action",
+      render: (_, record) => (
+        <Button type="link" danger onClick={() => handleDelete(record.id)}>
+          删除
+        </Button>
+      ),
+    },
+  ];
 
 export const AdminLog = () => {
   const [state, setState] = useState({
@@ -120,8 +120,10 @@ export const AdminLog = () => {
         const res = await logList({ page, page_size });
 
         if (res.code === 0) {
+          // 限制最大显示1000条日志
+          const total = Math.min(res.data.total, 1000);
           setState((prev) => ({ ...prev, data: res.data.list }));
-          setPagination((prev) => ({ ...prev, total: res.data.total }));
+          setPagination((prev) => ({ ...prev, total }));
         } else {
           message.error(res.message);
         }

@@ -34,6 +34,11 @@ export default defineConfig(({ mode }) => {
           target: VITE_SERVER_URL,
           changeOrigin: true,
         },
+        "/api/ws": {
+          target: VITE_SERVER_URL,
+          changeOrigin: true,
+          ws: true,
+        },
       },
     },
   };
