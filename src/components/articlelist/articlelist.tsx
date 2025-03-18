@@ -53,7 +53,15 @@ const ArticleItem = ({ item }: { item: articleType }) => (
         </Paragraph>
 
         <div className="flex justify-between items-center text-sm text-gray-500">
-          <span>{new Date(item.created_at).toLocaleDateString()}</span>
+          <span>
+            {new Date(item.created_at).toLocaleString('zh-CN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
 
           <div className="flex gap-6">
             <span className="flex items-center gap-1 hover:text-blue-600 transition-colors">
