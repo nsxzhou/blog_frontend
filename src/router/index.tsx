@@ -18,7 +18,6 @@ import { WebArchives } from "@/view/frontend/archives";
 import { AdminVisit } from "@/view/backend/visit";
 import { WebHome } from "@/view/frontend/home";
 import { WebIndex } from "@/view/frontend/index";
-import { WebChat } from "@/view/frontend/chat";
 import { createBrowserRouter, RouteObject } from "react-router-dom";
 
 // 定义基础路由类型，包含元数据接口
@@ -45,7 +44,6 @@ export const routerObj: RouteType[] = [
       { path: "archives", element: <WebArchives /> }, // 归档
       { path: "about", element: <WebAbout /> }, // 关于我们
       { path: "qq/callback", element: <QQCallback /> }, // QQ登录回调
-      { path: "chatroom", element: <WebChat /> }, // 聊天室
     ],
   },
   {

@@ -121,7 +121,7 @@ export const AdminLog = () => {
 
         if (res.code === 0) {
           // 限制最大显示1000条日志
-          const total = Math.min(res.data.total, 1000);
+          const total = Math.min(res.data.total, 500);
           setState((prev) => ({ ...prev, data: res.data.list }));
           setPagination((prev) => ({ ...prev, total }));
         } else {
