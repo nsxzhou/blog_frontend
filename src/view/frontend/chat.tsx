@@ -200,6 +200,12 @@ export const WebChat = () => {
             return;
         }
         switch (data.type) {
+            case 'history':
+                // 处理历史消息
+                if (Array.isArray(data.messages)) {
+                    setMessages(data.messages);
+                }
+                break;
             case 'message':
                 if (Array.isArray(data.messages)) {
                     setMessages(data.messages);
