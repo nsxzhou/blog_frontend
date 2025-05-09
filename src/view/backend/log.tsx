@@ -120,8 +120,8 @@ export const AdminLog = () => {
         const res = await logList({ page, page_size });
 
         if (res.code === 0) {
-          // 限制最大显示1000条日志
-          const total = Math.min(res.data.total, 500);
+          // 限制最大显示100条日志
+          const total = Math.min(res.data.total, 100);
           setState((prev) => ({ ...prev, data: res.data.list }));
           setPagination((prev) => ({ ...prev, total }));
         } else {

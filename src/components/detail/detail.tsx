@@ -157,7 +157,9 @@ const TableOfContentsItem = ({
 }) => {
   const scrollToHeading = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    const element = document.querySelector(href);
+    const elementId = href.substring(1); // 移除前面的#符号
+    const element = document.getElementById(elementId);
+    
     if (element) {
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY;
@@ -170,6 +172,8 @@ const TableOfContentsItem = ({
 
       // 更新 URL，但不触发页面跳转
       window.history.pushState(null, "", href);
+    } else {
+      console.error(`找不到ID为 ${elementId} 的元素`);
     }
   };
 
@@ -230,45 +234,55 @@ const extractHeadings = (content: string) => {
     if (headingMatch) {
       const level = headingMatch[1].length;
       const title = headingMatch[2].trim();
-
-      // 移除标题中的内联代码和链接
-      const cleanTitle = title
+      
+      // 将原始标题文本保存，保留原始格式，用于展示
+      const displayTitle = title
         .replace(/`[^`]+`/g, '')
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
         .replace(/[!@#$%^&*()]/g, '')
         .trim();
 
-      // 移除标题开头的序号（比如 "1." 或 "1.2.3."）
-      const titleWithoutNumber = cleanTitle.replace(/^[\d.]+\s*/, '');
+      // 为了生成ID，复制一份标题文本用于处理（这是关键）
+      let idText = displayTitle;
+      
+      // 1. 先移除所有标记格式
+      idText = idText
+        .replace(/\*\*(.*?)\*\*/g, '$1') // 移除粗体
+        .replace(/\*(.*?)\*/g, '$1')     // 移除斜体
+        .replace(/__(.*?)__/g, '$1')     // 移除下划线粗体
+        .replace(/_(.*?)_/g, '$1')       // 移除下划线斜体
+        .replace(/~~(.*?)~~/g, '$1')     // 移除删除线
+        .replace(/`(.*?)`/g, '$1');      // 移除代码
 
-      // 生成基础 ID，确保以字母开头
-      let baseKey = titleWithoutNumber
+      // 2. 移除标题开头的数字前缀（比如 "1." 或 "1.2.3."）
+      idText = idText.replace(/^[\d.]+\s*/, '');
+
+      // 3. 转换为小写并替换非字母数字字符为连字符
+      let baseKey = idText
         .toLowerCase()
-        .replace(/[\s,.]+/g, '-')
-        .replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '')
-        .replace(/^-+|-+$/g, '')
-        .replace(/-+/g, '-');
+        .replace(/[^\w\- ]/g, '') // 移除特殊字符
+        .replace(/\s+/g, '-')     // 空格替换为连字符
+        .replace(/-+/g, '-')      // 多个连字符替换为单个
+        .replace(/^-+|-+$/g, ''); // 移除首尾连字符
 
-      // 如果生成的 key 以数字开头，添加前缀
-      if (/^\d/.test(baseKey)) {
-        baseKey = `heading-${baseKey}`;
+      // 4. 如果生成的key为空，使用默认值
+      if (!baseKey) {
+        baseKey = 'section';
       }
 
-      // 处理重复标题
+      // 5. 处理重复标题
       const count = titleCounts.get(baseKey) || 0;
       titleCounts.set(baseKey, count + 1);
 
-      // 如果是重复标题，添加数字后缀
+      // 6. 如果是重复标题，添加数字后缀
       const key = count > 0 ? `${baseKey}-${count}` : baseKey;
 
-      if (key) {
-        headings.push({
-          key,
-          href: `#${key}`,
-          title: cleanTitle,
-          level,
-        });
-      }
+      headings.push({
+        key,
+        href: `#${key}`,
+        title: displayTitle,
+        level,
+      });
     }
   });
 
@@ -320,6 +334,8 @@ export const ArticleDetail = () => {
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState<commentType[]>([]);
   const [activeHeading, setActiveHeading] = useState<string>("");
+  // 新增一个state来存储修正后的headings
+  const [headings, setHeadings] = useState<HeadingType[]>([]);
 
   // 添加请求状态标记，避免重复请求
   const fetchData = useCallback(async () => {
@@ -372,30 +388,75 @@ export const ArticleDetail = () => {
     fetchData();
   }, [fetchData]);
 
-  // 优化标题观察器
+  // 优化标题观察器，并且添加ID映射逻辑
   useEffect(() => {
     if (!article) return;
 
-    const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveHeading(entry.target.id);
+    // 先提取预期的headings
+    const extractedHeadings = extractHeadings(article.content);
+    
+    // 等DOM渲染完成后
+    setTimeout(() => {
+      // 获取实际的标题元素
+      const actualHeadings = document.querySelectorAll(
+        ".markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4, .markdown-content h5, .markdown-content h6"
+      );
+      
+      // 创建一个修正后的headings数组
+      const correctedHeadings: HeadingType[] = [];
+      
+      // 遍历实际的标题元素
+      actualHeadings.forEach((element, index) => {
+        const headingText = element.textContent || "";
+        // 获取实际的ID
+        const actualId = element.id;
+        
+        // 尝试找到对应的预期heading
+        let matchingHeading = extractedHeadings.find(h => 
+          h.title.trim() === headingText.trim() ||
+          // 处理可能的数字前缀情况
+          headingText.trim().endsWith(h.title.trim())
+        );
+        
+        if (matchingHeading) {
+          // 使用实际ID更新heading
+          correctedHeadings.push({
+            ...matchingHeading,
+            key: actualId,
+            href: `#${actualId}`
+          });
+        } else if (actualId) {
+          // 如果没找到匹配但有ID，创建一个新的heading
+          correctedHeadings.push({
+            key: actualId,
+            href: `#${actualId}`,
+            title: headingText,
+            level: parseInt(element.tagName.substring(1), 10) // 从h1, h2等获取级别
+          });
         }
       });
-    };
+      
+      // 更新headings
+      setHeadings(correctedHeadings);
+      
+      // 设置观察器
+      const observerCallback = (entries: IntersectionObserverEntry[]) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveHeading(entry.target.id);
+          }
+        });
+      };
 
-    const observer = new IntersectionObserver(observerCallback, {
-      threshold: 0.5,
-      rootMargin: "-70px 0px -70px 0px",
-    });
+      const observer = new IntersectionObserver(observerCallback, {
+        threshold: 0.5,
+        rootMargin: "-70px 0px -70px 0px",
+      });
 
-    const headings = document.querySelectorAll(
-      ".markdown-content h1, .markdown-content h2, .markdown-content h3"
-    );
+      actualHeadings.forEach((heading) => observer.observe(heading));
 
-    headings.forEach((heading) => observer.observe(heading));
-
-    return () => observer.disconnect();
+      return () => observer.disconnect();
+    }, 500); // 给DOM渲染一些时间
   }, [article]);
 
   if (loading) return <LoadingState />;
@@ -406,8 +467,6 @@ export const ArticleDetail = () => {
         description="文章不存在"
       />
     );
-
-  const headings = extractHeadings(article.content);
 
   return (
     <div className="flex justify-center w-full bg-gray-50 py-8">
