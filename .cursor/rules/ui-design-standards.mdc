@@ -1,0 +1,104 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# UI 设计和样式规范
+
+## 设计理念
+- **创新新意**：界面需要有新意，创新感
+- **用户体验优先**：所有设计决策都要考虑用户使用感受
+- **一致性**：保持整个应用的视觉和交互一致性
+- **流畅性**：所有交互都要有平滑的过渡动画
+
+## 动效规范
+
+### Framer Motion 使用原则
+1. **入场动画**：淡入 + 轻微位移
+2. **退场动画**：淡出 + 缩放
+3. **悬停效果**：轻微缩放 + 阴影变化
+4. **页面切换**：滑动或淡入淡出
+
+### 标准动画配置
+```typescript
+// 基础动画变体
+export const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+  transition: { duration: 0.3, ease: "easeOut" }
+};
+
+export const scaleIn = {
+  initial: { opacity: 0, scale: 0.95 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.95 },
+  transition: { duration: 0.2, ease: "easeOut" }
+};
+
+export const slideIn = {
+  initial: { opacity: 0, x: -20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: 20 },
+  transition: { duration: 0.3, ease: "easeOut" }
+};
+
+// 悬停动画
+export const hoverScale = {
+  whileHover: { scale: 1.02 },
+  whileTap: { scale: 0.98 },
+  transition: { duration: 0.2 }
+};
+```
+
+### 动画时长标准
+- **微交互**：0.1-0.2s (按钮点击、输入框聚焦)
+- **组件动画**：0.2-0.3s (卡片展开、模态框)
+- **页面切换**：0.3-0.5s (路由跳转、大型组件)
+- **加载动画**：1-2s 循环
+
+## 布局规范
+
+### 间距系统
+```css
+/* 使用 Tailwind 的间距系统 */
+--spacing-xs: 0.25rem;   /* 1 */
+--spacing-sm: 0.5rem;    /* 2 */
+--spacing-md: 1rem;      /* 4 */
+--spacing-lg: 1.5rem;    /* 6 */
+--spacing-xl: 2rem;      /* 8 */
+--spacing-2xl: 3rem;     /* 12 */
+```
+
+### 响应式设计
+```typescript
+// 断点使用
+const responsive = {
+  mobile: 'sm:',     // 640px+
+  tablet: 'md:',     // 768px+
+  desktop: 'lg:',    // 1024px+
+  wide: 'xl:'        // 1280px+
+};
+```
+
+## 交互设计原则
+
+### 用户反馈
+1. **即时反馈**：用户操作后立即给出视觉反馈
+2. **状态指示**：清晰显示加载、成功、错误状态
+3. **进度提示**：长时间操作显示进度条
+4. **确认机制**：重要操作需要二次确认
+
+## 实施要求
+
+### 组件开发规范
+1. 每个组件都要包含 motion 动画
+2. 悬停状态必须有过渡效果
+3. 加载状态要有骨架屏或加载指示器
+4. 错误状态要有友好的提示信息
+
+### 性能考虑
+1. 动画使用 transform 和 opacity 属性
+2. 避免触发重排重绘的 CSS 属性
+3. 复杂动画使用 will-change 优化
+4. 长列表使用虚拟滚动
