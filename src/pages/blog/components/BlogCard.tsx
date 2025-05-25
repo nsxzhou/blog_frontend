@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { history } from '@umijs/max';
 import {
   CalendarOutlined,
   ClockCircleOutlined,
@@ -30,16 +31,25 @@ const itemVariants = {
 };
 
 const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
+  const handleCardClick = () => {
+    history.push(`/article-detail/${post.id}`);
+  };
+
+  const handleTagClick = (e: React.MouseEvent, tag: string) => {
+    e.stopPropagation();
+    onTagClick(tag);
+  };
+
   return (
     <motion.article
       variants={itemVariants}
       custom={index}
       layout
-      className="group relative"
+      onClick={handleCardClick}
+      className="group relative cursor-pointer"
     >
       <Card 
-        padding="none" 
-        className={`overflow-hidden h-full transition-all duration-300 ${
+        className={`overflow-hidden h-full transition-all duration-300 p-0 ${
           post.featured ? 'ring-2 ring-blue-200' : ''
         }`}
         hover={true}
@@ -100,15 +110,15 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
 
           {/* 标签 */}
           <div className="flex flex-wrap gap-1 mb-4">
-            {post.tags.slice(0, 3).map((tag, tagIndex) => (
-              <span
-                key={tagIndex}
-                className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
-                onClick={() => onTagClick(tag)}
-              >
-                {tag}
-              </span>
-            ))}
+                      {post.tags.slice(0, 3).map((tag, tagIndex) => (
+            <span
+              key={tagIndex}
+              className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+              onClick={(e) => handleTagClick(e, tag)}
+            >
+              {tag}
+            </span>
+          ))}
           </div>
 
           {/* 作者和统计信息 */}

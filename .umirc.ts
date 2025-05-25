@@ -16,9 +16,17 @@ export default defineConfig({
       component: '@/pages/blog',
     },
     {
+      path: '/article-detail/:id',
+      component: '@/pages/article-detail',
+    },
+    {
       path: '/about',
       component: '@/pages/about',
-    }
+    },
+    {
+      path: '/my-articles',
+      component: '@/pages/my-articles',
+    },
   ],
   npmClient: "pnpm",
   dva: {},

@@ -9,7 +9,7 @@ interface BreadcrumbItem {
 }
 
 interface PageContainerProps {
-  title: string;
+  title?: string;
   description?: string;
   breadcrumbs?: BreadcrumbItem[];
   children: React.ReactNode;
@@ -77,24 +77,28 @@ export const PageContainer: React.FC<PageContainerProps> = ({
       )}
 
       {/* 页面头部 */}
-      <motion.div variants={itemVariants} className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-            {description && (
-              <p className="text-gray-600 text-lg">{description}</p>
+      {(title || description || action) && (
+        <motion.div variants={itemVariants} className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              {title && (
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
+              )}
+              {description && (
+                <p className="text-gray-600 text-lg">{description}</p>
+              )}
+            </div>
+            {action && (
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {action}
+              </motion.div>
             )}
           </div>
-          {action && (
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {action}
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* 页面内容 */}
       <motion.div variants={itemVariants} className="space-y-6">

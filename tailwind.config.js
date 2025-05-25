@@ -4,4 +4,10 @@ module.exports = {
     './src/components/**/*.tsx',
     './src/layouts/**/*.tsx',
   ],
+  theme: {
+    extend: {},
+  },
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+  ],
 }
