@@ -7,7 +7,6 @@ export default defineConfig({
   initialState: {},
   request: {},
   routes: [],
-
   npmClient: "pnpm",
   dva: {},
   proxy: {
