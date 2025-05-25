@@ -6,7 +6,12 @@ export default defineConfig({
   model: {},
   initialState: {},
   request: {},
-  routes: [],
+  routes: [
+    {
+      path: '/',
+      component: '@/pages/home',
+    },
+  ],
   npmClient: "pnpm",
   dva: {},
   proxy: {
