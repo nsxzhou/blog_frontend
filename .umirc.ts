@@ -11,6 +11,14 @@ export default defineConfig({
       path: '/',
       component: '@/pages/home',
     },
+    {
+      path: '/blog',
+      component: '@/pages/blog',
+    },
+    {
+      path: '/about',
+      component: '@/pages/about',
+    }
   ],
   npmClient: "pnpm",
   dva: {},
@@ -21,4 +29,5 @@ export default defineConfig({
     },
   },
   tailwindcss: {},
+  esbuildMinifyIIFE: true,
 });

@@ -1,0 +1,9 @@
+export { default as AboutHeroSection } from './AboutHeroSection';
+export { default as PersonalInfoSection } from './PersonalInfoSection';
+export { default as SkillsSection } from './SkillsSection';
+export { default as ExperienceSection } from './ExperienceSection';
+export { default as HobbiesSection } from './HobbiesSection';
+export { default as ContactSection } from './ContactSection';
+export { default as AnimatedCounter } from './AnimatedCounter';
+export { default as SkillCard } from './SkillCard';
+export { default as TimelineItem } from './TimelineItem'; 

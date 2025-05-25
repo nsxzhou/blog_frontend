@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 interface AvatarProps {
   src?: string;
   alt?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   fallback?: string;
 }
@@ -12,7 +12,8 @@ interface AvatarProps {
 const sizeClasses = {
   sm: 'w-8 h-8 text-sm',
   md: 'w-10 h-10 text-base',
-  lg: 'w-12 h-12 text-lg'
+  lg: 'w-12 h-12 text-lg',
+  xl: 'w-16 h-16 text-xl'
 };
 
 export const Avatar: React.FC<AvatarProps> = ({

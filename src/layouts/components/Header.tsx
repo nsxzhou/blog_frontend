@@ -52,7 +52,7 @@ const navItemVariants = {
   tap: { scale: 0.98 }
 };
 
-const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
+const Header: React.FC<HeaderProps> = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const location = useLocation();
@@ -66,7 +66,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
     avatar?: string;
   } | null>(null);
   
-  const headerOpacity = useTransform(scrollY, [0, 80], [0.95, 0.98]);
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
   // 处理登录
@@ -80,6 +79,20 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const handleLogout = () => {
     setUser(null);
     message.success('已退出登录');
+  };
+
+  const toggleLoginState = () => {
+    if (user) {
+      handleLogout();
+    } else {
+      setUser({
+        id: '1',
+        name: '张三',
+        email: 'zhangsan@example.com',
+        avatar: 'https://avatars.githubusercontent.com/u/123456789?v=4'
+      });
+      message.success('登录成功');
+    }
   };
 
   return (
@@ -164,7 +177,15 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 </Button>
               ))}
             </div>
-          
+            
+            {/* 临时演示按钮 - 实际项目中可以移除 */}
+            <Button
+              onClick={toggleLoginState}
+              className="px-3 py-1 text-xs"
+              variant="secondary"
+            >
+              {user ? '演示登出' : '演示登录'}
+            </Button>
             
             {/* 用户头像触发器 */}
             <Button
