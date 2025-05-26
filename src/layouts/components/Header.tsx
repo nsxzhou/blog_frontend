@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { Link, useLocation, history } from '@umijs/max';
+import { Link, useLocation, history, useDispatch, useSelector } from '@umijs/max';
 import {
   MenuOutlined,
   SearchOutlined,
@@ -57,43 +57,40 @@ const Header: React.FC<HeaderProps> = () => {
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const location = useLocation();
   const { scrollY } = useScroll();
+  const dispatch = useDispatch();
   
-  // 模拟用户状态，实际项目中应该从全局状态管理中获取
-  const [user, setUser] = useState<{
-    id: string;
-    name: string;
-    email: string;
-    avatar?: string;
-  } | null>(null);
+  // 从全局状态获取用户信息
+  const { currentUser, isLoggedIn } = useSelector((state: any) => state.user);
   
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
   // 处理登录
   const handleLogin = () => {
-    // 这里应该跳转到登录页面或打开登录模态框
     history.push('/login');
-    message.info('跳转到登录页面');
   };
 
   // 处理登出
-  const handleLogout = () => {
-    setUser(null);
-    message.success('已退出登录');
-  };
-
-  const toggleLoginState = () => {
-    if (user) {
-      handleLogout();
-    } else {
-      setUser({
-        id: '1',
-        name: '张三',
-        email: 'zhangsan@example.com',
-        avatar: 'https://avatars.githubusercontent.com/u/123456789?v=4'
-      });
-      message.success('登录成功');
+  const handleLogout = async () => {
+    try {
+      await dispatch({ type: 'user/logout' });
+    } catch (error) {
+      console.error('登出失败:', error);
     }
   };
+
+  // const toggleLoginState = () => {
+  //   if (user) {
+  //     handleLogout();
+  //   } else {
+  //     setUser({
+  //       id: '1',
+  //       name: '张三',
+  //       email: 'zhangsan@example.com',
+  //       avatar: 'https://avatars.githubusercontent.com/u/123456789?v=4'
+  //     });
+  //     message.success('登录成功');
+  //   }
+  // };
 
   return (
     <motion.header
@@ -179,13 +176,13 @@ const Header: React.FC<HeaderProps> = () => {
             </div>
             
             {/* 临时演示按钮 - 实际项目中可以移除 */}
-            <Button
+            {/* <Button
               onClick={toggleLoginState}
               className="px-3 py-1 text-xs"
               variant="secondary"
             >
               {user ? '演示登出' : '演示登录'}
-            </Button>
+            </Button> */}
             
             {/* 用户头像触发器 */}
             <Button
@@ -193,13 +190,13 @@ const Header: React.FC<HeaderProps> = () => {
               className="p-1 rounded-lg"
               variant="ghost"
             >
-              {user ? (
+              {isLoggedIn && currentUser ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                    {user.name.charAt(0).toUpperCase()}
+                    {currentUser.nickname?.charAt(0)?.toUpperCase() || currentUser.username?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <span className="hidden sm:block text-sm font-medium text-gray-800">
-                    {user.name}
+                    {currentUser.nickname || currentUser.username}
                   </span>
                 </div>
               ) : (
@@ -248,7 +245,7 @@ const Header: React.FC<HeaderProps> = () => {
       <UserSidebar
         isOpen={userSidebarOpen}
         onClose={() => setUserSidebarOpen(false)}
-        user={user}
+        user={currentUser}
         onLogin={handleLogin}
         onLogout={handleLogout}
       />

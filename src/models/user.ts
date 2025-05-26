@@ -1,0 +1,252 @@
+import { Login, Register, Logout, GetUserInfo, UpdateUserInfo, ChangePassword } from '@/api/user';
+import type { 
+  LoginReq, 
+  RegisterReq, 
+  LoginRes, 
+  UpdateUserInfoReq, 
+  ChangePasswordReq,
+  UserInfo 
+} from '@/api/user';
+import { message } from 'antd';
+
+// 用户状态接口
+interface UserState {
+  currentUser: UserInfo | null;
+  token: string | null;
+  refreshToken: string | null;
+  isLoggedIn: boolean;
+  loading: boolean;
+}
+
+// 初始状态
+const initialState: UserState = {
+  currentUser: null,
+  token: localStorage.getItem('token'),
+  refreshToken: localStorage.getItem('refresh_token'),
+  isLoggedIn: Boolean(localStorage.getItem('token')),
+  loading: false,
+};
+
+export default {
+  namespace: 'user',
+  state: initialState,
+  
+  effects: {
+    // 用户登录
+    *login({ payload }: { payload: LoginReq }, { call, put }: any): Generator<any, any, any> {
+      yield put({ type: 'setLoading', payload: true });
+      try {
+        const response = yield call(Login, payload);
+        
+        if (response.code === 0) {
+          const { access_token, refresh_token, user_info } = response.data;
+          
+          // 存储token
+          localStorage.setItem('token', access_token);
+          localStorage.setItem('refresh_token', refresh_token);
+          
+          // 更新状态
+          yield put({
+            type: 'setUserInfo',
+            payload: {
+              token: access_token,
+              refreshToken: refresh_token,
+              currentUser: user_info,
+              isLoggedIn: true,
+            },
+          });
+          
+          message.success('登录成功！');
+          return { success: true, data: response.data };
+        } else {
+          message.error(response.message || '登录失败，请重试');
+          return { success: false, message: response.message };
+        }
+      } catch (error) {
+        message.error('登录失败，请检查网络连接');
+        return { success: false, message: '网络错误' };
+      } finally {
+        yield put({ type: 'setLoading', payload: false });
+      }
+    },
+
+    // 用户注册
+    *register({ payload }: { payload: RegisterReq }, { call, put }: any): Generator<any, any, any> {
+      yield put({ type: 'setLoading', payload: true });
+      try {
+        const response = yield call(Register, payload);
+        
+        if (response.code === 0) {
+          message.success('注册成功！请登录');
+          return { success: true };
+        } else {
+          message.error(response.message || '注册失败，请重试');
+          return { success: false, message: response.message };
+        }
+      } catch (error) {
+        message.error('注册失败，请检查网络连接');
+        return { success: false, message: '网络错误' };
+      } finally {
+        yield put({ type: 'setLoading', payload: false });
+      }
+    },
+
+    // 用户登出
+    *logout(_: any, { call, put, select }: any): Generator<any, void, any> {
+      try {
+        const { user } = yield select();
+        const { token, refreshToken } = user;
+        
+        if (token && refreshToken) {
+          yield call(Logout, {
+            access_token: token,
+            refresh_token: refreshToken,
+          });
+        }
+        
+        // 清除本地存储
+        localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
+        
+        // 重置状态
+        yield put({
+          type: 'clearUserInfo',
+        });
+        
+        message.success('已安全退出');
+      } catch (error) {
+        // 即使API调用失败，也要清除本地状态
+        localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
+        yield put({ type: 'clearUserInfo' });
+        console.error('登出API调用失败:', error);
+        message.success('已退出登录');
+      }
+    },
+
+    // 初始化用户状态（应用启动时调用）
+    *init(_: any, { put, select, call }: any): Generator<any, void, any> {
+      const { user } = yield select();
+      if (user.token) {
+        try {
+          // 调用获取用户信息的接口来验证token有效性
+          const response = yield call(GetUserInfo);
+          if (response.code === 0) {
+            yield put({
+              type: 'setUserInfo',
+              payload: {
+                currentUser: response.data.user,
+                isLoggedIn: true,
+              },
+            });
+          } else {
+            // 如果获取用户信息失败，清除本地存储
+            localStorage.removeItem('token');
+            localStorage.removeItem('refresh_token');
+            yield put({ type: 'clearUserInfo' });
+          }
+        } catch (error) {
+          // 如果token无效，清除本地存储
+          localStorage.removeItem('token');
+          localStorage.removeItem('refresh_token');
+          yield put({ type: 'clearUserInfo' });
+        }
+      }
+    },
+
+    // 获取当前用户信息
+    *getCurrentUser(_: any, { call, put }: any): Generator<any, any, any> {
+      try {
+        const response = yield call(GetUserInfo);
+        if (response.code === 0) {
+          yield put({
+            type: 'setUserInfo',
+            payload: {
+              currentUser: response.data.user,
+            },
+          });
+          return { success: true, data: response.data.user };
+        } else {
+          message.error(response.message || '获取用户信息失败');
+          return { success: false, message: response.message };
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+        message.error('获取用户信息失败，请重试');
+        return { success: false, message: '网络错误' };
+      }
+    },
+
+    // 更新用户信息
+    *updateUserInfo({ payload }: { payload: UpdateUserInfoReq }, { call, put }: any): Generator<any, any, any> {
+      yield put({ type: 'setLoading', payload: true });
+      try {
+        const response = yield call(UpdateUserInfo, payload);
+        if (response.code === 0) {
+          yield put({
+            type: 'setUserInfo',
+            payload: {
+              currentUser: response.data.user,
+            },
+          });
+          message.success('用户信息更新成功！');
+          return { success: true, data: response.data.user };
+        } else {
+          message.error(response.message || '更新用户信息失败');
+          return { success: false, message: response.message };
+        }
+      } catch (error) {
+        message.error('更新用户信息失败，请重试');
+        return { success: false, message: '网络错误' };
+      } finally {
+        yield put({ type: 'setLoading', payload: false });
+      }
+    },
+
+    // 修改密码
+    *changePassword({ payload }: { payload: ChangePasswordReq }, { call }: any): Generator<any, any, any> {
+      try {
+        const response = yield call(ChangePassword, payload);
+        if (response.code === 0) {
+          message.success('密码修改成功！');
+          return { success: true };
+        } else {
+          message.error(response.message || '修改密码失败');
+          return { success: false, message: response.message };
+        }
+      } catch (error) {
+        message.error('修改密码失败，请重试');
+        return { success: false, message: '网络错误' };
+      }
+    },
+  },
+
+  reducers: {
+    // 设置用户信息
+    setUserInfo(state: UserState, { payload }: any) {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+
+    // 清除用户信息
+    clearUserInfo(state: UserState) {
+      return {
+        ...state,
+        currentUser: null,
+        token: null,
+        refreshToken: null,
+        isLoggedIn: false,
+      };
+    },
+
+    // 设置加载状态
+    setLoading(state: UserState, { payload }: any) {
+      return {
+        ...state,
+        loading: payload,
+      };
+    },
+  },
+}; 

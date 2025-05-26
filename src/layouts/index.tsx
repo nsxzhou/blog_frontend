@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Outlet, useLocation } from '@umijs/max';
+import { Outlet, useLocation, useDispatch } from '@umijs/max';
 import StagewiseWrapper from '../components/StagewiseWrapper';
 import { Header, Footer } from './components';
 
@@ -9,6 +9,7 @@ import { Header, Footer } from './components';
 const GlobalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -21,6 +22,11 @@ const GlobalLayout: React.FC = () => {
   useEffect(() => {
     closeSidebar();
   }, [location.pathname]);
+
+  // 初始化用户状态
+  useEffect(() => {
+    dispatch({ type: 'user/init' });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative">

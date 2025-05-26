@@ -7,6 +7,10 @@ alwaysApply: true
 
 ## 代码质量约束
 
+### API接口开发规范
+1. 在开发API接口时全部的接口应该放到api文件夹下
+2. 在开发某一类接口时应该进行归类，在api文件夹下创建相应的文件目录并在这个目录下定义相对应的接口数据类型及其接口
+
 ### 代码提交规范
 1. 提交前必须通过 ESLint 和 Prettier 检查
 2. 使用语义化的 commit 信息：
@@ -50,12 +54,6 @@ const ErrorBoundary: FC<{ children: ReactNode }> = ({ children }) => {
 - Tailwind CSS IntelliSense
 - TypeScript Importer
 
-### 调试配置
-1. 使用 React DevTools 调试组件状态
-2. 使用 Network 面板调试 API 请求
-3. 使用 console.log 进行简单调试
-4. 复杂逻辑使用断点调试
-
 ### 环境变量管理
 ```typescript
 // .env.local 示例
@@ -75,5 +73,4 @@ REACT_APP_UPLOAD_URL=http://localhost:3000/upload
 ### 文件修改原则
 1. 修改现有文件时保持原有代码风格
 2. 添加新功能时不破坏现有功能
-3. 重构代码时保持向后兼容
 4. 删除代码前确认没有依赖关系
