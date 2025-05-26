@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   FileTextOutlined,
   EyeOutlined,
   HeartOutlined,
   MessageOutlined,
+  RiseOutlined,
 } from '@ant-design/icons';
 import type { ArticleStats } from '../types';
 
@@ -40,10 +41,37 @@ const statsItems = [
 ];
 
 const colorClasses = {
-  blue: 'from-blue-500 to-blue-600 text-white',
-  green: 'from-green-500 to-green-600 text-white',
-  red: 'from-red-500 to-red-600 text-white',
-  purple: 'from-purple-500 to-purple-600 text-white',
+  blue: {
+    icon: 'text-blue-600 bg-blue-50',
+    accent: 'text-blue-600',
+    border: 'border-blue-100',
+  },
+  green: {
+    icon: 'text-green-600 bg-green-50',
+    accent: 'text-green-600',
+    border: 'border-green-100',
+  },
+  red: {
+    icon: 'text-red-600 bg-red-50',
+    accent: 'text-red-600',
+    border: 'border-red-100',
+  },
+  purple: {
+    icon: 'text-purple-600 bg-purple-50',
+    accent: 'text-purple-600',
+    border: 'border-purple-100',
+  },
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
 };
 
 const cardVariants = {
@@ -52,57 +80,76 @@ const cardVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      duration: 0.3,
-      ease: 'easeOut',
+      duration: 0.4,
+      ease: "easeOut",
     },
   },
 };
 
-export const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
+const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {statsItems.map((item, index) => (
-        <motion.div
-          key={item.key}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: index * 0.1 }}
-          whileHover={{ scale: 1.02, y: -4 }}
-          className={`
-            relative overflow-hidden rounded-xl p-6 bg-gradient-to-br ${colorClasses[item.color as keyof typeof colorClasses]}
-            shadow-lg hover:shadow-xl transition-all duration-300
-          `}
-        >
-          {/* 背景装饰 */}
-          <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full" />
-          <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-white/5 rounded-full" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <div 
-                className="text-2xl opacity-90 flex items-center justify-center w-10 h-10"
-                style={{ fontSize: '24px', lineHeight: 1 }}
-              >
-                {item.icon}
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+    >
+      {statsItems.map((item, index) => {
+        const colors = colorClasses[item.color as keyof typeof colorClasses];
+        const todayIncrease = Math.floor(Math.random() * 50) + 1;
+
+        return (
+          <motion.div
+            key={item.key}
+            variants={cardVariants}
+            whileHover={{
+              y: -4,
+              transition: { duration: 0.2 }
+            }}
+            className={`
+              relative overflow-hidden rounded-xl p-6 
+              bg-white border ${colors.border}
+              shadow-sm hover:shadow-md 
+              transition-all duration-300 ease-out
+              group
+            `}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className={`
+                flex items-center justify-center w-12 h-12 rounded-lg
+                ${colors.icon}
+              `}>
+                <span className="text-lg">{item.icon}</span>
               </div>
-              <div className="text-xs opacity-70 font-medium">
-                今日 +{Math.floor(Math.random() * 50)}
+
+              <div className="flex items-center gap-1 text-xs font-medium text-gray-500">
+                <RiseOutlined className="text-green-500" />
+                <span>+{todayIncrease}</span>
               </div>
             </div>
-            
-            <div className="mb-1">
-              <div className="text-2xl font-bold">
+
+            <div className="mb-2">
+              <div className="text-2xl font-bold text-gray-900">
                 {(stats[item.key as keyof ArticleStats] as number).toLocaleString()}
               </div>
             </div>
-            
-            <div className="text-sm opacity-90 font-medium">
+
+            <div className="text-sm font-medium text-gray-600">
               {item.label}
             </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+
+            {/* 简单的装饰线条 */}
+            <motion.div
+              className={`absolute bottom-0 left-0 h-1 ${colors.accent.replace('text-', 'bg-')} opacity-0 group-hover:opacity-100`}
+              initial={{ width: 0 }}
+              whileHover={{ width: '100%' }}
+              transition={{ duration: 0.3 }}
+            />
+          </motion.div>
+        );
+      })}
+    </motion.div>
   );
-}; 
+};
+
+export { StatsCards };

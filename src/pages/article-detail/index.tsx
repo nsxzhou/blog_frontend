@@ -165,7 +165,6 @@ React 18 的并发特性为我们提供了构建更好用户体验的工具。�
   `,
     image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop",
     date: "2024-01-15",
-    readTime: "8分钟",
     views: 2340,
     likes: 156,
     comments: 23,

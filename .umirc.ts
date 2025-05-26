@@ -1,4 +1,4 @@
-import { defineConfig } from "@umijs/max";
+import { defineConfig } from '@umijs/max';
 
 export default defineConfig({
   antd: {},
@@ -28,11 +28,11 @@ export default defineConfig({
       component: '@/pages/my-articles',
     },
   ],
-  npmClient: "pnpm",
+  npmClient: 'pnpm',
   dva: {},
   proxy: {
-    "/api": {
-      target: "http://localhost:8888",
+    '/api': {
+      target: 'http://localhost:8888',
       changeOrigin: true,
     },
   },

@@ -60,17 +60,17 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
       variants={controlsVariants}
       initial="hidden"
       animate="visible"
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6"
     >
       {/* 顶部操作栏 */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div className="flex items-center space-x-3">
           <h2 className="text-xl font-semibold text-gray-800">我的文章</h2>
-          <span className="px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-lg font-medium">
+          <span className="px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-full font-medium border border-blue-100">
             共 {totalCount} 篇
           </span>
         </div>
-        
+
         <motion.button
           onClick={onCreateNew}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -85,24 +85,32 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
       {/* 搜索和过滤器 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* 搜索框 */}
-        <div className="relative">
-          <SearchOutlined className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <motion.div
+          className="relative group"
+          whileHover={{ scale: 1.01 }}
+          transition={{ duration: 0.2 }}
+        >
+          <SearchOutlined className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
           <input
             type="text"
             placeholder="搜索文章标题或内容..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50/50 hover:bg-white hover:border-gray-300 placeholder-gray-400 text-gray-700"
           />
-        </div>
+        </motion.div>
 
         {/* 状态过滤器 */}
-        <div className="relative group">
-          <FilterOutlined className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        <motion.div
+          className="relative group"
+          whileHover={{ scale: 1.01 }}
+          transition={{ duration: 0.2 }}
+        >
+          <FilterOutlined className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200 z-10" />
           <select
             value={filterType}
             onChange={(e) => onFilterChange(e.target.value as FilterType)}
-            className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 cursor-pointer text-gray-700 font-medium shadow-sm hover:shadow-md"
+            className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none bg-gray-50/50 hover:bg-white hover:border-gray-300 transition-all duration-200 cursor-pointer text-gray-700 font-medium"
           >
             {filterOptions.map((option) => (
               <option key={option.key} value={option.key}>
@@ -110,20 +118,32 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
               </option>
             ))}
           </select>
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-            <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+            <motion.svg
+              className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              animate={{ rotate: 0 }}
+              whileHover={{ rotate: 180 }}
+              transition={{ duration: 0.3 }}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            </motion.svg>
           </div>
-        </div>
+        </motion.div>
 
         {/* 排序选择器 */}
-        <div className="relative group">
-          <SortAscendingOutlined className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        <motion.div
+          className="relative group"
+          whileHover={{ scale: 1.01 }}
+          transition={{ duration: 0.2 }}
+        >
+          <SortAscendingOutlined className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200 z-10" />
           <select
             value={sortType}
             onChange={(e) => onSortChange(e.target.value as SortType)}
-            className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 cursor-pointer text-gray-700 font-medium shadow-sm hover:shadow-md"
+            className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none bg-gray-50/50 hover:bg-white hover:border-gray-300 transition-all duration-200 cursor-pointer text-gray-700 font-medium"
           >
             {sortOptions.map((option) => (
               <option key={option.key} value={option.key}>
@@ -131,28 +151,36 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
               </option>
             ))}
           </select>
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-            <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+            <motion.svg
+              className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              animate={{ rotate: 0 }}
+              whileHover={{ rotate: 180 }}
+              transition={{ duration: 0.3 }}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            </motion.svg>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* 状态标签 */}
-      <div className="flex flex-wrap gap-2 mt-4">
+      <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-gray-100">
         {filterOptions.map((option) => (
           <motion.button
             key={option.key}
             onClick={() => onFilterChange(option.key as FilterType)}
             className={`
-              px-3 py-1 rounded-lg text-sm font-medium transition-all
+              px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
               ${filterType === option.key
-                ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-500'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-200 shadow-sm'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-700'
               }
             `}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.95 }}
           >
             {option.label}
@@ -161,4 +189,4 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
       </div>
     </motion.div>
   );
-}; 
+};
