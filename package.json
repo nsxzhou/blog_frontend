@@ -13,6 +13,12 @@
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@ant-design/pro-components": "^2.4.4",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.36.8",
+    "@mdxeditor/editor": "^3.32.3",
+    "@uiw/react-markdown-preview": "^5.1.4",
+    "@uiw/react-md-editor": "^4.0.7",
     "@umijs/max": "^4.4.11",
     "antd": "^5.4.0",
     "clsx": "^2.1.1",

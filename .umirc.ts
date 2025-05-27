@@ -27,6 +27,14 @@ export default defineConfig({
       path: '/login',
       component: '@/pages/login',
     },
+    {
+      path: '/write',
+      component: '@/pages/write',
+    },
+    {
+      path: '/article-detail/:id',
+      component: '@/pages/article-detail',
+    },
   ],
   npmClient: 'pnpm',
   dva: {},
