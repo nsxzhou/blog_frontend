@@ -8,14 +8,19 @@ import {
   sidebarVariants,
 } from '@/constants';
 import {
+  AppstoreOutlined,
   BellOutlined,
   BookOutlined,
   CloseOutlined,
   EditOutlined,
+  FileImageOutlined,
   FileTextOutlined,
   HeartOutlined,
   LoginOutlined,
   LogoutOutlined,
+  MessageOutlined,
+  TagOutlined,
+  TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { Link } from '@umijs/max';
@@ -38,6 +43,16 @@ const menuItems = [
   { key: '/favorites', label: '收藏夹', icon: <HeartOutlined /> },
   { key: '/reading-list', label: '阅读列表', icon: <BookOutlined /> },
   { key: '/notifications', label: '通知', icon: <BellOutlined /> },
+];
+
+// 管理员专用菜单
+const adminMenuItems = [
+  { key: '/admin/articles', label: '文章管理', icon: <FileTextOutlined /> },
+  { key: '/admin/users', label: '用户管理', icon: <TeamOutlined /> },
+  { key: '/admin/images', label: '图片管理', icon: <FileImageOutlined /> },
+  { key: '/admin/tags', label: '标签管理', icon: <TagOutlined /> },
+  { key: '/admin/categories', label: '分类管理', icon: <AppstoreOutlined /> },
+  { key: '/admin/comments', label: '评论管理', icon: <MessageOutlined /> },
 ];
 
 export const UserSidebar: React.FC<UserSidebarProps> = ({
@@ -151,7 +166,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                   {menuItems.map((item) => (
                     <Link key={item.key} to={item.key} onClick={onClose}>
                       <motion.div
-                        className="flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+                        className="flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-blue-50 transition-colors"
                         {...hoverSlideX}
                       >
                         <span className="text-lg">{item.icon}</span>
@@ -159,6 +174,29 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                       </motion.div>
                     </Link>
                   ))}
+
+                  {/* 管理员菜单 */}
+                  {user.role === 'admin' && (
+                    <>
+                      <div className="border-t border-gray-100 my-3" />
+                      <div className="px-3 py-2">
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          管理功能
+                        </h4>
+                      </div>
+                      {adminMenuItems.map((item) => (
+                        <Link key={item.key} to={item.key} onClick={onClose}>
+                          <motion.div
+                            className="flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-blue-50 transition-colors"
+                            {...hoverSlideX}
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="font-medium">{item.label}</span>
+                          </motion.div>
+                        </Link>
+                      ))}
+                    </>
+                  )}
 
                   {/* 分割线 */}
                   <div className="border-t border-gray-100 my-3" />
