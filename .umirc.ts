@@ -35,6 +35,10 @@ export default defineConfig({
       path: '/article-detail/:id',
       component: '@/pages/article-detail',
     },
+    {
+      path: '/profile',
+      component: '@/pages/profile',
+    },
   ],
   npmClient: 'pnpm',
   dva: {},

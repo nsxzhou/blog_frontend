@@ -16,7 +16,6 @@ import {
   HeartOutlined,
   LoginOutlined,
   LogoutOutlined,
-  SettingOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { Link } from '@umijs/max';
@@ -33,13 +32,12 @@ interface UserSidebarProps {
 }
 
 const menuItems = [
-  { key: '/profile', label: '个人资料', icon: <UserOutlined /> },
+  { key: '/profile', label: '个人中心', icon: <UserOutlined /> },
   { key: '/my-articles', label: '我的文章', icon: <FileTextOutlined /> },
   { key: '/write', label: '写文章', icon: <EditOutlined /> },
   { key: '/favorites', label: '收藏夹', icon: <HeartOutlined /> },
   { key: '/reading-list', label: '阅读列表', icon: <BookOutlined /> },
   { key: '/notifications', label: '通知', icon: <BellOutlined /> },
-  { key: '/settings', label: '设置', icon: <SettingOutlined /> },
 ];
 
 export const UserSidebar: React.FC<UserSidebarProps> = ({
@@ -54,10 +52,6 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
     : user?.username
     ? user.username.charAt(0).toUpperCase()
     : '用';
-
-  // 调试信息
-  console.log('UserSidebar - user:', user);
-  console.log('UserSidebar - isOpen:', isOpen);
 
   return (
     <AnimatePresence>
