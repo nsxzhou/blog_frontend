@@ -47,12 +47,12 @@ const menuItems = [
 
 // 管理员专用菜单
 const adminMenuItems = [
-  { key: '/admin/articles', label: '文章管理', icon: <FileTextOutlined /> },
-  { key: '/admin/users', label: '用户管理', icon: <TeamOutlined /> },
-  { key: '/admin/images', label: '图片管理', icon: <FileImageOutlined /> },
-  { key: '/admin/tags', label: '标签管理', icon: <TagOutlined /> },
-  { key: '/admin/categories', label: '分类管理', icon: <AppstoreOutlined /> },
-  { key: '/admin/comments', label: '评论管理', icon: <MessageOutlined /> },
+  { key: '/articles', label: '文章管理', icon: <FileTextOutlined /> },
+  { key: '/users', label: '用户管理', icon: <TeamOutlined /> },
+  { key: '/images', label: '图片管理', icon: <FileImageOutlined /> },
+  { key: '/tags', label: '标签管理', icon: <TagOutlined /> },
+  { key: '/categories', label: '分类管理', icon: <AppstoreOutlined /> },
+  { key: '/comments', label: '评论管理', icon: <MessageOutlined /> },
 ];
 
 export const UserSidebar: React.FC<UserSidebarProps> = ({
