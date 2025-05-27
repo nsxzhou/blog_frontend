@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import StagewiseWrapper from '../components/StagewiseWrapper';
 import { Footer, Header } from './components';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { getRouteAccess } from '@/utils/routeAccess';
 
 const GlobalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -88,7 +90,9 @@ const GlobalLayout: React.FC = () => {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
-          <Outlet />
+          <ProtectedRoute access={getRouteAccess(location.pathname)}>
+            <Outlet />
+          </ProtectedRoute>
         </motion.div>
       </main>
 
