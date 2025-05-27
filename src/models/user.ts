@@ -25,7 +25,7 @@ interface UserState {
   loading: boolean;
 }
 
-// 初始状态 - 避免直接访问 localStorage
+// 初始状态 
 const initialState: UserState = {
   currentUser: null,
   token: null,
@@ -37,7 +37,6 @@ const initialState: UserState = {
 export default {
   namespace: 'user',
   state: initialState,
-
   effects: {
     // 用户登录
     *login(

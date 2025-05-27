@@ -20,24 +20,16 @@ export async function getInitialState(): Promise<{
   // 检查本地存储的token
   const token = getTokenFromStorage();
   const refreshToken = getRefreshTokenFromStorage();
-  console.log('initialState');
-  console.log('token', token);
-  console.log('refreshToken', refreshToken);
-  console.log('initialState');
   if (token && refreshToken) {
-    console.log('发现本地token，尝试验证用户身份');
     try {
       // 验证token有效性并获取用户信息（静默模式，不显示错误消息，也不尝试刷新token）
       const response = await GetUserInfo({
         silent: true,
         skipAuthRefresh: true,
       });
-      console.log(token);
-      console.log('GetUserInfo response:', response);
 
       if (response.code === 0) {
         // token有效，返回完整的用户状态
-        console.log('Token有效，用户已登录');
         return {
           ...initialState,
           currentUser: response.data.user,
