@@ -4,27 +4,19 @@ import Markdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
-import { 
-  HeartOutlined, 
+import {
+  HeartOutlined,
   HeartFilled,
   ShareAltOutlined,
   BookOutlined,
   CopyOutlined
 } from '@ant-design/icons';
 import type { BlogPost } from '../../blog/components/types';
+import { contentVariants } from '@/constants/animations';
 
 interface ArticleContentProps {
   article: BlogPost;
 }
-
-const contentVariants = {
-  initial: { opacity: 0, y: 30 },
-  animate: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
-};
 
 const ActionButton: React.FC<{
   icon: React.ReactNode;
@@ -36,28 +28,25 @@ const ActionButton: React.FC<{
   iconColor?: string;
 }> = ({ icon, label, count, active, onClick, tooltip, iconColor }) => {
   const isFloatingButton = !label; // 判断是否为浮动按钮
-  
+
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`transition-all duration-200 ${
-        isFloatingButton 
-          ? `w-10 h-10 rounded-xl flex items-center justify-center ${
-              active
-                ? 'bg-red-50 shadow-lg'
-                : 'bg-white/80 hover:bg-gray-50 shadow-md'
-            }`
-          : `flex items-center gap-2 px-4 py-2 rounded-lg border ${
-              active
-                ? 'bg-red-50 border-red-200 text-red-600'
-                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`
-      }`}
+      className={`transition-all duration-200 ${isFloatingButton
+          ? `w-10 h-10 rounded-xl flex items-center justify-center ${active
+            ? 'bg-red-50 shadow-lg'
+            : 'bg-white/80 hover:bg-gray-50 shadow-md'
+          }`
+          : `flex items-center gap-2 px-4 py-2 rounded-lg border ${active
+            ? 'bg-red-50 border-red-200 text-red-600'
+            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+          }`
+        }`}
       title={isFloatingButton ? tooltip : undefined}
     >
-      <span 
+      <span
         className={`${isFloatingButton ? 'text-lg' : ''}`}
         style={{ color: iconColor }}
       >
@@ -181,10 +170,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article }) => {
     ),
     // 自定义链接样式
     a: ({ children, href }: any) => (
-      <a 
-        href={href} 
-        className="text-blue-600 hover:text-blue-700 underline" 
-        target="_blank" 
+      <a
+        href={href}
+        className="text-blue-600 hover:text-blue-700 underline"
+        target="_blank"
         rel="noopener noreferrer"
       >
         {children}
@@ -219,6 +208,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article }) => {
     <>
       <motion.article
         variants={contentVariants}
+        initial="initial"
+        animate="animate"
         className="relative"
       >
         {/* 浮动操作栏 */}
@@ -268,20 +259,22 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article }) => {
           transition={{ delay: 0.3 }}
           className="prose prose-lg max-w-none"
         >
-          <div className="text-gray-900 leading-relaxed">
-            {article.content ? (
-              <Markdown 
-                components={markdownComponents}
-                remarkPlugins={[remarkGfm]}
-              >
-                {article.content}
-              </Markdown>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500">文章内容加载中...</p>
-              </div>
-            )}
-          </div>
+          <motion.h1
+            className="text-4xl font-bold text-gray-900 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {article.title}
+          </motion.h1>
+
+          <motion.div
+            className="prose-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
         </motion.div>
 
         {/* 移动端操作栏 */}

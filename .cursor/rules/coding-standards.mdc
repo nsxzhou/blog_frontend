@@ -8,10 +8,11 @@ alwaysApply: true
 ## React 组件开发规范
 
 ### 组件结构
+
 ```typescript
 // 推荐的组件结构
-import React from 'react';
-import type { FC } from 'react';
+import React from "react";
+import type { FC } from "react";
 
 interface ComponentProps {
   // 定义 props 类型
@@ -19,36 +20,41 @@ interface ComponentProps {
 
 const Component: FC<ComponentProps> = ({ prop1, prop2 }) => {
   // 组件逻辑
-  
-  return (
-    <div className="tailwind-classes">
-      {/* JSX 内容 */}
-    </div>
-  );
+
+  return <div className="tailwind-classes">{/* JSX 内容 */}</div>;
 };
 
 export default Component;
 ```
 
+### 动画效果规范
+
+1. 将所有的动画效果统一放到 constans 文件夹下
+2. 在想要使用动画效果时先去 constans 文件夹下查看是否有现成的动画效果可以使用
+
 ### 命名约定
+
 - 组件文件：`PascalCase.tsx` (如 `BlogCard.tsx`)
 - 页面文件：`index.tsx` 或 `kebab-case.tsx`
 - 工具函数：`camelCase.ts` (如 `formatDate.ts`)
 - 常量：`UPPER_SNAKE_CASE` (如 `API_BASE_URL`)
 
 ### TypeScript 使用规范
+
 1. 所有组件必须定义 Props 接口
 2. 使用 `type` 定义联合类型，`interface` 定义对象类型
 3. 避免使用 `any`，优先使用具体类型
 4. 导出类型时使用 `export type`
 
 ### 样式规范
+
 1. 优先使用 Tailwind CSS 类名
 2. 复杂样式可以使用 CSS Modules 或 styled-components
 3. 响应式设计使用 Tailwind 的响应式前缀
 4. 保持类名简洁，避免过长的类名链
 
 ### 状态管理
+
 1. 简单状态使用 `useState`
 2. 复杂状态使用 Umi 的 `useModel`
 3. 全局状态放在 `src/models/` 目录下

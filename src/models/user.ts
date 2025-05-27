@@ -1,11 +1,17 @@
-import { Login, Register, Logout, GetUserInfo, UpdateUserInfo, ChangePassword } from '@/api/user';
-import type { 
-  LoginReq, 
-  RegisterReq, 
-  LoginRes, 
-  UpdateUserInfoReq, 
+import type {
   ChangePasswordReq,
-  UserInfo 
+  LoginReq,
+  RegisterReq,
+  UpdateUserInfoReq,
+  UserInfo,
+} from '@/api/user';
+import {
+  ChangePassword,
+  GetUserInfo,
+  Login,
+  Logout,
+  Register,
+  UpdateUserInfo,
 } from '@/api/user';
 import { message } from 'antd';
 
@@ -30,21 +36,24 @@ const initialState: UserState = {
 export default {
   namespace: 'user',
   state: initialState,
-  
+
   effects: {
     // 用户登录
-    *login({ payload }: { payload: LoginReq }, { call, put }: any): Generator<any, any, any> {
+    *login(
+      { payload }: { payload: LoginReq },
+      { call, put }: any,
+    ): Generator<any, any, any> {
       yield put({ type: 'setLoading', payload: true });
       try {
         const response = yield call(Login, payload);
-        
+
         if (response.code === 0) {
           const { access_token, refresh_token, user_info } = response.data;
-          
+
           // 存储token
           localStorage.setItem('token', access_token);
           localStorage.setItem('refresh_token', refresh_token);
-          
+
           // 更新状态
           yield put({
             type: 'setUserInfo',
@@ -55,7 +64,7 @@ export default {
               isLoggedIn: true,
             },
           });
-          
+
           message.success('登录成功！');
           return { success: true, data: response.data };
         } else {
@@ -71,11 +80,14 @@ export default {
     },
 
     // 用户注册
-    *register({ payload }: { payload: RegisterReq }, { call, put }: any): Generator<any, any, any> {
+    *register(
+      { payload }: { payload: RegisterReq },
+      { call, put }: any,
+    ): Generator<any, any, any> {
       yield put({ type: 'setLoading', payload: true });
       try {
         const response = yield call(Register, payload);
-        
+
         if (response.code === 0) {
           message.success('注册成功！请登录');
           return { success: true };
@@ -96,23 +108,23 @@ export default {
       try {
         const { user } = yield select();
         const { token, refreshToken } = user;
-        
+
         if (token && refreshToken) {
           yield call(Logout, {
             access_token: token,
             refresh_token: refreshToken,
           });
         }
-        
+
         // 清除本地存储
         localStorage.removeItem('token');
         localStorage.removeItem('refresh_token');
-        
+
         // 重置状态
         yield put({
           type: 'clearUserInfo',
         });
-        
+
         message.success('已安全退出');
       } catch (error) {
         // 即使API调用失败，也要清除本地状态
@@ -178,7 +190,10 @@ export default {
     },
 
     // 更新用户信息
-    *updateUserInfo({ payload }: { payload: UpdateUserInfoReq }, { call, put }: any): Generator<any, any, any> {
+    *updateUserInfo(
+      { payload }: { payload: UpdateUserInfoReq },
+      { call, put }: any,
+    ): Generator<any, any, any> {
       yield put({ type: 'setLoading', payload: true });
       try {
         const response = yield call(UpdateUserInfo, payload);
@@ -204,7 +219,10 @@ export default {
     },
 
     // 修改密码
-    *changePassword({ payload }: { payload: ChangePasswordReq }, { call }: any): Generator<any, any, any> {
+    *changePassword(
+      { payload }: { payload: ChangePasswordReq },
+      { call }: any,
+    ): Generator<any, any, any> {
       try {
         const response = yield call(ChangePassword, payload);
         if (response.code === 0) {
@@ -249,4 +267,4 @@ export default {
       };
     },
   },
-}; 
+};

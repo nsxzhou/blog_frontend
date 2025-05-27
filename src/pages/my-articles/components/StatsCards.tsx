@@ -8,6 +8,12 @@ import {
   RiseOutlined,
 } from '@ant-design/icons';
 import type { ArticleStats } from '../types';
+import {
+  containerVariants,
+  itemVariants,
+  cardHover,
+  progressBarAnimation
+} from '@/constants';
 
 interface StatsCardsProps {
   stats: ArticleStats;
@@ -63,29 +69,6 @@ const colorClasses = {
   },
 };
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut",
-    },
-  },
-};
-
 const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
   return (
     <motion.div
@@ -101,11 +84,8 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
         return (
           <motion.div
             key={item.key}
-            variants={cardVariants}
-            whileHover={{
-              y: -4,
-              transition: { duration: 0.2 }
-            }}
+            variants={itemVariants}
+            {...cardHover}
             className={`
               relative overflow-hidden rounded-xl p-6 
               bg-white border ${colors.border}
@@ -141,9 +121,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
             {/* 简单的装饰线条 */}
             <motion.div
               className={`absolute bottom-0 left-0 h-1 ${colors.accent.replace('text-', 'bg-')} opacity-0 group-hover:opacity-100`}
-              initial={{ width: 0 }}
-              whileHover={{ width: '100%' }}
-              transition={{ duration: 0.3 }}
+              {...progressBarAnimation}
             />
           </motion.div>
         );

@@ -3,13 +3,21 @@ import { motion } from 'framer-motion';
 import { history } from '@umijs/max';
 import {
   CalendarOutlined,
-  ClockCircleOutlined,
   EyeOutlined,
   HeartOutlined,
   CommentOutlined,
   FireOutlined,
 } from '@ant-design/icons';
 import { Card } from '@/components/ui';
+import {
+  itemVariants,
+  cardHover,
+  scaleIn,
+  hoverScale,
+  imageVariants,
+  titleVariants,
+  overlayVariants
+} from '@/constants/animations';
 import type { BlogPost } from './types';
 
 interface BlogCardProps {
@@ -17,18 +25,6 @@ interface BlogCardProps {
   index: number;
   onTagClick: (tag: string) => void;
 }
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  }
-};
 
 const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
   const handleCardClick = () => {
@@ -48,11 +44,12 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
       onClick={handleCardClick}
       className="group relative cursor-pointer"
     >
-      <Card 
-        className={`overflow-hidden h-full transition-all duration-300 p-0 ${
-          post.featured ? 'ring-2 ring-blue-200' : ''
-        }`}
-        hover={true}
+      <motion.div
+        variants={cardHover}
+        initial="rest"
+        whileHover="hover"
+        className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${post.featured ? 'ring-2 ring-blue-200' : ''
+          }`}
       >
         {/* 特色标签 */}
         {post.featured && (
@@ -74,10 +71,12 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
             src={post.image}
             alt={post.title}
             className="w-full h-full object-cover"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.4 }}
+            variants={imageVariants}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <motion.div
+            variants={overlayVariants}
+            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+          />
         </div>
 
         <div className="p-6">
@@ -91,17 +90,16 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
                 <CalendarOutlined />
                 {post.date}
               </span>
-              <span className="flex items-center gap-1">
-                <ClockCircleOutlined />
-                {post.readTime}
-              </span>
             </div>
           </div>
 
           {/* 文章标题 */}
-          <h3 className="text-lg font-semibold mb-3 text-gray-900 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+          <motion.h3
+            variants={titleVariants}
+            className="text-lg font-semibold mb-3 line-clamp-2"
+          >
             {post.title}
-          </h3>
+          </motion.h3>
 
           {/* 文章摘要 */}
           <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3 text-sm">
@@ -110,22 +108,27 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
 
           {/* 标签 */}
           <div className="flex flex-wrap gap-1 mb-4">
-                      {post.tags.slice(0, 3).map((tag, tagIndex) => (
-            <span
-              key={tagIndex}
-              className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
-              onClick={(e) => handleTagClick(e, tag)}
-            >
-              {tag}
-            </span>
-          ))}
+            {post.tags.slice(0, 3).map((tag, tagIndex) => (
+              <motion.span
+                key={tagIndex}
+                className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 cursor-pointer"
+                whileHover={{
+                  backgroundColor: "#e5e7eb",
+                  transition: { duration: 0.1 }
+                }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => handleTagClick(e, tag)}
+              >
+                {tag}
+              </motion.span>
+            ))}
           </div>
 
           {/* 作者和统计信息 */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div className="flex items-center gap-2">
-              <img 
-                src={post.author.avatar} 
+              <img
+                src={post.author.avatar}
                 alt={post.author.name}
                 className="w-6 h-6 rounded-full object-cover"
               />
@@ -147,7 +150,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
             </div>
           </div>
         </div>
-      </Card>
+      </motion.div>
     </motion.article>
   );
 };

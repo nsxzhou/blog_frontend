@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from '@umijs/max';
 import {
     EyeOutlined,
     HeartOutlined,
@@ -12,6 +13,12 @@ import {
     TagOutlined,
 } from '@ant-design/icons';
 import type { MyArticle } from '../types';
+import {
+    articleCardVariants,
+    cardHover,
+    hoverScaleSmall,
+    modalVariants
+} from '@/constants';
 
 interface MyArticleCardProps {
     article: MyArticle;
@@ -20,18 +27,6 @@ interface MyArticleCardProps {
     onShare: (id: number) => void;
     onClick: (id: number) => void;
 }
-
-const cardVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-            duration: 0.3,
-            ease: 'easeOut',
-        },
-    },
-};
 
 const statusConfig = {
     published: { label: '已发布', color: 'bg-green-100 text-green-700' },
@@ -46,42 +41,68 @@ export const MyArticleCard: React.FC<MyArticleCardProps> = ({
     onShare,
     onClick,
 }) => {
-    const [showMenu, setShowMenu] = useState(false);
+    const [showActions, setShowActions] = useState(false);
     const status = statusConfig[article.status];
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'published':
+                return 'text-green-600 bg-green-50';
+            case 'draft':
+                return 'text-yellow-600 bg-yellow-50';
+            case 'archived':
+                return 'text-gray-600 bg-gray-50';
+            default:
+                return 'text-gray-600 bg-gray-50';
+        }
+    };
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'published':
+                return '已发布';
+            case 'draft':
+                return '草稿';
+            case 'archived':
+                return '已归档';
+            default:
+                return '未知';
+        }
+    };
 
     const handleMenuClick = (e: React.MouseEvent, action: () => void) => {
         e.stopPropagation();
         action();
-        setShowMenu(false);
+        setShowActions(false);
     };
 
     // ESC键关闭菜单
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                setShowMenu(false);
+                setShowActions(false);
             }
         };
 
-        if (showMenu) {
+        if (showActions) {
             document.addEventListener('keydown', handleEscape);
         }
 
         return () => {
             document.removeEventListener('keydown', handleEscape);
         };
-    }, [showMenu]);
+    }, [showActions]);
 
     return (
         <motion.div
-            variants={cardVariants}
+            variants={articleCardVariants}
             initial="hidden"
             animate="visible"
-            whileHover={{ y: -4, scale: 1.01 }}
+            {...cardHover}
             className="bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer relative flex flex-col h-full"
             onClick={() => {
-                if (showMenu) {
-                    setShowMenu(false);
+                if (showActions) {
+                    setShowActions(false);
                 } else {
                     onClick(article.id);
                 }
@@ -179,49 +200,36 @@ export const MyArticleCard: React.FC<MyArticleCardProps> = ({
                             <motion.button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setShowMenu(!showMenu);
+                                    setShowActions(!showActions);
                                 }}
                                 className="p-1 rounded-md hover:bg-gray-100 transition-colors"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                {...hoverScaleSmall}
                             >
                                 <MoreOutlined />
                             </motion.button>
 
                             <AnimatePresence>
-                                {showMenu && (
-                                    <>
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="absolute -top-20 -right-2 mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20"
-                                            onClick={(e) => e.stopPropagation()}
+                                {showActions && (
+                                    <motion.div
+                                        {...modalVariants}
+                                        className="absolute bottom-12 right-4 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <button
+                                            onClick={(e) => handleMenuClick(e, () => onEdit(article.id))}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                                         >
-                                            <button
-                                                onClick={(e) => handleMenuClick(e, () => onEdit(article.id))}
-                                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                                            >
-                                                <EditOutlined />
-                                                <span>编辑</span>
-                                            </button>
-                                            <button
-                                                onClick={(e) => handleMenuClick(e, () => onShare(article.id))}
-                                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                                            >
-                                                <ShareAltOutlined />
-                                                <span>分享</span>
-                                            </button>
-                                            <button
-                                                onClick={(e) => handleMenuClick(e, () => onDelete(article.id))}
-                                                className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                                            >
-                                                <DeleteOutlined />
-                                                <span>删除</span>
-                                            </button>
-                                        </motion.div>
-                                    </>
+                                            <EditOutlined />
+                                            <span>编辑</span>
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleMenuClick(e, () => onDelete(article.id))}
+                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                                        >
+                                            <DeleteOutlined />
+                                            <span>删除</span>
+                                        </button>
+                                    </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>

@@ -6,6 +6,7 @@ import {
   SortAscendingOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
+import { fadeInDown, hoverScale, hoverScaleSmall } from '@/constants/animations';
 import type { FilterType, SortType } from '../types';
 
 interface ArticleControlsProps {
@@ -33,18 +34,6 @@ const sortOptions = [
   { key: 'title', label: '标题' },
 ];
 
-const controlsVariants = {
-  hidden: { y: -20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.3,
-      ease: 'easeOut',
-    },
-  },
-};
-
 export const ArticleControls: React.FC<ArticleControlsProps> = ({
   searchTerm,
   onSearchChange,
@@ -57,9 +46,7 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
 }) => {
   return (
     <motion.div
-      variants={controlsVariants}
-      initial="hidden"
-      animate="visible"
+      {...fadeInDown}
       className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6"
     >
       {/* 顶部操作栏 */}
@@ -74,8 +61,7 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
         <motion.button
           onClick={onCreateNew}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          {...hoverScale}
         >
           <PlusOutlined />
           <span>写新文章</span>
@@ -87,8 +73,7 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
         {/* 搜索框 */}
         <motion.div
           className="relative group"
-          whileHover={{ scale: 1.01 }}
-          transition={{ duration: 0.2 }}
+          {...hoverScale}
         >
           <SearchOutlined className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
           <input
@@ -103,8 +88,7 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
         {/* 状态过滤器 */}
         <motion.div
           className="relative group"
-          whileHover={{ scale: 1.01 }}
-          transition={{ duration: 0.2 }}
+          {...hoverScale}
         >
           <FilterOutlined className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200 z-10" />
           <select
@@ -136,8 +120,7 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
         {/* 排序选择器 */}
         <motion.div
           className="relative group"
-          whileHover={{ scale: 1.01 }}
-          transition={{ duration: 0.2 }}
+          {...hoverScale}
         >
           <SortAscendingOutlined className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200 z-10" />
           <select
@@ -180,8 +163,7 @@ export const ArticleControls: React.FC<ArticleControlsProps> = ({
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-700'
               }
             `}
-            whileHover={{ scale: 1.05, y: -1 }}
-            whileTap={{ scale: 0.95 }}
+            {...hoverScaleSmall}
           >
             {option.label}
           </motion.button>

@@ -1,56 +1,40 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { Link, useLocation, history, useDispatch, useSelector } from '@umijs/max';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useLocation } from '@umijs/max';
+import { Link, history } from '@umijs/max';
+import { useSelector, useDispatch } from '@umijs/max';
 import {
-  MenuOutlined,
   SearchOutlined,
-  CloseOutlined,
+  UserOutlined,
+  MenuOutlined,
+  FileTextOutlined,
+  EditOutlined,
   GithubOutlined,
   TwitterOutlined,
   LinkedinOutlined,
-  HomeOutlined,
-  FileTextOutlined,
-  UserOutlined,
-  EditOutlined,
+  SettingOutlined,
+  CloseOutlined,
 } from '@ant-design/icons';
-import { Input, message } from 'antd';
-import { Button, UserSidebar } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { Input } from 'antd';
+import Sidebar from './Sidebar';
+import {
+  headerVariants,
+  navItemVariants,
+  fadeInUp,
+  slideInRight
+} from '@/constants/animations';
 
 interface HeaderProps {
   onMenuToggle: () => void;
 }
 
 const navigationItems = [
-  { key: '/', label: '首页', icon: <HomeOutlined /> },
+  { key: '/', label: '首页', icon: <FileTextOutlined /> },
   { key: '/blog', label: '文章', icon: <FileTextOutlined /> },
   { key: '/about', label: '关于', icon: <UserOutlined /> },
   { key: '/write', label: '写作', icon: <EditOutlined /> },
 ];
-
-const headerVariants = {
-  hidden: { y: -60, opacity: 0 },
-  visible: { 
-    y: 0, 
-    opacity: 1,
-    transition: { 
-      duration: 0.4, 
-      ease: "easeOut" 
-    }
-  }
-};
-
-const navItemVariants = {
-  idle: { scale: 1 },
-  hover: { 
-    scale: 1.05,
-    transition: { 
-      type: "spring", 
-      stiffness: 300, 
-      damping: 20 
-    }
-  },
-  tap: { scale: 0.98 }
-};
 
 const Header: React.FC<HeaderProps> = () => {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -58,10 +42,10 @@ const Header: React.FC<HeaderProps> = () => {
   const location = useLocation();
   const { scrollY } = useScroll();
   const dispatch = useDispatch();
-  
+
   // 从全局状态获取用户信息
   const { currentUser, isLoggedIn } = useSelector((state: any) => state.user);
-  
+
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
   // 处理登录
@@ -78,20 +62,6 @@ const Header: React.FC<HeaderProps> = () => {
     }
   };
 
-  // const toggleLoginState = () => {
-  //   if (user) {
-  //     handleLogout();
-  //   } else {
-  //     setUser({
-  //       id: '1',
-  //       name: '张三',
-  //       email: 'zhangsan@example.com',
-  //       avatar: 'https://avatars.githubusercontent.com/u/123456789?v=4'
-  //     });
-  //     message.success('登录成功');
-  //   }
-  // };
-
   return (
     <motion.header
       variants={headerVariants}
@@ -105,14 +75,6 @@ const Header: React.FC<HeaderProps> = () => {
     >
       <div className="flex items-center justify-between h-16 px-6 lg:px-8">
         <div className="flex items-center space-x-4">
-          {/* <Button
-            onClick={onMenuToggle}
-            className="p-2 rounded-lg"
-            variant="ghost"
-          >
-            <MenuOutlined className="text-lg" />
-          </Button> */}
-          
           <Link to="/">
             <motion.div
               className="flex items-center space-x-3"
@@ -134,11 +96,10 @@ const Header: React.FC<HeaderProps> = () => {
                 initial="idle"
                 whileHover="hover"
                 whileTap="tap"
-                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${
-                  location.pathname === item.key
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                }`}
+                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${location.pathname === item.key
+                  ? 'bg-gray-100 text-gray-900'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-500">{item.icon}</span>
@@ -157,7 +118,7 @@ const Header: React.FC<HeaderProps> = () => {
           >
             <SearchOutlined className="text-lg" />
           </Button>
-          
+
           <div className="flex items-center space-x-2">
             <div className="hidden md:flex items-center space-x-1">
               {[
@@ -174,16 +135,7 @@ const Header: React.FC<HeaderProps> = () => {
                 </Button>
               ))}
             </div>
-            
-            {/* 临时演示按钮 - 实际项目中可以移除 */}
-            {/* <Button
-              onClick={toggleLoginState}
-              className="px-3 py-1 text-xs"
-              variant="secondary"
-            >
-              {user ? '演示登出' : '演示登录'}
-            </Button> */}
-            
+
             {/* 用户头像触发器 */}
             <Button
               onClick={() => setUserSidebarOpen(true)}
@@ -210,10 +162,7 @@ const Header: React.FC<HeaderProps> = () => {
       <AnimatePresence>
         {searchOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            {...fadeInUp}
             className="border-t border-gray-200/50 bg-white/90 backdrop-blur-sm"
           >
             <div className="px-6 py-4">
@@ -222,17 +171,14 @@ const Header: React.FC<HeaderProps> = () => {
                   placeholder="搜索文章、标签、作者..."
                   prefix={<SearchOutlined className="text-gray-400" />}
                   suffix={
-                    <motion.button
+                    <Button
                       onClick={() => setSearchOpen(false)}
-                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      variant="ghost"
+                      size="sm"
                     >
                       <CloseOutlined />
-                    </motion.button>
+                    </Button>
                   }
-                  className="rounded-lg border-gray-200"
-                  size="large"
                   autoFocus
                 />
               </div>
@@ -242,10 +188,9 @@ const Header: React.FC<HeaderProps> = () => {
       </AnimatePresence>
 
       {/* 用户侧边栏 */}
-      <UserSidebar
+      <Sidebar
         isOpen={userSidebarOpen}
         onClose={() => setUserSidebarOpen(false)}
-        user={currentUser}
         onLogin={handleLogin}
         onLogout={handleLogout}
       />

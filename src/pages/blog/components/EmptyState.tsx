@@ -1,16 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { emptyStateVariants } from '@/constants/animations';
 
 const EmptyState: React.FC = () => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="text-center py-16"
+      variants={emptyStateVariants}
+      initial="hidden"
+      animate="visible"
+      className="text-center py-12"
     >
       <div className="text-6xl mb-4">📝</div>
-      <h3 className="text-xl font-semibold text-gray-600 mb-2">没有找到相关文章</h3>
-      <p className="text-gray-500">尝试调整搜索条件或浏览其他分类</p>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">暂无文章</h3>
+      <p className="text-gray-600">还没有发布任何文章，请稍后再来查看</p>
     </motion.div>
   );
 };

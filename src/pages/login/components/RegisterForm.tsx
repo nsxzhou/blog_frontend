@@ -1,44 +1,21 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from '@umijs/max';
+import { UserOutlined, LockOutlined, MailOutlined, TeamOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { Button } from '@/components/ui';
 import {
-    UserOutlined,
-    LockOutlined,
-    EyeOutlined,
-    EyeInvisibleOutlined,
-    MailOutlined,
-    TeamOutlined
-} from '@ant-design/icons';
+    containerVariants,
+    itemVariants,
+    fadeInUp,
+    hoverScaleSmall,
+    hoverScale
+} from '@/constants/animations';
 import type { RegisterReq } from '@/api/user';
 
 interface RegisterFormProps {
     onSuccess: () => void;
     onSwitchToLogin: () => void;
 }
-
-// 优化的输入框动画变体 - 与登录表单保持一致
-const inputVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1
-        }
-    }
-};
-
-const buttonVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1
-        }
-    }
-};
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin }) => {
     const dispatch = useDispatch();
@@ -140,14 +117,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
     };
 
     return (
-        <motion.form 
-            onSubmit={handleSubmit} 
+        <motion.form
+            onSubmit={handleSubmit}
             className="space-y-4"
             initial="hidden"
             animate="visible"
         >
             {/* 用户名输入 */}
-            <motion.div variants={inputVariants} custom={0}>
+            <motion.div variants={itemVariants} custom={0}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     用户名
                 </label>
@@ -182,7 +159,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
             </motion.div>
 
             {/* 昵称输入 */}
-            <motion.div variants={inputVariants} custom={1}>
+            <motion.div variants={itemVariants} custom={1}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     昵称
                 </label>
@@ -217,7 +194,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
             </motion.div>
 
             {/* 邮箱输入 */}
-            <motion.div variants={inputVariants} custom={2}>
+            <motion.div variants={itemVariants} custom={2}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     邮箱
                 </label>
@@ -252,7 +229,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
             </motion.div>
 
             {/* 密码输入 */}
-            <motion.div variants={inputVariants} custom={3}>
+            <motion.div variants={itemVariants} custom={3}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     密码
                 </label>
@@ -296,7 +273,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
             </motion.div>
 
             {/* 确认密码输入 */}
-            <motion.div variants={inputVariants} custom={4}>
+            <motion.div variants={itemVariants} custom={4}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     确认密码
                 </label>
@@ -340,7 +317,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
             </motion.div>
 
             {/* 注册按钮 */}
-            <motion.div variants={buttonVariants}>
+            <motion.div variants={itemVariants}>
                 <Button
                     type="submit"
                     variant="primary"
@@ -365,7 +342,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
 
             {/* 切换到登录 */}
             <motion.div
-                variants={buttonVariants}
+                variants={itemVariants}
                 className="text-center"
             >
                 <span className="text-gray-600">已有账户？</span>

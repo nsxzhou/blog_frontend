@@ -7,30 +7,7 @@ import {
   BlogList,
   type BlogPost
 } from './components';
-
-// 动画变体
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  }
-};
+import { containerVariants, itemVariants } from '@/constants/animations';
 
 const BlogPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +23,6 @@ const BlogPage: React.FC = () => {
       excerpt: "探索React 18引入的并发渲染、Suspense边界和自动批处理等革命性特性，以及它们如何改变我们构建用户界面的方式。",
       image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=400&fit=crop",
       date: "2024-01-15",
-      readTime: "8 分钟",
       views: 1234,
       likes: 89,
       comments: 23,
@@ -61,7 +37,6 @@ const BlogPage: React.FC = () => {
       excerpt: "从Flexbox到Grid，全面了解现代CSS布局技术的最佳实践和使用场景。",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
       date: "2024-01-12",
-      readTime: "10 分钟",
       views: 2156,
       likes: 143,
       comments: 31,
@@ -75,7 +50,6 @@ const BlogPage: React.FC = () => {
       excerpt: "TypeScript 5.0带来了哪些激动人心的新特性？深入了解最新的开发体验。",
       image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop",
       date: "2024-01-10",
-      readTime: "12 分钟",
       views: 1876,
       likes: 156,
       comments: 45,
@@ -89,7 +63,6 @@ const BlogPage: React.FC = () => {
       excerpt: "如何在大型项目中实施微前端架构，解决团队协作和技术栈统一的难题。",
       image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=600&h=400&fit=crop",
       date: "2024-01-08",
-      readTime: "15 分钟",
       views: 987,
       likes: 67,
       comments: 19,
@@ -103,7 +76,6 @@ const BlogPage: React.FC = () => {
       excerpt: "从内存管理到异步编程，全面提升Node.js应用的性能表现。",
       image: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&h=400&fit=crop",
       date: "2024-01-05",
-      readTime: "11 分钟",
       views: 1543,
       likes: 102,
       comments: 28,
@@ -117,7 +89,6 @@ const BlogPage: React.FC = () => {
       excerpt: "从智能合约到DApp开发，带你走进Web3的神奇世界。",
       image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop",
       date: "2024-01-03",
-      readTime: "20 分钟",
       views: 2234,
       likes: 189,
       comments: 52,
@@ -135,11 +106,11 @@ const BlogPage: React.FC = () => {
   const filteredPosts = useMemo(() => {
     let filtered = blogPosts.filter(post => {
       const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = activeCategory === '全部' || post.category === activeCategory;
-      const matchesTags = selectedTags.length === 0 || 
-                         selectedTags.some(tag => post.tags.includes(tag));
-      
+      const matchesTags = selectedTags.length === 0 ||
+        selectedTags.some(tag => post.tags.includes(tag));
+
       return matchesSearch && matchesCategory && matchesTags;
     });
 
@@ -162,8 +133,8 @@ const BlogPage: React.FC = () => {
   }, [searchTerm, activeCategory, selectedTags, sortBy]);
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
+    setSelectedTags(prev =>
+      prev.includes(tag)
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
@@ -185,7 +156,7 @@ const BlogPage: React.FC = () => {
       <motion.section variants={itemVariants} className="px-4 pb-8">
         <div className="max-w-6xl mx-auto">
           {/* 搜索栏 */}
-          <BlogSearch 
+          <BlogSearch
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
           />
@@ -204,13 +175,16 @@ const BlogPage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* 文章列表 */}
+      {/* 文章列表区域 */}
       <motion.section variants={itemVariants} className="px-4 pb-20">
-        <BlogList
-          filteredPosts={filteredPosts}
-          onTagClick={toggleTag}
-          filterKey={filterKey}
-        />
+        <div className="max-w-6xl mx-auto">
+          <BlogList
+            filteredPosts={filteredPosts}
+            key={filterKey}
+            onTagClick={toggleTag}
+            filterKey={filterKey}
+          />
+        </div>
       </motion.section>
     </motion.div>
   );

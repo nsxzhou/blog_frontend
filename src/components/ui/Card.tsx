@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { cardVariants, hoverVariants } from '@/constants/animations';
 
 interface CardProps {
   children: React.ReactNode;
@@ -10,24 +11,6 @@ interface CardProps {
   shadow?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
 }
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.3 }
-  },
-};
-
-const hoverVariants = {
-  rest: { scale: 1, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
-  hover: { 
-    scale: 1.02, 
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-    transition: { duration: 0.2 }
-  },
-};
 
 export const Card: React.FC<CardProps> = ({
   children,

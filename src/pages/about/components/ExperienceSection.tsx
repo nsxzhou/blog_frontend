@@ -1,156 +1,105 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import TimelineItem from './TimelineItem';
-
-const sectionVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
+import { CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { sectionVariants, itemVariants } from '@/constants/animations';
 
 const ExperienceSection: React.FC = () => {
   const experiences = [
     {
-      period: '2022 - 至今',
-      company: '创新科技有限公司',
-      position: '高级前端工程师',
-      description: '负责公司核心产品的前端架构设计与开发，带领团队完成多个大型项目的技术升级。主导 React 18 升级方案，提升应用性能 40%。',
-      technologies: ['React', 'TypeScript', 'Next.js', 'GraphQL'],
-      achievements: [
-        '设计并实现了公司设计系统，提高开发效率 50%',
-        '优化核心产品性能，首屏加载时间减少 60%',
-        '指导 5 名初级工程师成长为独立开发者'
-      ],
-      color: 'from-blue-500 to-cyan-500',
-      icon: '🚀'
+      title: '高级前端工程师',
+      company: 'TechCorp',
+      location: '北京',
+      period: '2022.01 - 至今',
+      description: '负责公司核心产品的前端架构设计和开发，带领团队完成多个大型项目。',
+      skills: ['React', 'TypeScript', 'Next.js', 'GraphQL']
     },
     {
-      period: '2021 - 2022',
-      company: '数字化解决方案公司',
-      position: '前端工程师',
-      description: '参与多个客户项目的前端开发，积累了丰富的业务场景经验。专注于用户体验优化和前端工程化建设。',
-      technologies: ['Vue.js', 'React', 'Webpack', 'Sass'],
-      achievements: [
-        '独立完成 3 个中大型项目的前端开发',
-        '建立前端代码规范和自动化部署流程',
-        '获得年度优秀员工奖'
-      ],
-      color: 'from-green-500 to-emerald-500',
-      icon: '💼'
+      title: '前端工程师',
+      company: 'StartupXYZ',
+      location: '上海',
+      period: '2020.06 - 2021.12',
+      description: '从零搭建公司前端技术栈，开发多个用户端和管理端应用。',
+      skills: ['Vue.js', 'Node.js', 'MongoDB', 'Docker']
     },
     {
-      period: '2020 - 2021',
-      company: '互联网创业公司',
-      position: '全栈开发工程师',
-      description: '在快节奏的创业环境中，负责产品的全栈开发。从前端界面到后端 API，从数据库设计到部署运维，积累了全面的技术经验。',
-      technologies: ['Node.js', 'Express', 'MongoDB', 'React'],
-      achievements: [
-        '从零开始构建公司核心产品',
-        '实现用户增长 10 倍的产品功能',
-        '建立完整的 CI/CD 部署流程'
-      ],
-      color: 'from-purple-500 to-pink-500',
-      icon: '⚡'
-    },
-    {
-      period: '2019 - 2020',
-      company: '计算机科学专业',
-      position: '本科毕业 / 实习经历',
-      description: '在大学期间通过课程学习和实习项目，奠定了扎实的计算机基础。参与了多个开源项目，开始了我的编程之旅。',
-      technologies: ['JavaScript', 'Python', 'Java', 'C++'],
-      achievements: [
-        '计算机科学学士学位，GPA 3.8/4.0',
-        '参与 5 个开源项目，获得 500+ GitHub stars',
-        '获得校级程序设计竞赛一等奖'
-      ],
-      color: 'from-orange-500 to-red-500',
-      icon: '🎓'
+      title: '初级前端开发',
+      company: 'WebStudio',
+      location: '深圳',
+      period: '2019.03 - 2020.05',
+      description: '参与多个企业级项目开发，学习现代前端开发技术和最佳实践。',
+      skills: ['JavaScript', 'CSS3', 'jQuery', 'Bootstrap']
     }
   ];
 
   return (
     <motion.section
       variants={sectionVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-      className="py-20 px-4"
+      initial="initial"
+      whileInView="animate"
+      viewport={{ once: true }}
+      className="py-20 px-4 bg-white"
     >
-      <div className="max-w-6xl mx-auto">
-        {/* 标题区域 */}
+      <div className="max-w-4xl mx-auto">
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-            职业
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-              成长历程
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            从初学者到专业开发者，每一步都充满挑战与成长。
-            这里记录了我的技术之路和职业发展轨迹。
-          </p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">工作经验</h2>
+          <p className="text-lg text-gray-600">我的职业发展历程</p>
         </motion.div>
 
-        {/* 时间线 */}
         <div className="relative">
-          {/* 时间线主线 */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 rounded-full opacity-20"></div>
-          
-          {/* 时间线项目 */}
-          <div className="space-y-12">
-            {experiences.map((experience, index) => (
-              <TimelineItem
-                key={index}
-                experience={experience}
-                index={index}
-                isEven={index % 2 === 0}
-              />
-            ))}
-          </div>
-        </div>
+          {/* 时间线 */}
+          <div className="absolute left-4 md:left-1/2 transform md:-translate-x-px top-0 bottom-0 w-0.5 bg-blue-200"></div>
 
-        {/* 总结卡片 */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-16 bg-gradient-to-r from-gray-900 to-gray-700 rounded-3xl p-8 md:p-12 text-center"
-        >
-          <h3 className="text-3xl font-bold mb-6">持续成长中...</h3>
-          <p className="text-xl opacity-95 mb-8 max-w-3xl mx-auto">
-            技术之路永无止境，我将继续在这个充满可能性的领域中探索、学习、创新。
-            期待与更多优秀的团队和项目合作，创造更大的价值。
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <div className="flex items-center gap-2 px-6 py-3 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
-              <span className="text-2xl">🎯</span>
-              <span>目标导向</span>
-            </div>
-            <div className="flex items-center gap-2 px-6 py-3 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
-              <span className="text-2xl">🤝</span>
-              <span>团队协作</span>
-            </div>
-            <div className="flex items-center gap-2 px-6 py-3 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
-              <span className="text-2xl">💡</span>
-              <span>创新思维</span>
-            </div>
-          </div>
-        </motion.div>
+          {experiences.map((exp, index) => (
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              className={`relative flex items-center mb-12 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                }`}
+            >
+              {/* 时间点 */}
+              <div className="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-blue-600 rounded-full border-4 border-white shadow-lg z-10"></div>
+
+              {/* 内容卡片 */}
+              <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'} ml-12 md:ml-0`}>
+                <motion.div
+                  className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100"
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">{exp.title}</h3>
+                      <p className="text-blue-600 font-medium">{exp.company}</p>
+                    </div>
+                    <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded">
+                      {exp.period}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center text-gray-500 text-sm mb-3">
+                    <EnvironmentOutlined className="mr-1" />
+                    {exp.location}
+                    <CalendarOutlined className="ml-4 mr-1" />
+                    {exp.period}
+                  </div>
+
+                  <p className="text-gray-600 mb-4">{exp.description}</p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {exp.skills.map((skill, skillIndex) => (
+                      <span
+                        key={skillIndex}
+                        className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </motion.section>
   );

@@ -3,35 +3,19 @@ import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from '@umijs/max';
 import { Button } from '@/components/ui';
 import { UserOutlined, LockOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import {
+    containerVariants,
+    itemVariants,
+    fadeInUp,
+    hoverScaleSmall,
+    hoverScale
+} from '@/constants/animations';
 import type { LoginReq } from '@/api/user';
 
 interface LoginFormProps {
     onSuccess: () => void;
     onSwitchToRegister: () => void;
 }
-
-// 优化的输入框动画变体 - 减少延迟，提升响应速度
-const inputVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1
-        }
-    }
-};
-
-const buttonVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1
-        }
-    }
-};
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) => {
     const dispatch = useDispatch();
@@ -69,12 +53,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
         if (!validateForm()) return;
 
         try {
-                  const result = await dispatch({
-        type: 'user/login',
-        payload: formData,
-      }) as unknown as { success: boolean; data?: any };
-      
-      if (result?.success) {
+            const result = await dispatch({
+                type: 'user/login',
+                payload: formData,
+            }) as unknown as { success: boolean; data?: any };
+
+            if (result?.success) {
                 onSuccess();
             }
         } catch (error) {
@@ -98,14 +82,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
     };
 
     return (
-        <motion.form 
-            onSubmit={handleSubmit} 
+        <motion.form
+            onSubmit={handleSubmit}
             className="space-y-5"
+            variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
             {/* 用户名输入 */}
-            <motion.div variants={inputVariants} custom={0}>
+            <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     用户名或邮箱
                 </label>
@@ -128,11 +113,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
                 </div>
                 {errors.username && (
                     <motion.p
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
+                        {...fadeInUp}
                         className="mt-1 text-sm text-red-600"
-                        transition={{ duration: 0.2 }}
                     >
                         {errors.username}
                     </motion.p>
@@ -140,7 +122,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
             </motion.div>
 
             {/* 密码输入 */}
-            <motion.div variants={inputVariants} custom={1}>
+            <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     密码
                 </label>
@@ -164,19 +146,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                        {...hoverScaleSmall}
                     >
                         {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                     </motion.button>
                 </div>
                 {errors.password && (
                     <motion.p
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
+                        {...fadeInUp}
                         className="mt-1 text-sm text-red-600"
-                        transition={{ duration: 0.2 }}
                     >
                         {errors.password}
                     </motion.p>
@@ -185,8 +163,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
 
             {/* 记住密码选项 */}
             <motion.div
-                variants={inputVariants}
-                custom={2}
+                variants={itemVariants}
                 className="flex items-center justify-between"
             >
                 <label className="flex items-center">
@@ -202,49 +179,42 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
                 <motion.button
                     type="button"
                     className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    {...hoverScale}
                 >
                     忘记密码？
                 </motion.button>
             </motion.div>
 
             {/* 登录按钮 */}
-            <motion.div variants={buttonVariants}>
+            <motion.div variants={itemVariants}>
                 <Button
-                    type="submit"
                     variant="primary"
-                    size="lg"
-                    className="w-full"
+                    type="submit"
                     disabled={loading}
+                    className="w-full py-3"
                 >
-                    {loading ? (
-                        <motion.div
-                            className="flex items-center justify-center gap-2"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                        >
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            登录中...
-                        </motion.div>
-                    ) : (
-                        '登录'
-                    )}
+                    {loading ? '登录中...' : '登录'}
                 </Button>
             </motion.div>
 
-            {/* 切换到注册 */}
-            <motion.div
-                variants={buttonVariants}
-                className="text-center"
-            >
+            {/* 分割线 */}
+            <motion.div variants={itemVariants} className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-gray-500">或</span>
+                </div>
+            </motion.div>
+
+            {/* 注册链接 */}
+            <motion.div variants={itemVariants} className="text-center">
                 <span className="text-gray-600">还没有账户？</span>
                 <motion.button
                     type="button"
                     onClick={onSwitchToRegister}
                     className="ml-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    {...hoverScale}
                 >
                     立即注册
                 </motion.button>

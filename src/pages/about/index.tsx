@@ -1,33 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  AboutHeroSection,
-  PersonalInfoSection,
-  SkillsSection,
-  ExperienceSection,
-  HobbiesSection,
-  ContactSection
-} from './components/index';
-
-// 页面容器动画变体
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1
-    }
-  }
-};
+import AboutHeroSection from './components/AboutHeroSection';
+import PersonalInfoSection from './components/PersonalInfoSection';
+import SkillsSection from './components/SkillsSection';
+import ExperienceSection from './components/ExperienceSection';
+import HobbiesSection from './components/HobbiesSection';
+import ContactSection from './components/ContactSection';
+import { containerVariantsSlow } from '@/constants';
 
 const AboutPage: React.FC = () => {
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariantsSlow}
       initial="hidden"
       animate="visible"
-      className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50"
+      className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white"
     >
       {/* 英雄区域 */}
       <AboutHeroSection />

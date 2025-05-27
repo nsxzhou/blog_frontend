@@ -14,6 +14,14 @@ import {
   BellOutlined,
 } from '@ant-design/icons';
 import { Avatar } from './Avatar';
+import {
+  sidebarVariants,
+  backdropVariants,
+  itemVariants,
+  hoverScaleSmall,
+  hoverScale,
+  hoverSlideX
+} from '@/constants';
 
 interface User {
   id: string;
@@ -29,46 +37,6 @@ interface UserSidebarProps {
   onLogin?: () => void;
   onLogout?: () => void;
 }
-
-const sidebarVariants = {
-  hidden: {
-    x: '100%',
-    opacity: 0,
-  },
-  visible: {
-    x: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-      staggerChildren: 0.1,
-    },
-  },
-  exit: {
-    x: '100%',
-    opacity: 0,
-    transition: {
-      duration: 0.3,
-      ease: 'easeInOut',
-    },
-  },
-};
-
-const backdropVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
-};
-
-const itemVariants = {
-  hidden: { x: 20, opacity: 0 },
-  visible: { 
-    x: 0, 
-    opacity: 1,
-    transition: { duration: 0.3 }
-  },
-};
 
 const menuItems = [
   { key: '/profile', label: '个人资料', icon: <UserOutlined /> },
@@ -117,8 +85,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
               <motion.button
                 onClick={onClose}
                 className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                {...hoverScaleSmall}
               >
                 <CloseOutlined className="text-lg" />
               </motion.button>
@@ -172,8 +139,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                   <motion.button
                     onClick={onLogin}
                     className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    {...hoverScale}
                   >
                     <LoginOutlined className="mr-2" />
                     立即登录
@@ -190,18 +156,17 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                     <Link key={item.key} to={item.key} onClick={onClose}>
                       <motion.div
                         className="flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors"
-                        whileHover={{ x: 4 }}
-                        transition={{ duration: 0.2 }}
+                        {...hoverSlideX}
                       >
                         <span className="text-lg">{item.icon}</span>
                         <span className="font-medium">{item.label}</span>
                       </motion.div>
                     </Link>
                   ))}
-                  
+
                   {/* 分割线 */}
                   <div className="border-t border-gray-100 my-3" />
-                  
+
                   {/* 退出登录 */}
                   <motion.button
                     onClick={() => {
@@ -209,8 +174,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                       onClose();
                     }}
                     className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
-                    whileHover={{ x: 4 }}
-                    transition={{ duration: 0.2 }}
+                    {...hoverSlideX}
                   >
                     <LogoutOutlined className="text-lg" />
                     <span className="font-medium">退出登录</span>

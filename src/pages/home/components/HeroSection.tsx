@@ -3,42 +3,13 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRightOutlined, BookOutlined, UserOutlined } from '@ant-design/icons';
 import { Button } from '@/components/ui';
 import TypewriterText from './TypewriterText';
-
-// 动画变体
-const heroTextVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const letterVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut"
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  }
-};
+import {
+  containerVariants,
+  itemVariants,
+  floatingAnimation,
+  scaleIn,
+  letterVariants
+} from '@/constants/animations';
 
 const HeroSection: React.FC = () => {
   const { scrollYProgress } = useScroll();
@@ -51,7 +22,7 @@ const HeroSection: React.FC = () => {
     >
       <div className="relative z-10 max-w-5xl mx-auto">
         <motion.div
-          variants={heroTextVariants}
+          variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="mb-8"
@@ -119,28 +90,11 @@ const HeroSection: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           className="absolute top-1/4 right-1/4 w-32 h-32 bg-blue-100 rounded-full opacity-30"
-          animate={{
-            y: [0, -20, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          {...floatingAnimation}
         />
         <motion.div
           className="absolute bottom-1/3 left-1/4 w-24 h-24 bg-purple-100 rounded-full opacity-20"
-          animate={{
-            y: [0, -15, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
+          {...floatingAnimation}
         />
       </div>
     </motion.section>

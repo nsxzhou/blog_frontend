@@ -6,18 +6,7 @@ import {
   BlogSection,
   SubscribeSection
 } from './components';
-
-// 简化的动画变体
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1
-    }
-  }
-};
+import { containerVariants } from '@/constants/animations';
 
 const HomePage: React.FC = () => {
 

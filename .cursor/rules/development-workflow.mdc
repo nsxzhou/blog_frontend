@@ -7,11 +7,13 @@ alwaysApply: true
 
 ## 代码质量约束
 
-### API接口开发规范
-1. 在开发API接口时全部的接口应该放到api文件夹下
-2. 在开发某一类接口时应该进行归类，在api文件夹下创建相应的文件目录并在这个目录下定义相对应的接口数据类型及其接口
+### API 接口开发规范
+
+1. 在开发 API 接口时全部的接口应该放到 api 文件夹下
+2. 在开发某一类接口时应该进行归类，在 api 文件夹下创建相应的文件目录并在这个目录下定义相对应的接口数据类型及其接口
 
 ### 代码提交规范
+
 1. 提交前必须通过 ESLint 和 Prettier 检查
 2. 使用语义化的 commit 信息：
    - `feat:` 新功能
@@ -22,14 +24,15 @@ alwaysApply: true
    - `test:` 测试相关
 
 ### 错误处理规范
+
 ```typescript
 // API 调用错误处理
 try {
   const response = await api.getPosts();
   setData(response.data);
 } catch (error) {
-  console.error('获取文章失败:', error);
-  message.error('获取文章失败，请稍后重试');
+  console.error("获取文章失败:", error);
+  message.error("获取文章失败，请稍后重试");
 }
 
 // 组件错误边界
@@ -39,6 +42,7 @@ const ErrorBoundary: FC<{ children: ReactNode }> = ({ children }) => {
 ```
 
 ### 性能优化要求
+
 1. 使用 React.memo 优化组件渲染
 2. 大列表使用虚拟滚动
 3. 图片懒加载
@@ -48,6 +52,7 @@ const ErrorBoundary: FC<{ children: ReactNode }> = ({ children }) => {
 ## 开发环境配置
 
 ### 必需的 VS Code 插件
+
 - ES7+ React/Redux/React-Native snippets
 - Prettier - Code formatter
 - ESLint
@@ -55,6 +60,7 @@ const ErrorBoundary: FC<{ children: ReactNode }> = ({ children }) => {
 - TypeScript Importer
 
 ### 环境变量管理
+
 ```typescript
 // .env.local 示例
 REACT_APP_API_BASE_URL=http://localhost:3000/api
@@ -64,6 +70,7 @@ REACT_APP_UPLOAD_URL=http://localhost:3000/upload
 ## AI 协作约束
 
 ### 代码生成要求
+
 1. 生成的代码必须符合项目的 TypeScript 规范
 2. 组件必须包含完整的类型定义
 3. 样式使用 Tailwind CSS 类名
@@ -71,6 +78,7 @@ REACT_APP_UPLOAD_URL=http://localhost:3000/upload
 5. 遵循 React Hooks 最佳实践
 
 ### 文件修改原则
+
 1. 修改现有文件时保持原有代码风格
 2. 添加新功能时不破坏现有功能
-4. 删除代码前确认没有依赖关系
+3. 删除代码前确认没有依赖关系

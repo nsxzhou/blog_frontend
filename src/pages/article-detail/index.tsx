@@ -6,13 +6,14 @@ import ArticleContent from './components/ArticleContent';
 import ArticleSidebar from './components/ArticleSidebar';
 import PageContainer from '@/components/ui/PageContainer';
 import type { BlogPost } from '../blog/components/types';
+import { pageVariants } from '@/constants/animations';
 
 // 模拟文章数据
 const mockArticleData: BlogPost = {
-    id: 1,
-    title: "React 18 新特性详解：Concurrent Features 实战指南",
-    excerpt: "深入了解 React 18 带来的并发特性，包括 Suspense、并发渲染、自动批处理等功能，以及如何在项目中应用这些新特性。",
-    content: `
+  id: 1,
+  title: "React 18 新特性详解：Concurrent Features 实战指南",
+  excerpt: "深入了解 React 18 带来的并发特性，包括 Suspense、并发渲染、自动批处理等功能，以及如何在项目中应用这些新特性。",
+  content: `
 # React 18 新特性详解：Concurrent Features 实战指南
 
 React 18 是 React 历史上最重要的版本之一，引入了许多令人兴奋的新特性。本文将深入探讨这些新特性，并提供实际的应用示例。
@@ -163,105 +164,91 @@ React 18 的并发特性为我们提供了构建更好用户体验的工具。�
 
 希望这篇文章能帮助你更好地理解和应用 React 18 的新特性。如果你有任何问题，欢迎在评论区讨论！
   `,
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop",
-    date: "2024-01-15",
-    views: 2340,
-    likes: 156,
-    comments: 23,
-    tags: ["React", "JavaScript", "前端开发", "React 18", "并发渲染"],
-    category: "前端技术",
-    author: {
-        name: "张三",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-    },
-    featured: true
-};
-
-const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            duration: 0.5,
-            ease: "easeOut",
-            staggerChildren: 0.1
-        }
-    },
-    exit: { opacity: 0, y: -20 }
+  image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop",
+  date: "2024-01-15",
+  views: 2340,
+  likes: 156,
+  comments: 23,
+  tags: ["React", "JavaScript", "前端开发", "React 18", "并发渲染"],
+  category: "前端技术",
+  author: {
+    name: "张三",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+  },
+  featured: true
 };
 
 const ArticleDetailPage: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const [article, setArticle] = useState<BlogPost | null>(null);
-    const [loading, setLoading] = useState(true);
+  const { id } = useParams<{ id: string }>();
+  const [article, setArticle] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // 模拟API请求
-        const timer = setTimeout(() => {
-            setArticle(mockArticleData);
-            setLoading(false);
-        }, 500);
+  useEffect(() => {
+    // 模拟API请求
+    const timer = setTimeout(() => {
+      setArticle(mockArticleData);
+      setLoading(false);
+    }, 500);
 
-        return () => clearTimeout(timer);
-    }, [id]);
+    return () => clearTimeout(timer);
+  }, [id]);
 
-    if (loading) {
-        return (
-            <PageContainer>
-                <div className="flex items-center justify-center min-h-screen">
-                    <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"
-                    />
-                </div>
-            </PageContainer>
-        );
-    }
-
-    if (!article) {
-        return (
-            <PageContainer>
-                <div className="flex flex-col items-center justify-center min-h-screen">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">文章未找到</h1>
-                    <button
-                        onClick={() => history.push('/blog')}
-                        className="text-blue-600 hover:text-blue-700"
-                    >
-                        返回博客列表
-                    </button>
-                </div>
-            </PageContainer>
-        );
-    }
-
+  if (loading) {
     return (
-        <PageContainer>
-            <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="max-w-7xl mx-auto"
-            >
-                {/* 文章头部 */}
-                <ArticleHeader article={article} />
-
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
-                    {/* 主要内容区域 */}
-                    <div className="lg:col-span-3">
-                        <ArticleContent article={article} />
-                    </div>
-
-                    {/* 侧边栏 */}
-                    <div className="lg:col-span-1">
-                        <ArticleSidebar article={article} />
-                    </div>
-                </div>
-            </motion.div>
-        </PageContainer>
+      <PageContainer>
+        <div className="flex items-center justify-center min-h-screen">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"
+          />
+        </div>
+      </PageContainer>
     );
+  }
+
+  if (!article) {
+    return (
+      <PageContainer>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">文章未找到</h1>
+          <button
+            onClick={() => history.push('/blog')}
+            className="text-blue-600 hover:text-blue-700"
+          >
+            返回博客列表
+          </button>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  return (
+    <PageContainer>
+      <motion.div
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="max-w-7xl mx-auto"
+      >
+        {/* 文章头部 */}
+        <ArticleHeader article={article} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
+          {/* 主要内容区域 */}
+          <div className="lg:col-span-3">
+            <ArticleContent article={article} />
+          </div>
+
+          {/* 侧边栏 */}
+          <div className="lg:col-span-1">
+            <ArticleSidebar article={article} />
+          </div>
+        </div>
+      </motion.div>
+    </PageContainer>
+  );
 };
 
 export default ArticleDetailPage;

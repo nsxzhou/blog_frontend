@@ -5,24 +5,12 @@ import {
   EyeOutlined,
   HeartOutlined,
 } from '@ant-design/icons';
-
+import { itemVariants, scaleIn, floatingAnimation } from '@/constants/animations';
 import type { BlogPost } from './types';
 
 interface BlogHeaderProps {
   blogPosts: BlogPost[];
 }
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  }
-};
 
 const BlogHeader: React.FC<BlogHeaderProps> = ({ blogPosts }) => {
   const totalViews = blogPosts.reduce((sum, post) => sum + post.views, 0);
@@ -32,9 +20,7 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ blogPosts }) => {
     <motion.section variants={itemVariants} className="relative py-20 px-4">
       <div className="max-w-6xl mx-auto text-center">
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          {...scaleIn}
           className="mb-8"
         >
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-6">
@@ -69,28 +55,12 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ blogPosts }) => {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           className="absolute top-1/4 right-1/6 w-40 h-40 bg-blue-100 rounded-full opacity-20"
-          animate={{
-            y: [0, -30, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          {...floatingAnimation}
         />
         <motion.div
           className="absolute bottom-1/3 left-1/6 w-32 h-32 bg-purple-100 rounded-full opacity-15"
-          animate={{
-            y: [0, -20, 0],
-            scale: [1, 1.3, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
+          {...floatingAnimation}
+          style={{ animationDelay: '2s' }}
         />
       </div>
     </motion.section>

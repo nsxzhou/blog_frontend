@@ -1,29 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import SkillCard from './SkillCard';
-
-const sectionVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
+import { containerVariantsMedium, itemVariantsLarge } from '@/constants';
 
 const SkillsSection: React.FC = () => {
   const frontendSkills = [
@@ -55,7 +33,7 @@ const SkillsSection: React.FC = () => {
 
   return (
     <motion.section
-      variants={sectionVariants}
+      variants={containerVariantsMedium}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
@@ -63,7 +41,7 @@ const SkillsSection: React.FC = () => {
     >
       <div className="max-w-6xl mx-auto">
         {/* 标题区域 */}
-        <motion.div variants={itemVariants} className="text-center mb-16">
+        <motion.div variants={itemVariantsLarge} className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
             技术
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
@@ -77,7 +55,7 @@ const SkillsSection: React.FC = () => {
         </motion.div>
 
         {/* 前端技能 */}
-        <motion.div variants={itemVariants} className="mb-16">
+        <motion.div variants={itemVariantsLarge} className="mb-16">
           <h3 className="text-2xl font-bold mb-8 text-gray-800 flex items-center">
             <span className="mr-3">🎨</span>
             前端开发
@@ -90,7 +68,7 @@ const SkillsSection: React.FC = () => {
         </motion.div>
 
         {/* 后端技能 */}
-        <motion.div variants={itemVariants} className="mb-16">
+        <motion.div variants={itemVariantsLarge} className="mb-16">
           <h3 className="text-2xl font-bold mb-8 text-gray-800 flex items-center">
             <span className="mr-3">⚙️</span>
             后端开发
@@ -103,7 +81,7 @@ const SkillsSection: React.FC = () => {
         </motion.div>
 
         {/* 工具和平台 */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariantsLarge}>
           <h3 className="text-2xl font-bold mb-8 text-gray-800 flex items-center">
             <span className="mr-3">🛠️</span>
             开发工具
@@ -117,7 +95,7 @@ const SkillsSection: React.FC = () => {
 
         {/* 技能亮点 */}
         <motion.div
-          variants={itemVariants}
+          variants={itemVariantsLarge}
           className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 md:p-12 text-center"
         >
           <h3 className="text-3xl font-bold mb-6">持续学习，永不止步</h3>

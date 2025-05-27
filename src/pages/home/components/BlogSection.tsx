@@ -1,72 +1,92 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  ArrowRightOutlined,
-  CalendarOutlined,
-  BookOutlined,
-  EyeOutlined,
-  HeartOutlined
-} from '@ant-design/icons';
-import { Card, Button } from '@/components/ui';
-
-interface BlogPost {
-  id: number;
-  title: string;
-  excerpt: string;
-  image: string;
-  date: string;
-  readTime: string;
-  views: number;
-  likes: number;
-  tags: string[];
-}
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  }
-};
+import { ArrowRightOutlined } from '@ant-design/icons';
+import { Button } from '@/components/ui';
+import BlogCard from '@/pages/blog/components/BlogCard';
+import { itemVariants, containerVariants } from '@/constants/animations';
+import type { BlogPost } from '@/pages/blog/components/types';
 
 const BlogSection: React.FC = () => {
   const blogPosts: BlogPost[] = [
     {
       id: 1,
       title: "深入理解React 18的并发特性",
-      excerpt: "探索React 18引入的并发渲染、Suspense边界和自动批处理等革命性特性。",
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500&h=300&fit=crop",
+      excerpt: "探索React 18引入的并发渲染、Suspense边界和自动批处理等革命性特性，以及它们如何改变我们构建用户界面的方式。",
+      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=400&fit=crop",
       date: "2024-01-15",
-      readTime: "8 分钟",
       views: 1234,
       likes: 89,
-      tags: ["React", "JavaScript", "前端"]
+      comments: 23,
+      tags: ["React", "JavaScript", "前端"],
+      category: "前端开发",
+      author: { name: "张三", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" },
+      featured: true
     },
     {
       id: 2,
       title: "现代CSS布局技术详解",
       excerpt: "从Flexbox到Grid，全面了解现代CSS布局技术的最佳实践和使用场景。",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=300&fit=crop",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
       date: "2024-01-12",
-      readTime: "10 分钟",
       views: 2156,
       likes: 143,
-      tags: ["CSS", "布局", "设计"]
+      comments: 31,
+      tags: ["CSS", "布局", "设计"],
+      category: "前端开发",
+      author: { name: "李四", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" }
     },
     {
       id: 3,
       title: "TypeScript 5.0新特性解析",
       excerpt: "TypeScript 5.0带来了哪些激动人心的新特性？深入了解最新的开发体验。",
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500&h=300&fit=crop",
+      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop",
       date: "2024-01-10",
-      readTime: "12 分钟",
       views: 1876,
       likes: 156,
-      tags: ["TypeScript", "JavaScript", "开发工具"]
+      comments: 45,
+      tags: ["TypeScript", "JavaScript", "开发工具"],
+      category: "编程语言",
+      author: { name: "王五", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" }
+    },
+    {
+      id: 4,
+      title: "微前端架构实战指南",
+      excerpt: "如何在大型项目中实施微前端架构，解决团队协作和技术栈统一的难题。",
+      image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=600&h=400&fit=crop",
+      date: "2024-01-08",
+      views: 987,
+      likes: 67,
+      comments: 19,
+      tags: ["微前端", "架构", "工程化"],
+      category: "系统架构",
+      author: { name: "赵六", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" }
+    },
+    {
+      id: 5,
+      title: "Node.js性能优化最佳实践",
+      excerpt: "从内存管理到异步编程，全面提升Node.js应用的性能表现。",
+      image: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&h=400&fit=crop",
+      date: "2024-01-05",
+      views: 1543,
+      likes: 102,
+      comments: 28,
+      tags: ["Node.js", "性能优化", "后端"],
+      category: "后端开发",
+      author: { name: "孙七", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" }
+    },
+    {
+      id: 6,
+      title: "Web3开发入门指南",
+      excerpt: "从智能合约到DApp开发，带你走进Web3的神奇世界。",
+      image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop",
+      date: "2024-01-03",
+      views: 2234,
+      likes: 189,
+      comments: 52,
+      tags: ["Web3", "区块链", "智能合约"],
+      category: "新兴技术",
+      author: { name: "周八", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" },
+      featured: true
     }
   ];
 
@@ -82,79 +102,22 @@ const BlogSection: React.FC = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
           {blogPosts.map((post, index) => (
-            <motion.article
+            <BlogCard
               key={post.id}
-              variants={itemVariants}
-              custom={index * 0.1}
-              className="group"
-            >
-              <Card padding="none" className="overflow-hidden h-full">
-                <div className="relative h-48 overflow-hidden">
-                  <motion.img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                    <span className="flex items-center gap-1">
-                      <CalendarOutlined />
-                      {post.date}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <BookOutlined />
-                      {post.readTime}
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
-                    {post.title}
-                  </h3>
-
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {post.excerpt}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {post.tags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <EyeOutlined />
-                        {post.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <HeartOutlined />
-                        {post.likes}
-                      </span>
-                    </div>
-                    <motion.div
-                      whileHover={{ x: 3 }}
-                      className="text-blue-600"
-                    >
-                      <ArrowRightOutlined />
-                    </motion.div>
-                  </div>
-                </div>
-              </Card>
-            </motion.article>
+              post={post}
+              index={index}
+              onTagClick={() => { }}
+            />
           ))}
-        </div>
+        </motion.div>
 
         <motion.div variants={itemVariants} className="text-center mt-12">
           <Button variant="primary" size="lg">

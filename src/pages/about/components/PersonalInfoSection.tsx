@@ -1,30 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CalendarOutlined, EnvironmentOutlined, HeartOutlined, FireOutlined } from '@ant-design/icons';
+import {
+  sectionVariants,
+  itemVariants,
+  cardHover,
+  floatingAnimation
+} from '@/constants/animations';
 import AnimatedCounter from './AnimatedCounter';
-
-const sectionVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
 
 const PersonalInfoSection: React.FC = () => {
   const stats = [
@@ -87,7 +70,7 @@ const PersonalInfoSection: React.FC = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              whileHover={{ y: -5, scale: 1.02 }}
+              {...cardHover}
               className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center group hover:shadow-xl transition-all duration-300"
             >
               <div className="mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -151,28 +134,12 @@ const PersonalInfoSection: React.FC = () => {
               {/* 装饰元素 */}
               <motion.div
                 className="absolute -top-4 -right-4 w-24 h-24 bg-blue-200 rounded-full opacity-50"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 180, 360],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
+                {...floatingAnimation}
               />
               <motion.div
                 className="absolute -bottom-4 -left-4 w-16 h-16 bg-purple-200 rounded-full opacity-40"
-                animate={{
-                  scale: [1, 1.3, 1],
-                  rotate: [360, 180, 0],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: 2,
-                }}
+                {...floatingAnimation}
+                style={{ animationDelay: '2s' }}
               />
             </div>
           </div>

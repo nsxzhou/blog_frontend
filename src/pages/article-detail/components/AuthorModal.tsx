@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CloseOutlined,
-    UserOutlined,
-    EditOutlined,
-    CalendarOutlined,
-    HeartOutlined,
-    EyeOutlined,
     PlusOutlined,
     CheckOutlined,
+    LinkOutlined,
+    CalendarOutlined,
 } from '@ant-design/icons';
+import { modalVariants, overlayVariants, fadeInUp } from '@/constants/animations';
 
 interface Author {
     name: string;
@@ -28,38 +26,6 @@ interface AuthorModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
-
-const modalVariants = {
-    hidden: {
-        opacity: 0,
-        scale: 0.8,
-        y: 50,
-    },
-    visible: {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        transition: {
-            type: "spring",
-            damping: 25,
-            stiffness: 300,
-        },
-    },
-    exit: {
-        opacity: 0,
-        scale: 0.8,
-        y: 50,
-        transition: {
-            duration: 0.2,
-        },
-    },
-};
-
-const overlayVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-    exit: { opacity: 0 },
-};
 
 const AuthorModal: React.FC<AuthorModalProps> = ({ author, isOpen, onClose }) => {
     const [isFollowing, setIsFollowing] = useState(false);
@@ -142,24 +108,21 @@ const AuthorModal: React.FC<AuthorModalProps> = ({ author, isOpen, onClose }) =>
                             {/* 作者基本信息 */}
                             <div className="text-center mb-6">
                                 <motion.h2
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    {...fadeInUp}
                                     transition={{ delay: 0.3 }}
                                     className="text-xl font-bold text-gray-900 mb-1"
                                 >
                                     {extendedAuthor.name}
                                 </motion.h2>
                                 <motion.p
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    {...fadeInUp}
                                     transition={{ delay: 0.4 }}
                                     className="text-gray-600 text-sm mb-3"
                                 >
                                     {extendedAuthor.location}
                                 </motion.p>
                                 <motion.p
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    {...fadeInUp}
                                     transition={{ delay: 0.5 }}
                                     className="text-gray-700 text-sm leading-relaxed"
                                 >
@@ -169,8 +132,7 @@ const AuthorModal: React.FC<AuthorModalProps> = ({ author, isOpen, onClose }) =>
 
                             {/* 统计数据 */}
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                {...fadeInUp}
                                 transition={{ delay: 0.6 }}
                                 className="grid grid-cols-3 gap-4 mb-6"
                             >
@@ -196,8 +158,7 @@ const AuthorModal: React.FC<AuthorModalProps> = ({ author, isOpen, onClose }) =>
 
                             {/* 关注按钮 */}
                             <motion.button
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                {...fadeInUp}
                                 transition={{ delay: 0.7 }}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
@@ -231,27 +192,26 @@ const AuthorModal: React.FC<AuthorModalProps> = ({ author, isOpen, onClose }) =>
                                 )}
                             </motion.button>
 
-                            {/* 其他信息 */}
+                            {/* 额外信息 */}
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                {...fadeInUp}
                                 transition={{ delay: 0.8 }}
                                 className="mt-6 pt-6 border-t border-gray-100 space-y-3"
                             >
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <CalendarOutlined />
-                                    <span>加入于 {extendedAuthor.joinDate}</span>
+                                    <span>加入于 {new Date(extendedAuthor.joinDate).toLocaleDateString()}</span>
                                 </div>
                                 {extendedAuthor.website && (
-                                    <div className="flex items-center gap-3 text-sm">
-                                        <UserOutlined className="text-gray-600" />
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <LinkOutlined />
                                         <a
                                             href={extendedAuthor.website}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-700 hover:underline"
+                                            className="text-blue-600 hover:text-blue-700 truncate"
                                         >
-                                            个人网站
+                                            {extendedAuthor.website}
                                         </a>
                                     </div>
                                 )}

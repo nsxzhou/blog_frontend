@@ -2,18 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ThunderboltOutlined } from '@ant-design/icons';
 import { Button } from '@/components/ui';
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  }
-};
+import { itemVariants } from '@/constants/animations';
 
 const SubscribeSection: React.FC = () => {
   return (

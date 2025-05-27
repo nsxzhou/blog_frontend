@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { message } from 'antd';
+import { message, Spin, Empty } from 'antd';
 import { history } from '@umijs/max';
 import {
     StatsCards,
@@ -11,30 +11,8 @@ import {
     type FilterType,
     type SortType,
 } from './components';
-
-// 页面容器动画
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.1,
-        },
-    },
-};
-
-const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-            duration: 0.4,
-            ease: 'easeOut',
-        },
-    },
-};
+import { EmptyState } from './components/EmptyState';
+import { containerVariants, itemVariants } from '@/constants';
 
 // 模拟数据
 const mockArticles: MyArticle[] = [
@@ -213,13 +191,12 @@ const MyArticlesPage: React.FC = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50"
+            className="min-h-screen bg-gray-50 py-8"
         >
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* 页面标题 */}
                 <motion.div variants={itemVariants} className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2">我的文章</h1>
-                    <p className="text-gray-600">管理和查看你的所有文章</p>
+                    <h1 className="text-3xl font-bold text-gray-900">我的文章</h1>
                 </motion.div>
 
                 {/* 统计卡片 */}
@@ -243,14 +220,30 @@ const MyArticlesPage: React.FC = () => {
 
                 {/* 文章列表 */}
                 <motion.div variants={itemVariants}>
-                    <ArticleList
-                        articles={filteredArticles}
-                        loading={loading}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        onShare={handleShare}
-                        onArticleClick={handleArticleClick}
-                    />
+                    {loading ? (
+                        <div className="flex justify-center items-center py-20">
+                            <Spin size="large" />
+                        </div>
+                    ) : filteredArticles.length === 0 ? (
+                        searchTerm || filterType !== 'all' ? (
+                            <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description="没有找到符合条件的文章"
+                                className="py-20"
+                            />
+                        ) : (
+                            <EmptyState onCreateClick={handleCreateNew} />
+                        )
+                    ) : (
+                        <ArticleList
+                            articles={filteredArticles}
+                            loading={loading}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onShare={handleShare}
+                            onArticleClick={handleArticleClick}
+                        />
+                    )}
                 </motion.div>
             </div>
         </motion.div>

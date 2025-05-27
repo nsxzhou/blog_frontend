@@ -4,20 +4,14 @@ import { UserOutlined, EditOutlined, LockOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from '@umijs/max';
 import { motion } from 'framer-motion';
 import type { UpdateUserInfoReq, ChangePasswordReq } from '@/api/user';
+import { fadeInUp } from '@/constants';
 
 const { TabPane } = Tabs;
-
-// 动画配置
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3, ease: "easeOut" }
-};
 
 const ProfilePage: React.FC = () => {
   const dispatch = useDispatch();
   const { currentUser, loading } = useSelector((state: any) => state.user);
-  
+
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [editForm] = Form.useForm();
@@ -51,7 +45,7 @@ const ProfilePage: React.FC = () => {
         type: 'user/updateUserInfo',
         payload: values as UpdateUserInfoReq,
       }) as unknown as { success: boolean };
-      
+
       if (result?.success) {
         setIsEditModalVisible(false);
         editForm.resetFields();
@@ -69,7 +63,7 @@ const ProfilePage: React.FC = () => {
         type: 'user/changePassword',
         payload: values as ChangePasswordReq,
       }) as unknown as { success: boolean };
-      
+
       if (result?.success) {
         setIsPasswordModalVisible(false);
         passwordForm.resetFields();
@@ -167,7 +161,7 @@ const ProfilePage: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      
+
                       {currentUser.bio && (
                         <div className="mt-6">
                           <label className="block text-sm font-medium text-gray-600 mb-2">

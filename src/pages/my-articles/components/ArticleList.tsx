@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MyArticleCard } from './MyArticleCard';
 import { EmptyState } from './EmptyState';
+import { containerVariants, itemVariants } from '@/constants/animations';
 import type { MyArticle } from '../types';
 
 interface ArticleListProps {
@@ -12,36 +13,6 @@ interface ArticleListProps {
     onShare: (id: number) => void;
     onArticleClick: (id: number) => void;
 }
-
-const listVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.2,
-        },
-    },
-};
-
-const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-            duration: 0.3,
-            ease: 'easeOut',
-        },
-    },
-    exit: {
-        y: -20,
-        opacity: 0,
-        transition: {
-            duration: 0.2,
-        },
-    },
-};
 
 // 骨架屏组件
 const SkeletonCard: React.FC = () => (
@@ -93,14 +64,14 @@ export const ArticleList: React.FC<ArticleListProps> = ({
         );
     }
 
-      // 空状态
-  if (articles.length === 0) {
-    return <EmptyState onCreateNew={() => window.location.href = '/write'} />;
-  }
+    // 空状态
+    if (articles.length === 0) {
+        return <EmptyState onCreateClick={() => window.location.href = '/write'} />;
+    }
 
     return (
         <motion.div
-            variants={listVariants}
+            variants={containerVariants}
             initial="hidden"
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"

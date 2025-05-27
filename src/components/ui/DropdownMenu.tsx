@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { dropdownVariants } from '@/constants';
 
 interface DropdownMenuProps {
   children: React.ReactNode;
@@ -15,32 +16,6 @@ interface DropdownMenuItemProps {
   className?: string;
   icon?: React.ReactNode;
 }
-
-const dropdownVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.95,
-    y: -10,
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut"
-    }
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: -10,
-    transition: {
-      duration: 0.15,
-      ease: "easeIn"
-    }
-  }
-};
 
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   children,
@@ -69,24 +44,24 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       const menuWidth = 200; // 菜单宽度
-      
+
       let leftPosition = rect.left + window.scrollX;
-      
+
       if (align === 'right') {
         leftPosition = rect.right + window.scrollX - menuWidth;
       }
-      
+
       // 确保菜单不超出屏幕右边界
       const screenWidth = window.innerWidth;
       if (leftPosition + menuWidth > screenWidth - 10) {
         leftPosition = screenWidth - menuWidth - 10;
       }
-      
+
       // 确保菜单不超出屏幕左边界
       if (leftPosition < 10) {
         leftPosition = 10;
       }
-      
+
       setPosition({
         top: rect.bottom + window.scrollY + 8,
         left: leftPosition
@@ -99,11 +74,11 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   };
 
   return (
-    <>
-      <div ref={triggerRef} onClick={handleTriggerClick} className="cursor-pointer">
+    <div className={`relative inline-block ${className}`} ref={triggerRef}>
+      <div onClick={handleTriggerClick} className="cursor-pointer">
         {trigger}
       </div>
-      
+
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isOpen && (
@@ -118,7 +93,8 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
                 left: position.left,
                 zIndex: 1000,
               }}
-              className={`bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px] ${className}`}
+              className={`absolute z-50 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 ${align === 'right' ? 'right-0' : 'left-0'
+                }`}
             >
               {children}
             </motion.div>
@@ -126,7 +102,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
         </AnimatePresence>,
         document.body
       )}
-    </>
+    </div>
   );
 };
 

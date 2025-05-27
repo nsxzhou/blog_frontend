@@ -1,43 +1,13 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { DownloadOutlined, MailOutlined, GithubOutlined, LinkedinOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-
-// 动画变体
-const heroVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 50, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut"
-    }
-  }
-};
-
-const floatingVariants = {
-  animate: {
-    y: [0, -10, 0],
-    rotate: [0, 3, -3, 0],
-    transition: {
-      duration: 6,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }
-  }
-};
+import { DownloadOutlined, MailOutlined, GithubOutlined, LinkedinOutlined } from '@ant-design/icons';
+import {
+  heroVariants,
+  itemVariants,
+  floatingVariants,
+  iconHover
+} from '@/constants/animations';
 
 const AboutHeroSection: React.FC = () => {
   const { scrollYProgress } = useScroll();
@@ -52,8 +22,8 @@ const AboutHeroSection: React.FC = () => {
       <div className="relative z-10 max-w-4xl mx-auto text-center">
         <motion.div
           variants={heroVariants}
-          initial="hidden"
-          animate="visible"
+          initial="initial"
+          animate="animate"
         >
           {/* 头像区域 */}
           <motion.div
@@ -123,17 +93,17 @@ const AboutHeroSection: React.FC = () => {
 
           {/* 操作按钮 */}
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Button 
-              type="primary" 
-              size="large" 
+            <Button
+              type="primary"
+              size="large"
               icon={<DownloadOutlined />}
               className="h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 border-none"
             >
               下载简历
             </Button>
-            <Button 
-              type="default" 
-              size="large" 
+            <Button
+              type="default"
+              size="large"
               icon={<MailOutlined />}
               className="h-12 px-8 rounded-full"
             >
@@ -149,8 +119,7 @@ const AboutHeroSection: React.FC = () => {
               rel="noopener noreferrer"
               aria-label="访问 GitHub 主页"
               className="w-12 h-12 bg-gray-800 text-white rounded-full flex items-center justify-center text-lg transition-colors hover:bg-gray-700"
-              whileHover={{ scale: 1.1, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              {...iconHover}
             >
               <GithubOutlined />
             </motion.a>
@@ -160,8 +129,7 @@ const AboutHeroSection: React.FC = () => {
               rel="noopener noreferrer"
               aria-label="访问 LinkedIn 主页"
               className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg transition-colors hover:bg-blue-700"
-              whileHover={{ scale: 1.1, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              {...iconHover}
             >
               <LinkedinOutlined />
             </motion.a>
@@ -169,8 +137,7 @@ const AboutHeroSection: React.FC = () => {
               href="mailto:zhouzirui@example.com"
               aria-label="发送邮件"
               className="w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center text-lg transition-colors hover:bg-red-600"
-              whileHover={{ scale: 1.1, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              {...iconHover}
             >
               <MailOutlined />
             </motion.a>
@@ -204,21 +171,6 @@ const AboutHeroSection: React.FC = () => {
             duration: 8,
             repeat: Infinity,
             ease: "linear",
-            delay: 2,
-          }}
-        />
-        <motion.div
-          className="absolute top-1/2 left-1/2 w-20 h-20 bg-green-100 rounded-full opacity-10"
-          animate={{
-            y: [0, -25, 0],
-            x: [0, 15, 0],
-            scale: [1, 1.4, 1],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 4,
           }}
         />
       </div>

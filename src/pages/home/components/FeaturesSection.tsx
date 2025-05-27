@@ -7,18 +7,7 @@ import {
   RocketOutlined
 } from '@ant-design/icons';
 import { Card } from '@/components/ui';
-
-const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  }
-};
+import { itemVariants } from '@/constants/animations';
 
 const FeaturesSection: React.FC = () => {
   const features = [

@@ -2,40 +2,27 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { history } from '@umijs/max';
 import {
+  ArrowLeftOutlined,
   CalendarOutlined,
-  ClockCircleOutlined,
   EyeOutlined,
   HeartOutlined,
   CommentOutlined,
-  ArrowLeftOutlined,
   ShareAltOutlined,
   BookOutlined,
 } from '@ant-design/icons';
 import { Button } from '@/components/ui';
+import {
+  articleHeaderVariants,
+  imageVariants,
+  fadeInUp,
+  hoverScale
+} from '@/constants/animations';
 import AuthorModal from './AuthorModal';
 import type { BlogPost } from '../../blog/components/types';
 
 interface ArticleHeaderProps {
   article: BlogPost;
 }
-
-const headerVariants = {
-  initial: { opacity: 0, y: -20 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
-};
-
-const imageVariants = {
-  initial: { opacity: 0, scale: 1.1 },
-  animate: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.8, ease: "easeOut" }
-  }
-};
 
 const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
   const [isAuthorModalOpen, setIsAuthorModalOpen] = useState(false);
@@ -73,13 +60,12 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
   return (
     <>
       <motion.header
-        variants={headerVariants}
+        variants={articleHeaderVariants}
         className="relative"
       >
         {/* 返回按钮 */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          {...fadeInUp}
           transition={{ delay: 0.2 }}
           className="my-6"
         >
@@ -122,8 +108,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
 
           {/* 操作按钮 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            {...fadeInUp}
             transition={{ delay: 0.6 }}
             className="absolute top-6 right-6 flex gap-2"
           >
@@ -148,8 +133,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
 
         {/* 分类标签 */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          {...fadeInUp}
           transition={{ delay: 0.3 }}
           className="mb-4"
         >
@@ -160,8 +144,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
 
         {/* 文章标题 */}
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          {...fadeInUp}
           transition={{ delay: 0.4 }}
           className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-6"
         >
@@ -170,8 +153,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
 
         {/* 文章摘要 */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          {...fadeInUp}
           transition={{ delay: 0.5 }}
           className="text-lg text-gray-600 leading-relaxed mb-8"
         >
@@ -180,8 +162,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
 
         {/* 作者信息和文章元数据 */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          {...fadeInUp}
           transition={{ delay: 0.6 }}
           className="flex flex-col md:flex-row md:items-center md:justify-between py-6 border-t border-b border-gray-200"
         >
@@ -189,8 +170,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
           <motion.div
             className="flex items-center gap-4 mb-4 md:mb-0 cursor-pointer group"
             onClick={handleAuthorClick}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            {...hoverScale}
           >
             <div className="relative">
               <img
@@ -212,18 +192,20 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
               </div>
             </div>
             {/* 点击提示 */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                点击查看详情
-              </span>
-            </div>
+            <motion.div
+              className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              initial={{ opacity: 0 }}
+              whileHover={{ opacity: 1 }}
+            >
+              点击查看作者信息
+            </motion.div>
           </motion.div>
 
           {/* 文章统计 */}
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <span className="flex items-center gap-1">
               <EyeOutlined />
-              {article.views.toLocaleString()} 阅读
+              {article.views} 阅读
             </span>
             <span className="flex items-center gap-1">
               <HeartOutlined />
@@ -238,8 +220,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({ article }) => {
 
         {/* 标签 */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          {...fadeInUp}
           transition={{ delay: 0.7 }}
           className="flex flex-wrap gap-2 mt-6"
         >
