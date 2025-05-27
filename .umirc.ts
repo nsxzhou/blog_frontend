@@ -16,10 +16,6 @@ export default defineConfig({
       component: '@/pages/blog',
     },
     {
-      path: '/article-detail/:id',
-      component: '@/pages/article-detail',
-    },
-    {
       path: '/about',
       component: '@/pages/about',
     },
@@ -30,10 +26,6 @@ export default defineConfig({
     {
       path: '/login',
       component: '@/pages/login',
-    },
-    {
-      path: '/profile',
-      component: '@/pages/profile',
     },
   ],
   npmClient: 'pnpm',
