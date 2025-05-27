@@ -13,6 +13,7 @@ import {
   Register,
   UpdateUserInfo,
 } from '@/api/user';
+import { clearAuthTokens, setAuthTokens } from '@/utils/auth';
 import { message } from 'antd';
 
 // 用户状态接口
@@ -24,12 +25,12 @@ interface UserState {
   loading: boolean;
 }
 
-// 初始状态
+// 初始状态 - 避免直接访问 localStorage
 const initialState: UserState = {
   currentUser: null,
-  token: localStorage.getItem('token'),
-  refreshToken: localStorage.getItem('refresh_token'),
-  isLoggedIn: Boolean(localStorage.getItem('token')),
+  token: null,
+  refreshToken: null,
+  isLoggedIn: false,
   loading: false,
 };
 
@@ -51,8 +52,7 @@ export default {
           const { access_token, refresh_token, user_info } = response.data;
 
           // 存储token
-          localStorage.setItem('token', access_token);
-          localStorage.setItem('refresh_token', refresh_token);
+          setAuthTokens(access_token, refresh_token);
 
           // 更新状态
           yield put({
@@ -117,8 +117,10 @@ export default {
         }
 
         // 清除本地存储
-        localStorage.removeItem('token');
-        localStorage.removeItem('refresh_token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refresh_token');
+        }
 
         // 重置状态
         yield put({
@@ -128,41 +130,13 @@ export default {
         message.success('已安全退出');
       } catch (error) {
         // 即使API调用失败，也要清除本地状态
-        localStorage.removeItem('token');
-        localStorage.removeItem('refresh_token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refresh_token');
+        }
         yield put({ type: 'clearUserInfo' });
         console.error('登出API调用失败:', error);
         message.success('已退出登录');
-      }
-    },
-
-    // 初始化用户状态（应用启动时调用）
-    *init(_: any, { put, select, call }: any): Generator<any, void, any> {
-      const { user } = yield select();
-      if (user.token) {
-        try {
-          // 调用获取用户信息的接口来验证token有效性
-          const response = yield call(GetUserInfo);
-          if (response.code === 0) {
-            yield put({
-              type: 'setUserInfo',
-              payload: {
-                currentUser: response.data.user,
-                isLoggedIn: true,
-              },
-            });
-          } else {
-            // 如果获取用户信息失败，清除本地存储
-            localStorage.removeItem('token');
-            localStorage.removeItem('refresh_token');
-            yield put({ type: 'clearUserInfo' });
-          }
-        } catch (error) {
-          // 如果token无效，清除本地存储
-          localStorage.removeItem('token');
-          localStorage.removeItem('refresh_token');
-          yield put({ type: 'clearUserInfo' });
-        }
       }
     },
 
@@ -250,6 +224,9 @@ export default {
 
     // 清除用户信息
     clearUserInfo(state: UserState) {
+      // 清除本地存储
+      clearAuthTokens();
+
       return {
         ...state,
         currentUser: null,

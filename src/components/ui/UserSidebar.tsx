@@ -1,39 +1,33 @@
-import React from 'react';
-import { Link } from '@umijs/max';
-import { motion, AnimatePresence } from 'framer-motion';
+import type { UserInfo } from '@/api/user';
 import {
-  UserOutlined,
-  SettingOutlined,
-  FileTextOutlined,
-  LogoutOutlined,
-  LoginOutlined,
+  backdropVariants,
+  hoverScale,
+  hoverScaleSmall,
+  hoverSlideX,
+  itemVariants,
+  sidebarVariants,
+} from '@/constants';
+import {
+  BellOutlined,
+  BookOutlined,
   CloseOutlined,
   EditOutlined,
+  FileTextOutlined,
   HeartOutlined,
-  BookOutlined,
-  BellOutlined,
+  LoginOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
+import { Link } from '@umijs/max';
+import { AnimatePresence, motion } from 'framer-motion';
+import React from 'react';
 import { Avatar } from './Avatar';
-import {
-  sidebarVariants,
-  backdropVariants,
-  itemVariants,
-  hoverScaleSmall,
-  hoverScale,
-  hoverSlideX
-} from '@/constants';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
 
 interface UserSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  user?: User | null;
+  user?: UserInfo | null;
   onLogin?: () => void;
   onLogout?: () => void;
 }
@@ -55,7 +49,15 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
   onLogin,
   onLogout,
 }) => {
-  const userFallback = user?.name ? user.name.charAt(0).toUpperCase() : '用';
+  const userFallback = user?.nickname
+    ? user.nickname.charAt(0).toUpperCase()
+    : user?.username
+    ? user.username.charAt(0).toUpperCase()
+    : '用';
+
+  // 调试信息
+  console.log('UserSidebar - user:', user);
+  console.log('UserSidebar - isOpen:', isOpen);
 
   return (
     <AnimatePresence>
@@ -98,14 +100,14 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                   <div className="mb-4">
                     <Avatar
                       src={user.avatar}
-                      alt={user.name}
+                      alt={user.nickname || user.username}
                       size="lg"
                       fallback={userFallback}
                       className="mx-auto"
                     />
                   </div>
                   <h3 className="text-lg font-medium text-gray-800 mb-1">
-                    {user.name}
+                    {user.nickname || user.username}
                   </h3>
                   <p className="text-sm text-gray-500 mb-4">{user.email}</p>
                   <div className="flex justify-center space-x-4 text-sm">
@@ -189,4 +191,4 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
   );
 };
 
-export default UserSidebar; 
+export default UserSidebar;

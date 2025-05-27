@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { Outlet, useDispatch, useLocation, useModel } from '@umijs/max';
 import { motion } from 'framer-motion';
-import { Outlet, useLocation, useDispatch } from '@umijs/max';
+import React, { useEffect, useState } from 'react';
 import StagewiseWrapper from '../components/StagewiseWrapper';
-import { Header, Footer } from './components';
-
-// 简化的动画变体
+import { Footer, Header } from './components';
 
 const GlobalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
+
+  // 获取全局初始状态
+  const { initialState } = useModel('@@initialState');
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -19,20 +20,30 @@ const GlobalLayout: React.FC = () => {
     setSidebarOpen(false);
   };
 
+  // 同步全局初始状态到用户模型
+  useEffect(() => {
+    if (initialState?.isLoggedIn && initialState?.currentUser) {
+      dispatch({
+        type: 'user/setUserInfo',
+        payload: {
+          currentUser: initialState.currentUser,
+          token: initialState.token,
+          refreshToken: initialState.refreshToken,
+          isLoggedIn: initialState.isLoggedIn,
+        },
+      });
+    }
+  }, [initialState, dispatch]);
+
   useEffect(() => {
     closeSidebar();
   }, [location.pathname]);
-
-  // 初始化用户状态
-  useEffect(() => {
-    dispatch({ type: 'user/init' });
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative">
       {/* Stagewise Toolbar (development only) */}
       <StagewiseWrapper />
-      
+
       {/* 简化的背景装饰 */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -44,7 +55,7 @@ const GlobalLayout: React.FC = () => {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
         <motion.div
@@ -56,7 +67,7 @@ const GlobalLayout: React.FC = () => {
           transition={{
             duration: 10,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
             delay: 1,
           }}
         />
@@ -75,7 +86,7 @@ const GlobalLayout: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <Outlet />
         </motion.div>
@@ -87,4 +98,4 @@ const GlobalLayout: React.FC = () => {
   );
 };
 
-export default GlobalLayout; 
+export default GlobalLayout;

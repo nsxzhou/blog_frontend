@@ -1,29 +1,35 @@
-import React, { useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { useLocation } from '@umijs/max';
-import { Link, history } from '@umijs/max';
-import { useSelector, useDispatch } from '@umijs/max';
-import {
-  SearchOutlined,
-  UserOutlined,
-  MenuOutlined,
-  FileTextOutlined,
-  EditOutlined,
-  GithubOutlined,
-  TwitterOutlined,
-  LinkedinOutlined,
-  SettingOutlined,
-  CloseOutlined,
-} from '@ant-design/icons';
 import { Button } from '@/components/ui';
-import { Input } from 'antd';
-import Sidebar from './Sidebar';
 import {
+  fadeInUp,
   headerVariants,
   navItemVariants,
-  fadeInUp,
-  slideInRight
 } from '@/constants/animations';
+import {
+  CloseOutlined,
+  EditOutlined,
+  FileTextOutlined,
+  GithubOutlined,
+  LinkedinOutlined,
+  SearchOutlined,
+  TwitterOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import {
+  Link,
+  history,
+  useDispatch,
+  useLocation,
+  useModel,
+  useSelector,
+} from '@umijs/max';
+import { Input } from 'antd';
+import {
+  AnimatePresence,
+  motion,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
+import React, { useState } from 'react';
 import UserSidebar from '../../components/ui/UserSidebar';
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -43,8 +49,14 @@ const Header: React.FC<HeaderProps> = () => {
   const { scrollY } = useScroll();
   const dispatch = useDispatch();
 
-  // 从全局状态获取用户信息
-  const { currentUser, isLoggedIn } = useSelector((state: any) => state.user);
+  // 从全局状态获取用户信息 - 优先使用 initialState
+  const { initialState } = useModel('@@initialState');
+  const { currentUser: userFromDva, isLoggedIn: isLoggedInFromDva } =
+    useSelector((state: any) => state.user);
+
+  // 使用 initialState 的用户信息，如果没有则使用 dva 的
+  const currentUser = initialState?.currentUser || userFromDva;
+  const isLoggedIn = initialState?.isLoggedIn || isLoggedInFromDva;
 
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
@@ -96,10 +108,11 @@ const Header: React.FC<HeaderProps> = () => {
                 initial="idle"
                 whileHover="hover"
                 whileTap="tap"
-                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${location.pathname === item.key
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                  }`}
+                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${
+                  location.pathname === item.key
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                }`}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-500">{item.icon}</span>
@@ -126,11 +139,7 @@ const Header: React.FC<HeaderProps> = () => {
                 { icon: <TwitterOutlined />, href: '#' },
                 { icon: <LinkedinOutlined />, href: '#' },
               ].map((social, index) => (
-                <Button
-                  key={index}
-                  className="p-2 rounded-lg"
-                  variant="ghost"
-                >
+                <Button key={index} className="p-2 rounded-lg" variant="ghost">
                   {social.icon}
                 </Button>
               ))}
@@ -145,7 +154,9 @@ const Header: React.FC<HeaderProps> = () => {
               {isLoggedIn && currentUser ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                    {currentUser.nickname?.charAt(0)?.toUpperCase() || currentUser.username?.charAt(0)?.toUpperCase() || 'U'}
+                    {currentUser.nickname?.charAt(0)?.toUpperCase() ||
+                      currentUser.username?.charAt(0)?.toUpperCase() ||
+                      'U'}
                   </div>
                   <span className="hidden sm:block text-sm font-medium text-gray-800">
                     {currentUser.nickname || currentUser.username}
@@ -191,6 +202,7 @@ const Header: React.FC<HeaderProps> = () => {
       <UserSidebar
         isOpen={userSidebarOpen}
         onClose={() => setUserSidebarOpen(false)}
+        user={currentUser}
         onLogin={handleLogin}
         onLogout={handleLogout}
       />
@@ -198,4 +210,4 @@ const Header: React.FC<HeaderProps> = () => {
   );
 };
 
-export default Header; 
+export default Header;
