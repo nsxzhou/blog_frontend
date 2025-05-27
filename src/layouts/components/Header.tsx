@@ -24,7 +24,7 @@ import {
   fadeInUp,
   slideInRight
 } from '@/constants/animations';
-
+import UserSidebar from '../../components/ui/UserSidebar';
 interface HeaderProps {
   onMenuToggle: () => void;
 }
@@ -188,7 +188,7 @@ const Header: React.FC<HeaderProps> = () => {
       </AnimatePresence>
 
       {/* 用户侧边栏 */}
-      <Sidebar
+      <UserSidebar
         isOpen={userSidebarOpen}
         onClose={() => setUserSidebarOpen(false)}
         onLogin={handleLogin}
