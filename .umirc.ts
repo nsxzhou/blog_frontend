@@ -40,6 +40,18 @@ export default defineConfig({
       component: '@/pages/profile',
     },
     {
+      path: '/categories',
+      component: '@/pages/category',
+    },  
+    {
+      path: '/tags',
+      component: '@/pages/tag',
+    },
+    {
+      path: '/images',
+      component: '@/pages/images',
+    },
+    {
       path: '/403',
       component: '@/pages/403',
     },
