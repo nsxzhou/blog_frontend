@@ -5,7 +5,6 @@ export interface BlogPost {
   content?: string;
   image: string;
   date: string;
-  readTime: string;
   views: number;
   likes: number;
   comments: number;

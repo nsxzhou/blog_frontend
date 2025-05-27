@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   MenuOutlined,
-  UserOutlined,
-  TagOutlined,
-  ClockCircleOutlined,
-  EyeOutlined,
-  HeartOutlined
 } from '@ant-design/icons';
-import { Card } from '@/components/ui';
 import type { BlogPost } from '../../blog/components/types';
 
 interface ArticleSidebarProps {
@@ -43,7 +37,6 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ article }) => {
     title: string;
     level: number;
   }>>([]);
-  const [activeSection, setActiveSection] = useState<string>('');
   const [showToc, setShowToc] = useState(false);
 
   // 生成目录
@@ -52,12 +45,14 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ article }) => {
       const headings = article.content
         .split('\n')
         .filter(line => line.match(/^#{1,3}\s/))
-        .map((line, index) => {
+        .map((line) => {
           const match = line.match(/^(#{1,3})\s(.+)/);
           if (match) {
+            const title = match[2];
+            const id = `heading-${title.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')}`;
             return {
-              id: `heading-${index}`,
-              title: match[2],
+              id,
+              title,
               level: match[1].length
             };
           }
@@ -68,32 +63,6 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ article }) => {
       setTableOfContents(headings);
     }
   }, [article.content]);
-
-  // 监听滚动，更新当前活动章节
-  useEffect(() => {
-    const handleScroll = () => {
-      // 简化的实现，实际应用中可能需要更复杂的逻辑
-      const headings = document.querySelectorAll('h1, h2, h3');
-      const scrollPosition = window.scrollY + 100;
-
-      headings.forEach((heading, index) => {
-        const element = heading as HTMLElement;
-        if (element.offsetTop <= scrollPosition) {
-          setActiveSection(`heading-${index}`);
-        }
-      });
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   return (
     <>
@@ -130,7 +99,7 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ article }) => {
             </motion.button>
           ) : (
             // 展开状态：完整的目录面板
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 max-w-xs">
+            <div className="bg-white backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 max-w-xs">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -163,10 +132,7 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ article }) => {
                       transition={{ delay: index * 0.05 }}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => scrollToSection(item.id)}
-                      className={`block w-full text-left text-xs py-2 px-2 rounded-lg transition-all duration-200 ${activeSection === item.id
-                        ? 'bg-blue-50 text-blue-600 font-medium shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      className={`block w-full text-left text-xs py-2 px-2 rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                         }`}
                       style={{ paddingLeft: `${(item.level - 1) * 12 + 8}px` }}
                     >

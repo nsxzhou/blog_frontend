@@ -19,24 +19,24 @@ interface RegisterFormProps {
 
 // 优化的输入框动画变体 - 与登录表单保持一致
 const inputVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: (i: number) => ({
+    hidden: { opacity: 0 },
+    visible: {
         opacity: 1,
-        y: 0,
         transition: {
-            duration: 0.3,
-            ease: "easeOut",
-            delay: i * 0.08
+            staggerChildren: 0.08,
+            delayChildren: 0.1
         }
-    })
+    }
 };
 
 const buttonVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        y: 0,
-        transition: { duration: 0.3, ease: "easeOut", delay: 0.4 }
+        transition: {
+            staggerChildren: 0.08,
+            delayChildren: 0.1
+        }
     }
 };
 
@@ -161,13 +161,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                         onChange={(e) => handleInputChange('username', e.target.value)}
                         className={`
               w-full pl-10 pr-4 py-3 border rounded-lg
-              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+            focus:border-blue-500
               transition-all duration-200 outline-none
               ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}
             `}
                         placeholder="请输入用户名"
-                        whileFocus={{ scale: 1.01 }}
-                        transition={{ duration: 0.15 }}
                     />
                 </div>
                 {errors.username && (
@@ -198,13 +196,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                         onChange={(e) => handleInputChange('nickname', e.target.value)}
                         className={`
               w-full pl-10 pr-4 py-3 border rounded-lg
-              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+              focus:border-blue-500
               transition-all duration-200 outline-none
               ${errors.nickname ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}
             `}
                         placeholder="请输入昵称"
-                        whileFocus={{ scale: 1.01 }}
-                        transition={{ duration: 0.15 }}
                     />
                 </div>
                 {errors.nickname && (
@@ -235,13 +231,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         className={`
               w-full pl-10 pr-4 py-3 border rounded-lg
-              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+              focus:border-blue-500
               transition-all duration-200 outline-none
               ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}
             `}
                         placeholder="请输入邮箱地址"
-                        whileFocus={{ scale: 1.01 }}
-                        transition={{ duration: 0.15 }}
                     />
                 </div>
                 {errors.email && (
@@ -272,13 +266,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                         onChange={(e) => handleInputChange('password', e.target.value)}
                         className={`
               w-full pl-10 pr-12 py-3 border rounded-lg
-              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+              focus:border-blue-500
               transition-all duration-200 outline-none
               ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}
             `}
                         placeholder="请输入密码"
-                        whileFocus={{ scale: 1.01 }}
-                        transition={{ duration: 0.15 }}
                     />
                     <motion.button
                         type="button"
@@ -318,13 +310,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                         onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                         className={`
               w-full pl-10 pr-12 py-3 border rounded-lg
-              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                focus:border-blue-500
               transition-all duration-200 outline-none
               ${errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}
             `}
                         placeholder="请再次输入密码"
-                        whileFocus={{ scale: 1.01 }}
-                        transition={{ duration: 0.15 }}
                     />
                     <motion.button
                         type="button"

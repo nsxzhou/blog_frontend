@@ -17,27 +17,12 @@ const pageVariants = {
 
 // 表单切换动画 - 更快速的切换
 const formVariants = {
-  hidden: { 
-    opacity: 0, 
-    x: 10,
-    scale: 0.95
-  },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    x: 0,
-    scale: 1,
-    transition: { 
-      duration: 0.1, 
-      ease: "easeOut" 
-    }
-  },
-  exit: {
-    opacity: 0,
-    x: -10,
-    scale: 0.95,
-    transition: { 
-      duration: 0.1,
-      ease: "easeIn"
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1
     }
   }
 };
@@ -46,7 +31,6 @@ const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   
   const handleAuthSuccess = () => {
-    // 使用更流畅的页面跳转
     history.push('/');
   };
 
@@ -96,10 +80,6 @@ const AuthPage: React.FC = () => {
         {/* 卡片容器 */}
         <motion.div
           className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/30"
-          whileHover={{ 
-            y: -4, 
-            boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.15)" 
-          }}
           transition={{ duration: 0.2 }}
         >
           {/* 头部标题 */}
