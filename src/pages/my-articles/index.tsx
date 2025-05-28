@@ -1,253 +1,292 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { message, Spin, Empty } from 'antd';
-import { history } from '@umijs/max';
 import {
-    StatsCards,
-    ArticleControls,
-    ArticleList,
-    type MyArticle,
-    type ArticleStats,
-    type FilterType,
-    type SortType,
+  DeleteArticle,
+  GetArticleStats,
+  GetMyArticles,
+  type ArticleListItem,
+} from '@/api/article';
+import { containerVariants, itemVariants } from '@/constants';
+import { history, useRequest } from '@umijs/max';
+import { Empty, message, Spin } from 'antd';
+import { motion } from 'framer-motion';
+import React, { useMemo, useState } from 'react';
+import {
+  ArticleControls,
+  ArticleList,
+  StatsCards,
+  type ArticleStats,
+  type FilterType,
+  type MyArticle,
+  type SortType,
 } from './components';
 import { EmptyState } from './components/EmptyState';
-import { containerVariants, itemVariants } from '@/constants';
 
-// 模拟数据
-const mockArticles: MyArticle[] = [
-    {
-        id: 1,
-        title: 'React 18 并发特性深度解析',
-        excerpt: '深入探讨React 18中的并发渲染机制，包括Suspense、useDeferredValue和useTransition等新特性的实际应用场景。',
-        image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=400&fit=crop',
-        date: '2024-01-15',
-        lastModified: '2024-01-16',
-        readTime: '8 分钟',
-        views: 1234,
-        likes: 89,
-        comments: 23,
-        tags: ['React', 'JavaScript', '前端'],
-        category: '前端开发',
-        status: 'published',
-        featured: true,
-    },
-    {
-        id: 2,
-        title: 'TypeScript 高级类型技巧总结',
-        excerpt: '总结TypeScript中的高级类型技巧，包括条件类型、映射类型、模板字面量类型等实用技术。',
-        image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop',
-        date: '2024-01-12',
-        lastModified: '2024-01-12',
-        readTime: '12 分钟',
-        views: 856,
-        likes: 67,
-        comments: 15,
-        tags: ['TypeScript', '前端', '类型系统'],
-        category: '编程语言',
-        status: 'published',
-    },
-    {
-        id: 3,
-        title: '微前端架构设计与实践',
-        excerpt: '分享微前端架构的设计思路和具体实现方案，以及在大型项目中的应用经验。',
-        image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop',
-        date: '2024-01-10',
-        lastModified: '2024-01-11',
-        readTime: '15 分钟',
-        views: 445,
-        likes: 34,
-        comments: 8,
-        tags: ['微前端', '架构', '工程化'],
-        category: '系统架构',
-        status: 'draft',
-    },
-    {
-        id: 4,
-        title: 'Node.js 性能优化实战',
-        excerpt: '从内存管理、异步编程、缓存策略等多个维度分析Node.js应用的性能优化方法。',
-        image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&h=400&fit=crop',
-        date: '2024-01-08',
-        lastModified: '2024-01-08',
-        readTime: '10 分钟',
-        views: 623,
-        likes: 45,
-        comments: 12,
-        tags: ['Node.js', '性能优化', '后端'],
-        category: '后端开发',
-        status: 'published',
-    },
-    {
-        id: 5,
-        title: 'CSS Grid 布局完全指南',
-        excerpt: '全面介绍CSS Grid布局的各种特性和使用技巧，帮助开发者掌握现代CSS布局技术。',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop',
-        date: '2024-01-05',
-        lastModified: '2024-01-05',
-        readTime: '6 分钟',
-        views: 234,
-        likes: 18,
-        comments: 5,
-        tags: ['CSS', '布局', '前端'],
-        category: '前端开发',
-        status: 'private',
-    },
-    {
-        id: 6,
-        title: 'Vue 3 Composition API 最佳实践',
-        excerpt: '分享Vue 3 Composition API的使用心得和最佳实践，提升开发效率和代码质量。',
-        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop',
-        date: '2024-01-03',
-        lastModified: '2024-01-03',
-        readTime: '9 分钟',
-        views: 567,
-        likes: 42,
-        comments: 11,
-        tags: ['Vue', 'Composition API', '前端'],
-        category: '前端开发',
-        status: 'published',
-        featured: true,
-    },
-];
+// 将 API 返回的文章数据转换为组件需要的格式
+const convertArticleData = (apiArticle: ArticleListItem): MyArticle => {
+  return {
+    id: apiArticle.id,
+    title: apiArticle.title,
+    excerpt: apiArticle.summary,
+    image: apiArticle.cover_image,
+    date: apiArticle.published_at || apiArticle.created_at,
+    lastModified: apiArticle.updated_at,
+    readTime: `${Math.ceil(apiArticle.word_count / 200)} 分钟`,
+    views: apiArticle.view_count,
+    likes: apiArticle.like_count,
+    comments: apiArticle.comment_count,
+    tags: apiArticle.tags.map((tag) => tag.name),
+    category: apiArticle.category_name,
+    status: apiArticle.status as 'published' | 'draft',
+    featured: apiArticle.is_top === 1,
+  };
+};
 
 const MyArticlesPage: React.FC = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterType, setFilterType] = useState<FilterType>('all');
-    const [sortType, setSortType] = useState<SortType>('date');
-    const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [sortType, setSortType] = useState<SortType>('date');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(20); // 设置为20，小于后端限制的50
 
-    // 计算统计数据
-    const stats: ArticleStats = useMemo(() => {
-        const publishedArticles = mockArticles.filter(article => article.status === 'published');
-        const draftArticles = mockArticles.filter(article => article.status === 'draft');
+  // 获取我的文章列表
+  const {
+    data: articlesData,
+    loading: articlesLoading,
+    refresh: refreshArticles,
+  } = useRequest(
+    () => {
+      return GetMyArticles({
+        page: currentPage,
+        page_size: pageSize,
+        keyword: searchTerm || undefined,
+        status: filterType === 'all' ? undefined : filterType,
+        order_by:
+          sortType === 'date'
+            ? 'published_at'
+            : sortType === 'views'
+            ? 'view_count'
+            : sortType === 'likes'
+            ? 'like_count'
+            : 'title',
+        order: sortType === 'title' ? 'asc' : 'desc',
+        is_original: 1,
+      });
+    },
+    {
+      refreshDeps: [currentPage, pageSize, searchTerm, filterType, sortType],
+      onError: (error) => {
+        console.error('获取文章列表失败:', error);
+        message.error('获取文章列表失败，请稍后重试');
+      },
+    },
+  );
 
-        return {
-            totalArticles: mockArticles.length,
-            totalViews: mockArticles.reduce((sum, article) => sum + article.views, 0),
-            totalLikes: mockArticles.reduce((sum, article) => sum + article.likes, 0),
-            totalComments: mockArticles.reduce((sum, article) => sum + article.comments, 0),
-            publishedCount: publishedArticles.length,
-            draftCount: draftArticles.length,
-        };
-    }, []);
+  // 获取文章统计数据
+  const { data: statsData, loading: statsLoading } = useRequest(
+    () => GetArticleStats(),
+    {
+      onError: (error) => {
+        console.error('获取统计数据失败:', error);
+      },
+    },
+  );
 
-    // 过滤和排序文章
-    const filteredArticles = useMemo(() => {
-        let filtered = mockArticles.filter(article => {
-            // 搜索过滤
-            const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                article.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+  // 转换文章数据
+  const articles = useMemo(() => {
+    if (!articlesData?.list) return [];
+    return articlesData.list.map(convertArticleData);
+  }, [articlesData]);
 
-            // 状态过滤
-            const matchesFilter = filterType === 'all' || article.status === filterType;
+  // 计算统计数据
+  const stats: ArticleStats = useMemo(() => {
+    if (statsData) {
+      return {
+        totalArticles: statsData.total_articles,
+        totalViews: statsData.total_views,
+        totalLikes: statsData.total_likes,
+        totalComments: statsData.total_comments,
+        publishedCount: statsData.published_articles,
+        draftCount: statsData.draft_articles,
+      };
+    }
 
-            return matchesSearch && matchesFilter;
-        });
-
-        // 排序
-        switch (sortType) {
-            case 'date':
-                filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                break;
-            case 'views':
-                filtered.sort((a, b) => b.views - a.views);
-                break;
-            case 'likes':
-                filtered.sort((a, b) => b.likes - a.likes);
-                break;
-            case 'title':
-                filtered.sort((a, b) => a.title.localeCompare(b.title));
-                break;
-        }
-
-        return filtered;
-    }, [searchTerm, filterType, sortType]);
-
-    // 处理操作
-    const handleCreateNew = () => {
-        history.push('/write');
-    };
-
-    const handleEdit = (id: number) => {
-        history.push(`/write?id=${id}`);
-    };
-
-    const handleDelete = (id: number) => {
-        message.success('文章删除成功');
-        // 这里应该调用API删除文章
-    };
-
-    const handleShare = (id: number) => {
-        navigator.clipboard.writeText(`${window.location.origin}/article-detail/${id}`);
-        message.success('链接已复制到剪贴板');
-    };
-
-    const handleArticleClick = (id: number) => {
-        history.push(`/article-detail/${id}`);
-    };
-
-    return (
-        <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="min-h-screen bg-gray-50 py-8"
-        >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* 页面标题 */}
-                <motion.div variants={itemVariants} className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">我的文章</h1>
-                </motion.div>
-
-                {/* 统计卡片 */}
-                <motion.div variants={itemVariants}>
-                    <StatsCards stats={stats} />
-                </motion.div>
-
-                {/* 控制栏 */}
-                <motion.div variants={itemVariants}>
-                    <ArticleControls
-                        searchTerm={searchTerm}
-                        onSearchChange={setSearchTerm}
-                        filterType={filterType}
-                        onFilterChange={setFilterType}
-                        sortType={sortType}
-                        onSortChange={setSortType}
-                        totalCount={filteredArticles.length}
-                        onCreateNew={handleCreateNew}
-                    />
-                </motion.div>
-
-                {/* 文章列表 */}
-                <motion.div variants={itemVariants}>
-                    {loading ? (
-                        <div className="flex justify-center items-center py-20">
-                            <Spin size="large" />
-                        </div>
-                    ) : filteredArticles.length === 0 ? (
-                        searchTerm || filterType !== 'all' ? (
-                            <Empty
-                                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                description="没有找到符合条件的文章"
-                                className="py-20"
-                            />
-                        ) : (
-                            <EmptyState onCreateClick={handleCreateNew} />
-                        )
-                    ) : (
-                        <ArticleList
-                            articles={filteredArticles}
-                            loading={loading}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            onShare={handleShare}
-                            onArticleClick={handleArticleClick}
-                        />
-                    )}
-                </motion.div>
-            </div>
-        </motion.div>
+    // 如果统计接口失败，从文章列表计算（注意：这里只是当前页的数据）
+    const publishedArticles = articles.filter(
+      (article: MyArticle) => article.status === 'published',
     );
+    const draftArticles = articles.filter(
+      (article: MyArticle) => article.status === 'draft',
+    );
+
+    return {
+      totalArticles: articles.length,
+      totalViews: articles.reduce(
+        (sum: number, article: MyArticle) => sum + article.views,
+        0,
+      ),
+      totalLikes: articles.reduce(
+        (sum: number, article: MyArticle) => sum + article.likes,
+        0,
+      ),
+      totalComments: articles.reduce(
+        (sum: number, article: MyArticle) => sum + article.comments,
+        0,
+      ),
+      publishedCount: publishedArticles.length,
+      draftCount: draftArticles.length,
+    };
+  }, [statsData, articles]);
+
+  // 处理搜索和过滤变化
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // 重置到第一页
+  };
+
+  const handleFilterChange = (value: FilterType) => {
+    setFilterType(value);
+    setCurrentPage(1); // 重置到第一页
+  };
+
+  const handleSortChange = (value: SortType) => {
+    setSortType(value);
+    setCurrentPage(1); // 重置到第一页
+  };
+
+  // 处理分页变化
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // 处理操作
+  const handleCreateNew = () => {
+    history.push('/write');
+  };
+
+  const handleEdit = (id: number) => {
+    history.push(`/write?id=${id}`);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await DeleteArticle(id);
+      message.success('文章删除成功');
+      refreshArticles(); // 刷新文章列表
+    } catch (error) {
+      console.error('删除文章失败:', error);
+      message.error('删除文章失败，请稍后重试');
+    }
+  };
+
+  const handleShare = (id: number) => {
+    navigator.clipboard.writeText(
+      `${window.location.origin}/article-detail/${id}`,
+    );
+    message.success('链接已复制到剪贴板');
+  };
+
+  const handleArticleClick = (id: number) => {
+    history.push(`/article-detail/${id}`);
+  };
+
+  const loading = articlesLoading || statsLoading;
+
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="min-h-screen bg-gray-50 py-8"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 页面标题 */}
+        <motion.div variants={itemVariants} className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">我的文章</h1>
+        </motion.div>
+
+        {/* 统计卡片 */}
+        <motion.div variants={itemVariants}>
+          <StatsCards stats={stats} />
+        </motion.div>
+
+        {/* 控制栏 */}
+        <motion.div variants={itemVariants}>
+          <ArticleControls
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            filterType={filterType}
+            onFilterChange={handleFilterChange}
+            sortType={sortType}
+            onSortChange={handleSortChange}
+            totalCount={articlesData?.total || 0}
+            onCreateNew={handleCreateNew}
+          />
+        </motion.div>
+
+        {/* 文章列表 */}
+        <motion.div variants={itemVariants}>
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <Spin size="large" />
+            </div>
+          ) : articles.length === 0 ? (
+            searchTerm || filterType !== 'all' ? (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="没有找到符合条件的文章"
+                className="py-20"
+              />
+            ) : (
+              <EmptyState onCreateClick={handleCreateNew} />
+            )
+          ) : (
+            <>
+              <ArticleList
+                articles={articles}
+                loading={false}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onShare={handleShare}
+                onArticleClick={handleArticleClick}
+              />
+
+              {/* 分页组件 */}
+              {articlesData && articlesData.total > pageSize && (
+                <div className="flex justify-center mt-8">
+                  <div className="bg-white px-4 py-3 rounded-lg shadow">
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage <= 1}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        上一页
+                      </button>
+
+                      <span className="px-4 py-2 text-sm text-gray-700">
+                        第 {currentPage} 页，共{' '}
+                        {Math.ceil(articlesData.total / pageSize)} 页
+                      </span>
+
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={
+                          currentPage >=
+                          Math.ceil(articlesData.total / pageSize)
+                        }
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        下一页
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </motion.div>
+      </div>
+    </motion.div>
+  );
 };
 
 export default MyArticlesPage;

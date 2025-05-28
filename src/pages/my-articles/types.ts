@@ -12,7 +12,7 @@ export interface MyArticle {
   comments: number;
   tags: string[];
   category: string;
-  status: 'published' | 'draft' | 'private';
+  status: 'published' | 'draft';
   featured?: boolean;
 }
 
@@ -26,4 +26,4 @@ export interface ArticleStats {
 }
 
 export type SortType = 'date' | 'views' | 'likes' | 'title';
-export type FilterType = 'all' | 'published' | 'draft' | 'private'; 
+export type FilterType = 'all' | 'published' | 'draft';

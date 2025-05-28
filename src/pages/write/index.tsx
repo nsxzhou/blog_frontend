@@ -10,14 +10,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // 导入真正的API接口
 import {
   CreateArticle,
-  UpdateArticle,
   GetArticleDetail,
+  UpdateArticle,
   type CreateArticleReq,
   type UpdateArticleReq,
-  type Article
 } from '@/api/article';
 import { GetCategoryList, type CategoryInfo } from '@/api/category';
-import { GetTagList, CreateTag, type TagInfo } from '@/api/tag';
+import { CreateTag, GetTagList, type TagInfo } from '@/api/tag';
 import {
   ArticleSettings,
   WriteEditor,
@@ -100,7 +99,7 @@ const WritePage: React.FC = () => {
           title: article.title,
           excerpt: article.summary,
           content: article.content,
-          tags: article.tags.map(tag => tag.name),
+          tags: article.tags.map((tag) => tag.name),
           category: article.category_name,
           coverImage: article.cover_image,
           isDraft: article.status === 'draft',
@@ -131,17 +130,6 @@ const WritePage: React.FC = () => {
     }
   }, [editId, loadCategories, loadTags, loadArticleData]);
 
-  // 自动保存
-  useEffect(() => {
-    const autoSave = setInterval(() => {
-      if (articleData.title || articleData.content) {
-        handleSaveDraft(true);
-      }
-    }, 30000); // 30秒自动保存
-
-    return () => clearInterval(autoSave);
-  }, [articleData]);
-
   // 处理内容变化
   const handleContentChange = useCallback((value: string = '') => {
     setArticleData((prev) => ({ ...prev, content: value }));
@@ -152,7 +140,9 @@ const WritePage: React.FC = () => {
     if (newTag.trim() && !articleData.tags.includes(newTag.trim())) {
       try {
         // 如果标签不存在，先创建标签
-        const existingTag = popularTags.find(tag => tag.name === newTag.trim());
+        const existingTag = popularTags.find(
+          (tag) => tag.name === newTag.trim(),
+        );
         if (!existingTag) {
           const createTagResponse = await CreateTag({ name: newTag.trim() });
           if (createTagResponse.code === 0) {
@@ -196,14 +186,18 @@ const WritePage: React.FC = () => {
       setSaving(true);
       try {
         // 查找分类ID
-        const category = categories.find(cat => cat.name === articleData.category);
+        const category = categories.find(
+          (cat) => cat.name === articleData.category,
+        );
         const categoryId = category?.id || 1; // 默认分类ID
 
         // 查找标签ID
-        const tagIds = articleData.tags.map(tagName => {
-          const tag = popularTags.find(t => t.name === tagName);
-          return tag?.id || 0; // 如果找不到标签，使用0
-        }).filter(id => id > 0);
+        const tagIds = articleData.tags
+          .map((tagName) => {
+            const tag = popularTags.find((t) => t.name === tagName);
+            return tag?.id || 0; // 如果找不到标签，使用0
+          })
+          .filter((id) => id > 0);
 
         const articlePayload: CreateArticleReq | UpdateArticleReq = {
           title: articleData.title,
@@ -223,7 +217,9 @@ const WritePage: React.FC = () => {
           await UpdateArticle(currentArticleId, articlePayload);
         } else {
           // 创建新文章
-          const response = await CreateArticle(articlePayload as CreateArticleReq);
+          const response = await CreateArticle(
+            articlePayload as CreateArticleReq,
+          );
           if (response.code === 0) {
             setCurrentArticleId(response.data.article_id);
           }
@@ -262,7 +258,9 @@ const WritePage: React.FC = () => {
     setLoading(true);
     try {
       // 查找分类ID
-      const category = categories.find(cat => cat.name === articleData.category);
+      const category = categories.find(
+        (cat) => cat.name === articleData.category,
+      );
       const categoryId = category?.id;
 
       if (!categoryId) {
@@ -271,10 +269,12 @@ const WritePage: React.FC = () => {
       }
 
       // 查找标签ID
-      const tagIds = articleData.tags.map(tagName => {
-        const tag = popularTags.find(t => t.name === tagName);
-        return tag?.id || 0;
-      }).filter(id => id > 0);
+      const tagIds = articleData.tags
+        .map((tagName) => {
+          const tag = popularTags.find((t) => t.name === tagName);
+          return tag?.id || 0;
+        })
+        .filter((id) => id > 0);
 
       const articlePayload: CreateArticleReq | UpdateArticleReq = {
         title: articleData.title,
@@ -294,7 +294,9 @@ const WritePage: React.FC = () => {
         await UpdateArticle(currentArticleId, articlePayload);
       } else {
         // 创建并发布新文章
-        const response = await CreateArticle(articlePayload as CreateArticleReq);
+        const response = await CreateArticle(
+          articlePayload as CreateArticleReq,
+        );
         if (response.code === 0) {
           setCurrentArticleId(response.data.article_id);
         }
@@ -398,10 +400,11 @@ const WritePage: React.FC = () => {
               category: articleData.category,
               isDraft: articleData.isDraft,
               tags: articleData.tags,
+              coverImage: articleData.coverImage,
             }}
             newTag={newTag}
-            categories={categories.map(cat => cat.name)}
-            popularTags={popularTags.map(tag => tag.name)}
+            categories={categories.map((cat) => cat.name)}
+            popularTags={popularTags.map((tag) => tag.name)}
             onDataChange={(data: Partial<ArticleData>) =>
               setArticleData((prev) => ({ ...prev, ...data }))
             }

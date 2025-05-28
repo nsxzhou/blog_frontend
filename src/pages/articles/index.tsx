@@ -1,12 +1,12 @@
 import {
   DeleteArticle,
+  GetArticles,
   GetArticleStats,
-  GetMyArticles,
   UpdateArticleAccess,
   UpdateArticleStatus,
   type ArticleListItem,
-  type ArticleListQuery,
   type ArticleStatsRes,
+  type UnifiedArticleQuery,
 } from '@/api/article';
 import {
   containerVariants,
@@ -52,6 +52,7 @@ const ArticleManagementPage: React.FC = () => {
     is_original: undefined,
     start_date: '',
     end_date: '',
+    author_id: undefined,
   });
 
   const [sorting, setSorting] = useState<SortParams>({
@@ -60,10 +61,10 @@ const ArticleManagementPage: React.FC = () => {
   });
 
   // 获取文章列表
-  const fetchArticles = async (params?: Partial<ArticleListQuery>) => {
+  const fetchArticles = async (params?: Partial<UnifiedArticleQuery>) => {
     setLoading(true);
     try {
-      const query: ArticleListQuery = {
+      const query: UnifiedArticleQuery = {
         page: pagination.current,
         page_size: pagination.pageSize,
         keyword: filters.keyword || undefined,
@@ -74,16 +75,17 @@ const ArticleManagementPage: React.FC = () => {
           filters.access_type === 'all'
             ? undefined
             : (filters.access_type as any),
-        is_top: filters.is_top,
-        is_original: filters.is_original,
+        is_top: filters.is_top as 0 | 1 | undefined,
+        is_original: filters.is_original as 0 | 1 | undefined,
         start_date: filters.start_date || undefined,
         end_date: filters.end_date || undefined,
-        order_by: sorting.order_by,
+        author_id: filters.author_id,
+        sort_by: sorting.order_by as any,
         order: sorting.order,
         ...params,
       };
 
-      const response = await GetMyArticles(query);
+      const response = await GetArticles(query);
 
       if (response.code === 0 && response.data) {
         setArticles(response.data.list || []);
@@ -309,7 +311,7 @@ const ArticleManagementPage: React.FC = () => {
           <motion.div variants={itemVariants} className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">文章管理</h1>
             <p className="mt-2 text-gray-600">
-              管理您的所有文章，包括发布、编辑、删除等操作
+              管理系统中的所有文章，包括查看、编辑、删除、状态管理等操作
             </p>
           </motion.div>
 

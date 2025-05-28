@@ -349,17 +349,62 @@
   background-color: #2563eb !important;
 }
 
-/* 图片选择器样式 */
+/* 优化的图片选择器样式 */
+.image-selector-modal {
+  z-index: 1050;
+}
+
+.image-selector-modal .ant-modal-content {
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
 .image-selector-modal .ant-modal-body {
-  padding: 20px;
+  padding: 24px !important;
 }
 
-.image-selector-modal .ant-input-search {
-  margin-bottom: 16px;
+/* 自定义分页样式 */
+.custom-pagination {
+  margin-top: 20px !important;
 }
 
-.image-selector-modal .ant-pagination {
-  margin-top: 16px;
+.custom-pagination .ant-pagination-item {
+  border-radius: 8px !important;
+  border: 2px solid #e2e8f0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.custom-pagination .ant-pagination-item:hover {
+  border-color: #667eea !important;
+  transform: translateY(-1px) !important;
+}
+
+.custom-pagination .ant-pagination-item-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: #667eea !important;
+}
+
+.custom-pagination .ant-pagination-item-active a {
+  color: white !important;
+}
+
+.custom-pagination .ant-pagination-prev,
+.custom-pagination .ant-pagination-next {
+  border-radius: 8px !important;
+  border: 2px solid #e2e8f0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.custom-pagination .ant-pagination-prev:hover,
+.custom-pagination .ant-pagination-next:hover {
+  border-color: #667eea !important;
+  transform: translateY(-1px) !important;
+}
+
+.custom-pagination .ant-pagination-jump-prev,
+.custom-pagination .ant-pagination-jump-next {
+  border-radius: 8px !important;
 }
 
 /* 图片网格动画 */
@@ -403,4 +448,28 @@
   border-color: #2196f3;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+}
+
+/* 图片卡片边框加粗样式 */
+.border-3 {
+  border-width: 3px !important;
+}
+
+/* 图片选择器加载状态优化 */
+.image-selector-modal .ant-spin-dot {
+  font-size: 24px !important;
+}
+
+.image-selector-modal .ant-spin-dot-item {
+  background-color: #667eea !important;
+}
+
+/* Empty 状态样式优化 */
+.image-selector-modal .ant-empty {
+  padding: 40px 20px !important;
+}
+
+.image-selector-modal .ant-empty-description {
+  color: #94a3b8 !important;
+  font-size: 16px !important;
 }

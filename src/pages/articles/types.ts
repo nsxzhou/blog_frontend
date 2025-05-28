@@ -9,6 +9,7 @@ export interface FilterParams {
   is_original?: number;
   start_date: string;
   end_date: string;
+  author_id?: number;
 }
 
 // 排序参数类型
