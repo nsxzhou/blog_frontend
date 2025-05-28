@@ -26,18 +26,6 @@ const GlobalLayout: React.FC = () => {
     closeSidebar();
   }, [location.pathname]);
 
-  // 等待初始化完成再渲染
-  if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">正在初始化...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative">
       {/* Stagewise Toolbar (development only) */}
