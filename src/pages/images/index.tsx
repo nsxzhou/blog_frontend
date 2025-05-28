@@ -72,7 +72,7 @@ const ImagesManagementPage: React.FC = () => {
       });
 
       if (response.code === 0 && response.data) {
-        let imageList = response.data.items || [];
+        let imageList = response.data.list || [];
 
         // 客户端搜索过滤
         if (searchTerm) {

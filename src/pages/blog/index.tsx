@@ -1,23 +1,23 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { message, Spin } from 'antd';
 import {
-  BlogHeader,
-  BlogSearch,
-  BlogFilters,
-  BlogList,
-  type BlogPost
-} from './components';
-import { containerVariants, itemVariants } from '@/constants/animations';
-import {
-  SearchArticles,
-  GetLatestArticles,
   GetHotArticles,
+  GetLatestArticles,
+  SearchArticles,
   type ArticleListItem,
-  type SearchArticleQuery
+  type SearchArticleQuery,
 } from '@/api/article';
 import { GetCategoryList, type CategoryInfo } from '@/api/category';
 import { GetTagList, type TagInfo } from '@/api/tag';
+import { containerVariants, itemVariants } from '@/constants/animations';
+import { message, Spin } from 'antd';
+import { motion } from 'framer-motion';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  BlogFilters,
+  BlogHeader,
+  BlogList,
+  BlogSearch,
+  type BlogPost,
+} from './components';
 
 /**
  * 将API返回的文章数据转换为BlogPost格式
@@ -27,18 +27,17 @@ const transformArticleToPost = (article: ArticleListItem): BlogPost => {
     id: article.id,
     title: article.title,
     excerpt: article.summary,
-    image: article.cover_image || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop',
+    image: article.cover_image,
     date: article.published_at,
     views: article.view_count,
     likes: article.like_count,
     comments: article.comment_count,
-    tags: article.tags.map(tag => tag.name),
+    tags: article.tags.map((tag) => tag.name),
     category: article.category_name,
     author: {
       name: article.author_name,
-      avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`
     },
-    featured: article.is_top === 1
+    featured: article.is_top === 1,
   };
 };
 
@@ -71,7 +70,8 @@ const BlogPage: React.FC = () => {
     try {
       const response = await GetCategoryList();
       if (response.code === 0 && response.data) {
-        const categoryNames = response.data.list?.map((item: CategoryInfo) => item.name) || [];
+        const categoryNames =
+          response.data.list?.map((item: CategoryInfo) => item.name) || [];
         setCategories(['全部', ...categoryNames]);
       }
     } catch (err) {
@@ -86,7 +86,8 @@ const BlogPage: React.FC = () => {
     try {
       const response = await GetTagList();
       if (response.code === 0 && response.data) {
-        const tagNames = response.data.list?.map((item: TagInfo) => item.name) || [];
+        const tagNames =
+          response.data.list?.map((item: TagInfo) => item.name) || [];
         setAllTags(tagNames);
       }
     } catch (err) {
@@ -97,52 +98,63 @@ const BlogPage: React.FC = () => {
   /**
    * 根据排序类型获取文章
    */
-  const fetchArticlesBySortType = useCallback(async (resetPage = false) => {
-    try {
-      const targetPage = resetPage ? 1 : currentPage;
-      setSearchLoading(true);
-      setError(null);
+  const fetchArticlesBySortType = useCallback(
+    async (resetPage = false) => {
+      try {
+        const targetPage = resetPage ? 1 : currentPage;
+        setSearchLoading(true);
+        setError(null);
 
-      let response;
+        let response;
 
-      if (sortBy === 'latest') {
-        // 获取最新文章
-        response = await GetLatestArticles();
-      } else if (sortBy === 'hot') {
-        // 获取热门文章
-        response = await GetHotArticles();
-      } else {
-        // 全部文章 - 使用搜索接口
-        const searchParams: SearchArticleQuery = {
-          page: targetPage,
-          page_size: pageSize,
-          keyword: searchTerm || undefined,
-        };
-        response = await SearchArticles(searchParams);
-      }
-
-      if (response.code === 0 && response.data) {
-        const articles = response.data.items || [];
-        const transformedPosts = articles.map(transformArticleToPost);
-        setBlogPosts(transformedPosts);
-        setTotal(response.data.total || 0);
-
-        if (resetPage) {
-          setCurrentPage(1);
+        if (sortBy === 'latest') {
+          // 获取最新文章
+          response = await GetLatestArticles({
+            page: targetPage,
+            page_size: pageSize,
+          });
+        } else if (sortBy === 'hot') {
+          // 获取热门文章
+          response = await GetHotArticles({
+            page: targetPage,
+            page_size: pageSize,
+          });
+        } else {
+          // 全部文章 - 使用搜索接口
+          const searchParams: SearchArticleQuery = {
+            page: targetPage,
+            page_size: pageSize,
+            keyword: searchTerm || undefined,
+            status: 'published',
+            access_type: 'public',
+          };
+          response = await SearchArticles(searchParams);
         }
-      } else {
-        throw new Error(response.message || '获取文章失败');
+
+        if (response.code === 0 && response.data) {
+          const articles = response.data.list || [];
+          const transformedPosts = articles.map(transformArticleToPost);
+          setBlogPosts(transformedPosts);
+          setTotal(response.data.total || 0);
+
+          if (resetPage) {
+            setCurrentPage(1);
+          }
+        } else {
+          throw new Error(response.message || '获取文章失败');
+        }
+      } catch (err) {
+        console.error('获取文章失败:', err);
+        setError('获取文章列表失败，请稍后重试');
+        message.error('获取文章列表失败，请稍后重试');
+        setBlogPosts([]);
+        setTotal(0);
+      } finally {
+        setSearchLoading(false);
       }
-    } catch (err) {
-      console.error('获取文章失败:', err);
-      setError('获取文章列表失败，请稍后重试');
-      message.error('获取文章列表失败，请稍后重试');
-      setBlogPosts([]);
-      setTotal(0);
-    } finally {
-      setSearchLoading(false);
-    }
-  }, [currentPage, searchTerm, pageSize, sortBy]);
+    },
+    [currentPage, searchTerm, pageSize, sortBy],
+  );
 
   /**
    * 初始化数据
@@ -152,10 +164,7 @@ const BlogPage: React.FC = () => {
       setLoading(true);
       try {
         // 并行获取分类、标签数据
-        await Promise.all([
-          fetchCategories(),
-          fetchTags()
-        ]);
+        await Promise.all([fetchCategories(), fetchTags()]);
 
         // 获取初始文章数据
         await fetchArticlesBySortType();
@@ -194,10 +203,12 @@ const BlogPage: React.FC = () => {
 
   // 客户端过滤逻辑（基于已获取的数据进行二次过滤）
   const filteredPosts = useMemo(() => {
-    let filtered = blogPosts.filter(post => {
-      const matchesCategory = activeCategory === '全部' || post.category === activeCategory;
-      const matchesTags = selectedTags.length === 0 ||
-        selectedTags.some(tag => post.tags.includes(tag));
+    let filtered = blogPosts.filter((post) => {
+      const matchesCategory =
+        activeCategory === '全部' || post.category === activeCategory;
+      const matchesTags =
+        selectedTags.length === 0 ||
+        selectedTags.some((tag) => post.tags.includes(tag));
 
       return matchesCategory && matchesTags;
     });
@@ -207,14 +218,14 @@ const BlogPage: React.FC = () => {
   }, [blogPosts, activeCategory, selectedTags]);
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag)
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
-  const filterKey = `${activeCategory}-${searchTerm}-${selectedTags.join(',')}-${sortBy}`;
+  const filterKey = `${activeCategory}-${searchTerm}-${selectedTags.join(
+    ',',
+  )}-${sortBy}`;
 
   /**
    * 渲染加载状态
@@ -279,7 +290,8 @@ const BlogPage: React.FC = () => {
               onChange: setCurrentPage,
               showSizeChanger: false,
               showQuickJumper: true,
-              showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`
+              showTotal: (total, range) =>
+                `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
             }}
           />
         </div>

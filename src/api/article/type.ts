@@ -136,11 +136,9 @@ export interface ArticleListItem {
 
 // 文章列表响应数据
 export interface ArticleListRes {
-  items: ArticleListItem[];
+  list: ArticleListItem[];
   total: number;
 }
-
-
 
 // 文章交互操作请求参数
 export interface ArticleActionReq {
@@ -199,23 +197,40 @@ export interface SearchArticleQuery {
   author_id?: number;
   tag_id?: number;
   category_id?: number;
+  status?: 'draft' | 'published' | 'archived';
+  access_type?: 'public' | 'private' | 'password';
+  is_top?: 0 | 1;
+  is_original?: 0 | 1;
+  start_date?: string;
+  end_date?: string;
+  sort_by?:
+    | 'created_at'
+    | 'updated_at'
+    | 'published_at'
+    | 'view_count'
+    | 'like_count'
+    | 'comment_count';
+  order?: 'asc' | 'desc';
 }
+
+// 通用文章查询参数 - 新的统一接口使用
+export interface UnifiedArticleQuery extends SearchArticleQuery {}
 
 // 搜索文章响应数据
 export interface SearchArticleRes {
-  items: ArticleListItem[];
+  list: ArticleListItem[];
   total: number;
 }
 
 // 根据标签获取文章响应数据
 export interface ArticlesByTagRes {
-  items: ArticleListItem[];
+  list: ArticleListItem[];
   total: number;
 }
 
 // 根据分类获取文章响应数据
 export interface ArticlesByCategoryRes {
-  items: ArticleListItem[];
+  list: ArticleListItem[];
   total: number;
 }
 

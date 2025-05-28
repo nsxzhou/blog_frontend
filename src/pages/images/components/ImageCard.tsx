@@ -54,7 +54,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = image.url;
-    link.download = image.original_name;
+    link.download = image.filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -157,7 +157,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({
 
         <img
           src={image.url}
-          alt={image.original_name}
+          alt={image.filename}
           className={`w-full h-full object-cover transition-all duration-300 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           } group-hover:scale-105`}
@@ -188,7 +188,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({
       <div className="p-4">
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-900 truncate">
-            {image.original_name}
+            {image.filename}
           </h3>
 
           <div className="flex items-center justify-between text-xs text-gray-500">

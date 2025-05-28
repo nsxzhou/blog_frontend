@@ -38,7 +38,7 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
 
             if (response.code === 0) {
                 console.log(response.data);
-                let imageList = response.data.items;
+                let imageList = response.data.list;
 
                 setImages(imageList);
                 setTotal(response.data.total);

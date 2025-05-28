@@ -12,7 +12,6 @@ export interface BlogPost {
   category: string;
   author: {
     name: string;
-    avatar: string;
   };
   featured?: boolean;
 } 

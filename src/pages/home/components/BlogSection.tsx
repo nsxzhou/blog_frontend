@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRightOutlined } from '@ant-design/icons';
-import { Button } from '@/components/ui';
-import BlogCard from '@/pages/blog/components/BlogCard';
-import { itemVariants, containerVariants } from '@/constants/animations';
 import { GetLatestArticles, type ArticleListItem } from '@/api/article';
+import { Button } from '@/components/ui';
+import { containerVariants, itemVariants } from '@/constants/animations';
+import BlogCard from '@/pages/blog/components/BlogCard';
 import type { BlogPost } from '@/pages/blog/components/types';
-import { Spin, Empty, message } from 'antd';
+import { ArrowRightOutlined } from '@ant-design/icons';
+import { Empty, message, Spin } from 'antd';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 
 /**
  * 将API返回的文章数据转换为BlogPost格式
@@ -16,18 +16,17 @@ const transformArticleToPost = (article: ArticleListItem): BlogPost => {
     id: article.id,
     title: article.title,
     excerpt: article.summary,
-    image: article.cover_image || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop',
+    image: article.cover_image,
     date: article.published_at,
     views: article.view_count,
     likes: article.like_count,
     comments: article.comment_count,
-    tags: article.tags.map(tag => tag.name),
+    tags: article.tags.map((tag) => tag.name),
     category: article.category_name,
     author: {
       name: article.author_name,
-      avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`
     },
-    featured: article.is_top === 1
+    featured: article.is_top === 1,
   };
 };
 
@@ -44,18 +43,19 @@ const BlogSection: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const response = await GetLatestArticles();
+      const response = await GetLatestArticles({
+        page: 1,
+        page_size: 6, // 只获取前6篇文章
+      });
 
       console.log('API响应:', response); // 调试日志
 
       if (response.code === 0 && response.data) {
-        // 检查数据结构并安全访问
-        const items = response.data || [];
-        console.log('文章列表:', items); // 调试日志
+        // 正确访问list属性
+        const articles = response.data.list || [];
+        console.log('文章列表:', articles); // 调试日志
 
-        if (items.length > 0) {
-          // 只显示前6篇文章
-          const articles = items.slice(0, 6);
+        if (articles.length > 0) {
           const transformedPosts = articles.map(transformArticleToPost);
           setBlogPosts(transformedPosts);
         } else {
@@ -92,10 +92,7 @@ const BlogSection: React.FC = () => {
    */
   const renderEmpty = () => (
     <div className="flex justify-center items-center py-20">
-      <Empty
-        description="暂无文章"
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-      />
+      <Empty description="暂无文章" image={Empty.PRESENTED_IMAGE_SIMPLE} />
     </div>
   );
 
@@ -105,9 +102,7 @@ const BlogSection: React.FC = () => {
   const renderError = () => (
     <div className="text-center py-20">
       <p className="text-gray-500 mb-4">{error}</p>
-      <Button onClick={fetchLatestArticles}>
-        重试
-      </Button>
+      <Button onClick={fetchLatestArticles}>重试</Button>
     </div>
   );
 
@@ -143,7 +138,7 @@ const BlogSection: React.FC = () => {
                   key={post.id}
                   post={post}
                   index={index}
-                  onTagClick={() => { }}
+                  onTagClick={() => {}}
                 />
               ))}
             </motion.div>
@@ -163,4 +158,4 @@ const BlogSection: React.FC = () => {
   );
 };
 
-export default BlogSection; 
+export default BlogSection;

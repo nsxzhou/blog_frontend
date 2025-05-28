@@ -12,14 +12,13 @@ import type {
   CreateArticleReq,
   CreateArticleRes,
   SearchArticleQuery,
-  SearchArticleRes,
+  UnifiedArticleQuery,
   UpdateArticleAccessReq,
   UpdateArticleAccessRes,
   UpdateArticleReq,
   UpdateArticleRes,
   UpdateArticleStatusReq,
   UpdateArticleStatusRes,
-  ArticleListItem,
 } from './type';
 
 // 创建文章
@@ -104,26 +103,42 @@ export function UpdateArticleAccess(id: number, data: UpdateArticleAccessReq) {
   );
 }
 
-// 搜索文章
-export function SearchArticles(params?: SearchArticleQuery) {
-  return request<baseResponse<SearchArticleRes>>('/api/articles/search', {
+// 统一文章获取接口 - 替换搜索文章、热门文章、最新文章
+export function GetArticles(params?: UnifiedArticleQuery) {
+  return request<baseResponse<ArticleListRes>>('/api/articles', {
     method: 'GET',
     params,
   });
 }
 
-// 获取热门文章
-export function GetHotArticles() {
-  return request<baseResponse<ArticleListRes>>('/api/articles/hot', {
-    method: 'GET',
+// 获取热门文章 - 使用统一接口
+export function GetHotArticles(params?: { page?: number; page_size?: number }) {
+  return GetArticles({
+    ...params,
+    sort_by: 'view_count',
+    order: 'desc',
+    status: 'published',
+    access_type: 'public',
   });
 }
 
-// 获取最新文章
-export function GetLatestArticles() {
-  return request<baseResponse<Array<ArticleListItem>>>('/api/articles/latest', {
-    method: 'GET',
+// 获取最新文章 - 使用统一接口
+export function GetLatestArticles(params?: {
+  page?: number;
+  page_size?: number;
+}) {
+  return GetArticles({
+    ...params,
+    sort_by: 'published_at',
+    order: 'desc',
+    status: 'published',
+    access_type: 'public',
   });
+}
+
+// 搜索文章 - 使用统一接口（保持向后兼容）
+export function SearchArticles(params?: SearchArticleQuery) {
+  return GetArticles(params);
 }
 
 // 根据标签获取文章

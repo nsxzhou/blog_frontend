@@ -65,7 +65,7 @@ export interface GetImageListReq {
 
 // 获取图片列表响应数据
 export interface GetImageListRes {
-  items: ImageInfo[];
+  list: ImageInfo[];
   total: number;
 }
 
