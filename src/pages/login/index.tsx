@@ -1,14 +1,6 @@
-import {
-  containerVariants,
-  delayedEntry,
-  fadeInDown,
-  fadeInUp,
-  floatingAnimation,
-  hoverScaleSmall,
-  scaleIn,
-} from '@/constants/animations';
+import { delayedEntry, hoverScaleSmall } from '@/constants/animations';
 import { useNavigate } from '@umijs/max';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { LoginForm, RegisterForm } from './components';
 
@@ -27,35 +19,22 @@ const AuthPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8 relative overflow-hidden">
       {/* 简化的背景装饰 - 减少动画元素提升性能 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-80 h-80 bg-blue-100 rounded-full opacity-30 blur-3xl"
-          {...floatingAnimation}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-100 rounded-full opacity-25 blur-3xl"
-          {...floatingAnimation}
-        />
+        <motion.div className="absolute top-1/4 left-1/4 w-80 h-80 bg-blue-100 rounded-full opacity-30 blur-3xl" />
+        <motion.div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-100 rounded-full opacity-25 blur-3xl" />
       </div>
 
       {/* 主容器 */}
       <motion.div
-        variants={containerVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
         className="w-full max-w-md relative z-10"
       >
         {/* 卡片容器 */}
-        <motion.div
-          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/30"
-          {...scaleIn}
-        >
+        <motion.div className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 border border-white/30">
           {/* 头部标题 */}
-          <motion.div className="text-center mb-8" {...fadeInDown}>
-            <motion.div
-              key={isLogin ? 'login-title' : 'register-title'}
-              {...fadeInUp}
-            >
+          <motion.div className="text-center mb-8">
+            <motion.div key={isLogin ? 'login-title' : 'register-title'}>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {isLogin ? '欢迎回来' : '加入我们'}
               </h1>
@@ -65,28 +44,24 @@ const AuthPage: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* 表单区域 */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isLogin ? 'login' : 'register'}
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              {isLogin ? (
-                <LoginForm
-                  onSuccess={handleAuthSuccess}
-                  onSwitchToRegister={handleSwitchMode}
-                />
-              ) : (
-                <RegisterForm
-                  onSuccess={() => setIsLogin(true)}
-                  onSwitchToLogin={handleSwitchMode}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={isLogin ? 'login' : 'register'}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            {isLogin ? (
+              <LoginForm
+                onSuccess={handleAuthSuccess}
+                onSwitchToRegister={handleSwitchMode}
+              />
+            ) : (
+              <RegisterForm
+                onSuccess={() => setIsLogin(true)}
+                onSwitchToLogin={handleSwitchMode}
+              />
+            )}
+          </motion.div>
         </motion.div>
 
         {/* 底部装饰 - 简化动画 */}

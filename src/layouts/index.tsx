@@ -1,6 +1,7 @@
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuthSync } from '@/hooks/useAuthSync';
 import { getRouteAccess } from '@/utils/routeAccess';
-import { Outlet, useDispatch, useLocation, useModel } from '@umijs/max';
+import { Outlet, useLocation } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import StagewiseWrapper from '../components/StagewiseWrapper';
@@ -9,10 +10,9 @@ import { Footer, Header } from './components';
 const GlobalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const dispatch = useDispatch();
 
-  // 获取全局初始状态
-  const { initialState } = useModel('@@initialState');
+  // 使用优化的认证状态同步hook
+  const { currentUser } = useAuthSync();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -22,24 +22,21 @@ const GlobalLayout: React.FC = () => {
     setSidebarOpen(false);
   };
 
-  // 仅在首次加载且有initialState时同步到DVA
-  useEffect(() => {
-    if (initialState?.isLoggedIn && initialState?.currentUser) {
-      dispatch({
-        type: 'user/setUserInfo',
-        payload: {
-          currentUser: initialState.currentUser,
-          token: initialState.token,
-          refreshToken: initialState.refreshToken,
-          isLoggedIn: initialState.isLoggedIn,
-        },
-      });
-    }
-  }, [initialState?.isLoggedIn]); // 只依赖登录状态变化
-
   useEffect(() => {
     closeSidebar();
   }, [location.pathname]);
+
+  // 等待初始化完成再渲染
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">正在初始化...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative">

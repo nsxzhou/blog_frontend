@@ -1,19 +1,14 @@
 import type { LoginReq } from '@/api/user';
 import { Button } from '@/components/ui';
-import {
-  containerVariants,
-  fadeInUp,
-  hoverScale,
-  hoverScaleSmall,
-  itemVariants,
-} from '@/constants/animations';
+import { fadeInUp, hoverScale, hoverScaleSmall } from '@/constants/animations';
+import { useAuthSync } from '@/hooks/useAuthSync';
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
   LockOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { useDispatch, useSelector } from '@umijs/max';
+import { useDispatch } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
@@ -27,7 +22,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToRegister,
 }) => {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state: any) => state.user);
+  const { syncLoginState } = useAuthSync();
 
   const [formData, setFormData] = useState<LoginReq>({
     username: '',
@@ -64,13 +59,26 @@ const LoginForm: React.FC<LoginFormProps> = ({
       const result = (await dispatch({
         type: 'user/login',
         payload: formData,
-      })) as unknown as { success: boolean; data?: any };
+      })) as unknown as { success: boolean; data?: any; message?: string };
 
       if (result?.success) {
-        onSuccess();
+        await syncLoginState(result.data);
+
+        // 清空表单数据
+        setFormData({
+          username: '',
+          password: '',
+          remember: false,
+        });
+
+        setTimeout(() => {
+          onSuccess();
+        }, 100);
+      } else {
+        console.error('登录失败:', result?.message);
       }
     } catch (error) {
-      console.error('登录失败:', error);
+      console.error('登录异常:', error);
     }
   };
 
@@ -93,12 +101,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
     <motion.form
       onSubmit={handleSubmit}
       className="space-y-5"
-      variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {/* 用户名输入 */}
-      <motion.div variants={itemVariants}>
+      <motion.div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           用户名或邮箱
         </label>
@@ -131,7 +138,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </motion.div>
 
       {/* 密码输入 */}
-      <motion.div variants={itemVariants}>
+      <motion.div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           密码
         </label>
@@ -172,10 +179,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </motion.div>
 
       {/* 记住密码选项 */}
-      <motion.div
-        variants={itemVariants}
-        className="flex items-center justify-between"
-      >
+      <motion.div className="flex items-center justify-between">
         <label className="flex items-center">
           <motion.input
             type="checkbox"
@@ -196,19 +200,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </motion.div>
 
       {/* 登录按钮 */}
-      <motion.div variants={itemVariants}>
-        <Button
-          variant="primary"
-          type="submit"
-          disabled={loading}
-          className="w-full py-3"
-        >
-          {loading ? '登录中...' : '登录'}
+      <motion.div>
+        <Button variant="primary" type="submit" className="w-full py-3">
+          登录
         </Button>
       </motion.div>
 
       {/* 分割线 */}
-      <motion.div variants={itemVariants} className="relative my-6">
+      <motion.div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-200"></div>
         </div>
@@ -218,7 +217,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </motion.div>
 
       {/* 注册链接 */}
-      <motion.div variants={itemVariants} className="text-center">
+      <motion.div className="text-center">
         <span className="text-gray-600">还没有账户？</span>
         <motion.button
           type="button"

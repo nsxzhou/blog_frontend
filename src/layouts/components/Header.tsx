@@ -4,6 +4,7 @@ import {
   headerVariants,
   navItemVariants,
 } from '@/constants/animations';
+import { useAuthSync } from '@/hooks/useAuthSync';
 import {
   CloseOutlined,
   EditOutlined,
@@ -14,13 +15,7 @@ import {
   TwitterOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Link,
-  useDispatch,
-  useLocation,
-  useNavigate,
-  useSelector,
-} from '@umijs/max';
+import { Link, useDispatch, useLocation, useNavigate } from '@umijs/max';
 import { Input } from 'antd';
 import {
   AnimatePresence,
@@ -28,8 +23,9 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import UserSidebar from '../../components/ui/UserSidebar';
+
 interface HeaderProps {
   onMenuToggle: () => void;
 }
@@ -46,10 +42,11 @@ const Header: React.FC<HeaderProps> = () => {
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const location = useLocation();
   const { scrollY } = useScroll();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const currentUser = useSelector((state: any) => state.currentUser);
-  const isLoggedIn = useSelector((state: any) => state.isLoggedIn);
+  const dispatch = useDispatch();
+
+  // 使用 useAuthSync hook 获取统一的状态
+  const { currentUser, isLoggedIn, syncLogoutState } = useAuthSync();
 
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
@@ -62,6 +59,7 @@ const Header: React.FC<HeaderProps> = () => {
   const handleLogout = async () => {
     try {
       await dispatch({ type: 'user/logout' });
+      await syncLogoutState();
     } catch (error) {
       console.error('登出失败:', error);
     }

@@ -26,7 +26,7 @@ export interface LoginRes {
     access_token: string;
     refresh_token: string;
     expires_at: number;
-    user_info?: UserInfo;
+    user: UserInfo;
 }
 
 // 刷新令牌请求参数
