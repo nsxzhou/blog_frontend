@@ -18,9 +18,9 @@ import type {
   UpdateArticleReq,
   UpdateArticleRes,
   UpdateArticleStatusReq,
-  UpdateArticleStatusRes,       
+  UpdateArticleStatusRes,
+  ArticleListItem,
 } from './type';
-import { S } from 'node_modules/framer-motion/dist/types.d-CtuPurYT';
 
 // 创建文章
 export function CreateArticle(data: CreateArticleReq) {
@@ -121,7 +121,7 @@ export function GetHotArticles() {
 
 // 获取最新文章
 export function GetLatestArticles() {
-  return request<baseResponse<ArticleListRes>>('/api/articles/latest', {
+  return request<baseResponse<Array<ArticleListItem>>>('/api/articles/latest', {
     method: 'GET',
   });
 }

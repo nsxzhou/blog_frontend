@@ -222,12 +222,6 @@ const ImageDetailModal: React.FC<ImageDetailModalProps> = ({
                 删除
               </Button>
             </motion.div>
-            <Button
-              type="text"
-              icon={<CloseOutlined />}
-              onClick={onCancel}
-              className="text-gray-400 hover:text-gray-600"
-            />
           </div>
         </div>
 

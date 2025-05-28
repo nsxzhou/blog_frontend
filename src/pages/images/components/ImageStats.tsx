@@ -59,7 +59,6 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
       icon: PictureOutlined,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      change: '+12%',
       changeColor: 'text-green-600',
     },
     {
@@ -68,7 +67,6 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
       icon: CloudUploadOutlined,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
-      change: '+8%',
       changeColor: 'text-green-600',
     },
     {
@@ -84,7 +82,6 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
       icon: BarChartOutlined,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
-      change: '+15%',
       changeColor: 'text-green-600',
     },
     {
@@ -98,7 +95,6 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
       icon: DatabaseOutlined,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      change: 'stable',
       changeColor: 'text-gray-600',
     },
   ];
@@ -127,12 +123,6 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
                   {(card as any).subtitle}
                 </p>
               )}
-              <div className="flex items-center">
-                <span className={`text-xs ${card.changeColor} font-medium`}>
-                  {card.change}
-                </span>
-                <span className="text-xs text-gray-500 ml-1">vs 上月</span>
-              </div>
             </div>
             <div className={`p-3 rounded-lg ${card.bgColor} ml-3`}>
               <card.icon className={`text-xl ${card.color}`} />

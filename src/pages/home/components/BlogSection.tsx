@@ -1,94 +1,115 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { Button } from '@/components/ui';
 import BlogCard from '@/pages/blog/components/BlogCard';
 import { itemVariants, containerVariants } from '@/constants/animations';
+import { GetLatestArticles, type ArticleListItem } from '@/api/article';
 import type { BlogPost } from '@/pages/blog/components/types';
+import { Spin, Empty, message } from 'antd';
+
+/**
+ * 将API返回的文章数据转换为BlogPost格式
+ */
+const transformArticleToPost = (article: ArticleListItem): BlogPost => {
+  return {
+    id: article.id,
+    title: article.title,
+    excerpt: article.summary,
+    image: article.cover_image || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop',
+    date: article.published_at,
+    views: article.view_count,
+    likes: article.like_count,
+    comments: article.comment_count,
+    tags: article.tags.map(tag => tag.name),
+    category: article.category_name,
+    author: {
+      name: article.author_name,
+      avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`
+    },
+    featured: article.is_top === 1
+  };
+};
 
 const BlogSection: React.FC = () => {
-  const blogPosts: BlogPost[] = [
-    {
-      id: 1,
-      title: "深入理解React 18的并发特性",
-      excerpt: "探索React 18引入的并发渲染、Suspense边界和自动批处理等革命性特性，以及它们如何改变我们构建用户界面的方式。",
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=400&fit=crop",
-      date: "2024-01-15",
-      views: 1234,
-      likes: 89,
-      comments: 23,
-      tags: ["React", "JavaScript", "前端"],
-      category: "前端开发",
-      author: { name: "张三", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" },
-      featured: true
-    },
-    {
-      id: 2,
-      title: "现代CSS布局技术详解",
-      excerpt: "从Flexbox到Grid，全面了解现代CSS布局技术的最佳实践和使用场景。",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
-      date: "2024-01-12",
-      views: 2156,
-      likes: 143,
-      comments: 31,
-      tags: ["CSS", "布局", "设计"],
-      category: "前端开发",
-      author: { name: "李四", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" }
-    },
-    {
-      id: 3,
-      title: "TypeScript 5.0新特性解析",
-      excerpt: "TypeScript 5.0带来了哪些激动人心的新特性？深入了解最新的开发体验。",
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop",
-      date: "2024-01-10",
-      views: 1876,
-      likes: 156,
-      comments: 45,
-      tags: ["TypeScript", "JavaScript", "开发工具"],
-      category: "编程语言",
-      author: { name: "王五", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" }
-    },
-    {
-      id: 4,
-      title: "微前端架构实战指南",
-      excerpt: "如何在大型项目中实施微前端架构，解决团队协作和技术栈统一的难题。",
-      image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=600&h=400&fit=crop",
-      date: "2024-01-08",
-      views: 987,
-      likes: 67,
-      comments: 19,
-      tags: ["微前端", "架构", "工程化"],
-      category: "系统架构",
-      author: { name: "赵六", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" }
-    },
-    {
-      id: 5,
-      title: "Node.js性能优化最佳实践",
-      excerpt: "从内存管理到异步编程，全面提升Node.js应用的性能表现。",
-      image: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&h=400&fit=crop",
-      date: "2024-01-05",
-      views: 1543,
-      likes: 102,
-      comments: 28,
-      tags: ["Node.js", "性能优化", "后端"],
-      category: "后端开发",
-      author: { name: "孙七", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" }
-    },
-    {
-      id: 6,
-      title: "Web3开发入门指南",
-      excerpt: "从智能合约到DApp开发，带你走进Web3的神奇世界。",
-      image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop",
-      date: "2024-01-03",
-      views: 2234,
-      likes: 189,
-      comments: 52,
-      tags: ["Web3", "区块链", "智能合约"],
-      category: "新兴技术",
-      author: { name: "周八", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" },
-      featured: true
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * 获取最新文章数据
+   */
+  const fetchLatestArticles = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await GetLatestArticles();
+
+      console.log('API响应:', response); // 调试日志
+
+      if (response.code === 0 && response.data) {
+        // 检查数据结构并安全访问
+        const items = response.data || [];
+        console.log('文章列表:', items); // 调试日志
+
+        if (items.length > 0) {
+          // 只显示前6篇文章
+          const articles = items.slice(0, 6);
+          const transformedPosts = articles.map(transformArticleToPost);
+          setBlogPosts(transformedPosts);
+        } else {
+          setBlogPosts([]);
+        }
+      } else {
+        throw new Error(response.message || '获取文章列表失败');
+      }
+    } catch (err) {
+      console.error('获取最新文章失败:', err);
+      setError('获取文章列表失败，请稍后重试');
+      message.error('获取文章列表失败，请稍后重试');
+      setBlogPosts([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchLatestArticles();
+  }, []);
+
+  /**
+   * 渲染加载状态
+   */
+  const renderLoading = () => (
+    <div className="flex justify-center items-center py-20">
+      <Spin size="large" />
+    </div>
+  );
+
+  /**
+   * 渲染空状态
+   */
+  const renderEmpty = () => (
+    <div className="flex justify-center items-center py-20">
+      <Empty
+        description="暂无文章"
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+      />
+    </div>
+  );
+
+  /**
+   * 渲染错误状态
+   */
+  const renderError = () => (
+    <div className="text-center py-20">
+      <p className="text-gray-500 mb-4">{error}</p>
+      <Button onClick={fetchLatestArticles}>
+        重试
+      </Button>
+    </div>
+  );
 
   return (
     <motion.section variants={itemVariants} className="py-20 px-4">
@@ -102,31 +123,41 @@ const BlogSection: React.FC = () => {
           </p>
         </motion.div>
 
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-        >
-          {blogPosts.map((post, index) => (
-            <BlogCard
-              key={post.id}
-              post={post}
-              index={index}
-              onTagClick={() => { }}
-            />
-          ))}
-        </motion.div>
+        {loading && renderLoading()}
 
-        <motion.div variants={itemVariants} className="text-center mt-12">
-          <Button variant="primary" size="lg">
-            <span className="flex items-center gap-2">
-              查看全部文章
-              <ArrowRightOutlined />
-            </span>
-          </Button>
-        </motion.div>
+        {!loading && error && renderError()}
+
+        {!loading && !error && blogPosts.length === 0 && renderEmpty()}
+
+        {!loading && !error && blogPosts.length > 0 && (
+          <>
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              {blogPosts.map((post, index) => (
+                <BlogCard
+                  key={post.id}
+                  post={post}
+                  index={index}
+                  onTagClick={() => { }}
+                />
+              ))}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="text-center mt-12">
+              <Button variant="primary" size="lg">
+                <span className="flex items-center gap-2">
+                  查看全部文章
+                  <ArrowRightOutlined />
+                </span>
+              </Button>
+            </motion.div>
+          </>
+        )}
       </div>
     </motion.section>
   );

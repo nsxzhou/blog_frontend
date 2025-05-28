@@ -24,6 +24,10 @@ export default defineConfig({
       component: '@/pages/my-articles',
     },
     {
+      path: '/articles',
+      component: '@/pages/articles',
+    },
+    {
       path: '/login',
       component: '@/pages/login',
     },
@@ -41,11 +45,11 @@ export default defineConfig({
     },
     {
       path: '/categories',
-      component: '@/pages/category',
+      component: '@/pages/categories',
     },
     {
       path: '/tags',
-      component: '@/pages/tag',
+      component: '@/pages/tags',
     },
     {
       path: '/images',
@@ -60,6 +64,10 @@ export default defineConfig({
   dva: {},
   proxy: {
     '/api': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '/uploads': {
       target: 'http://localhost:8080',
       changeOrigin: true,
     },

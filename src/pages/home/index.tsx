@@ -20,9 +20,6 @@ const HomePage: React.FC = () => {
       {/* Hero区域 */}
       <HeroSection />
 
-      {/* 特色功能 */}
-      <FeaturesSection />
-
       {/* 最新文章 */}
       <BlogSection />
 

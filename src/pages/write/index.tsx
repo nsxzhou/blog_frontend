@@ -7,6 +7,17 @@ import { history, useSearchParams } from '@umijs/max';
 import { message, Modal } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+// 导入真正的API接口
+import {
+  CreateArticle,
+  UpdateArticle,
+  GetArticleDetail,
+  type CreateArticleReq,
+  type UpdateArticleReq,
+  type Article
+} from '@/api/article';
+import { GetCategoryList, type CategoryInfo } from '@/api/category';
+import { GetTagList, CreateTag, type TagInfo } from '@/api/tag';
 import {
   ArticleSettings,
   WriteEditor,
@@ -15,47 +26,6 @@ import {
 } from './components';
 import './style.css';
 import type { ArticleData } from './types';
-
-// 预设分类
-const categories = [
-  '前端开发',
-  '后端开发',
-  '移动开发',
-  '数据库',
-  '系统架构',
-  '编程语言',
-  '开发工具',
-  '算法与数据结构',
-  '人工智能',
-  '区块链',
-  '新兴技术',
-  '项目管理',
-  '职业发展',
-];
-
-// 常用标签
-const popularTags = [
-  'React',
-  'Vue',
-  'Angular',
-  'JavaScript',
-  'TypeScript',
-  'Node.js',
-  'Python',
-  'Java',
-  'Go',
-  'CSS',
-  'HTML',
-  'Webpack',
-  'Vite',
-  'Git',
-  'Docker',
-  '微服务',
-  '云计算',
-  '性能优化',
-  '架构设计',
-  'UI设计',
-];
 
 const WritePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -68,6 +38,7 @@ const WritePage: React.FC = () => {
       '# 开始写作\n\n在这里开始你的创作...\n\n## 小贴士\n\n- 使用Markdown语法来格式化文章\n- 支持代码高亮\n- 支持表格、列表等格式\n\n```javascript\nconsole.log("Hello, World!");\n```\n\n> 好的开始是成功的一半',
     tags: [],
     category: '',
+    coverImage: '',
     isDraft: true,
   });
 
@@ -77,28 +48,88 @@ const WritePage: React.FC = () => {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [newTag, setNewTag] = useState('');
 
-  // 从URL参数加载文章数据（编辑模式）
-  useEffect(() => {
-    if (editId) {
-      // 模拟加载文章数据
-      setLoading(true);
-      setTimeout(() => {
-        // 这里应该是API调用
-        const mockData = {
-          title: 'React 18 并发特性详解',
-          excerpt:
-            '探索React 18引入的并发渲染、Suspense边界和自动批处理等革命性特性...',
-          content:
-            '# React 18 并发特性详解\n\nReact 18 带来了许多激动人心的新特性...',
-          tags: ['React', 'JavaScript', '前端'],
-          category: '前端开发',
-          isDraft: false,
-        };
-        setArticleData(mockData);
-        setLoading(false);
-      }, 1000);
+  // 分类和标签数据
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
+  const [popularTags, setPopularTags] = useState<TagInfo[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [tagsLoading, setTagsLoading] = useState(false);
+
+  // 当前编辑的文章ID
+  const [currentArticleId, setCurrentArticleId] = useState<number | null>(null);
+
+  // 加载分类列表
+  const loadCategories = useCallback(async () => {
+    setCategoriesLoading(true);
+    try {
+      const response = await GetCategoryList({ page: 1, page_size: 100 });
+      if (response.code === 0) {
+        setCategories(response.data.list);
+      }
+    } catch (error) {
+      console.error('加载分类失败:', error);
+      message.error('加载分类失败');
+    } finally {
+      setCategoriesLoading(false);
     }
-  }, [editId]);
+  }, []);
+
+  // 加载标签列表
+  const loadTags = useCallback(async () => {
+    setTagsLoading(true);
+    try {
+      const response = await GetTagList({ page: 1, page_size: 100 });
+      if (response.code === 0) {
+        setPopularTags(response.data.list);
+      }
+    } catch (error) {
+      console.error('加载标签失败:', error);
+      message.error('加载标签失败');
+    } finally {
+      setTagsLoading(false);
+    }
+  }, []);
+
+  // 从URL参数加载文章数据（编辑模式）
+  const loadArticleData = useCallback(async (id: string) => {
+    setLoading(true);
+    try {
+      const response = await GetArticleDetail(parseInt(id));
+      if (response.code === 0) {
+        const article = response.data;
+        setArticleData({
+          title: article.title,
+          excerpt: article.summary,
+          content: article.content,
+          tags: article.tags.map(tag => tag.name),
+          category: article.category_name,
+          coverImage: article.cover_image,
+          isDraft: article.status === 'draft',
+        });
+        setCurrentArticleId(article.id);
+      } else {
+        message.error('加载文章失败');
+        history.back();
+      }
+    } catch (error) {
+      console.error('加载文章失败:', error);
+      message.error('加载文章失败');
+      history.back();
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // 组件初始化
+  useEffect(() => {
+    // 加载基础数据
+    loadCategories();
+    loadTags();
+
+    // 如果是编辑模式，加载文章数据
+    if (editId) {
+      loadArticleData(editId);
+    }
+  }, [editId, loadCategories, loadTags, loadArticleData]);
 
   // 自动保存
   useEffect(() => {
@@ -117,15 +148,35 @@ const WritePage: React.FC = () => {
   }, []);
 
   // 添加标签
-  const handleAddTag = useCallback(() => {
+  const handleAddTag = useCallback(async () => {
     if (newTag.trim() && !articleData.tags.includes(newTag.trim())) {
-      setArticleData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()],
-      }));
-      setNewTag('');
+      try {
+        // 如果标签不存在，先创建标签
+        const existingTag = popularTags.find(tag => tag.name === newTag.trim());
+        if (!existingTag) {
+          const createTagResponse = await CreateTag({ name: newTag.trim() });
+          if (createTagResponse.code === 0) {
+            // 重新加载标签列表
+            await loadTags();
+          }
+        }
+
+        setArticleData((prev) => ({
+          ...prev,
+          tags: [...prev.tags, newTag.trim()],
+        }));
+        setNewTag('');
+      } catch (error) {
+        console.error('创建标签失败:', error);
+        // 即使创建标签失败，也允许添加到本地
+        setArticleData((prev) => ({
+          ...prev,
+          tags: [...prev.tags, newTag.trim()],
+        }));
+        setNewTag('');
+      }
     }
-  }, [newTag, articleData.tags]);
+  }, [newTag, articleData.tags, popularTags, loadTags]);
 
   // 删除标签
   const handleRemoveTag = useCallback((tagToRemove: string) => {
@@ -144,13 +195,45 @@ const WritePage: React.FC = () => {
 
       setSaving(true);
       try {
-        // 模拟API调用
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        // 查找分类ID
+        const category = categories.find(cat => cat.name === articleData.category);
+        const categoryId = category?.id || 1; // 默认分类ID
+
+        // 查找标签ID
+        const tagIds = articleData.tags.map(tagName => {
+          const tag = popularTags.find(t => t.name === tagName);
+          return tag?.id || 0; // 如果找不到标签，使用0
+        }).filter(id => id > 0);
+
+        const articlePayload: CreateArticleReq | UpdateArticleReq = {
+          title: articleData.title,
+          content: articleData.content,
+          summary: articleData.excerpt,
+          cover_image: articleData.coverImage,
+          status: 'draft',
+          access_type: 'public',
+          is_original: 1,
+          is_top: 0,
+          category_id: categoryId,
+          tag_ids: tagIds,
+        };
+
+        if (currentArticleId) {
+          // 更新现有文章
+          await UpdateArticle(currentArticleId, articlePayload);
+        } else {
+          // 创建新文章
+          const response = await CreateArticle(articlePayload as CreateArticleReq);
+          if (response.code === 0) {
+            setCurrentArticleId(response.data.article_id);
+          }
+        }
 
         if (!isAutoSave) {
           message.success('草稿保存成功');
         }
       } catch (error) {
+        console.error('保存草稿失败:', error);
         if (!isAutoSave) {
           message.error('保存失败，请重试');
         }
@@ -158,7 +241,7 @@ const WritePage: React.FC = () => {
         setSaving(false);
       }
     },
-    [articleData],
+    [articleData, categories, popularTags, currentArticleId],
   );
 
   // 发布文章
@@ -178,17 +261,54 @@ const WritePage: React.FC = () => {
 
     setLoading(true);
     try {
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 查找分类ID
+      const category = categories.find(cat => cat.name === articleData.category);
+      const categoryId = category?.id;
+
+      if (!categoryId) {
+        message.error('选择的分类不存在');
+        return;
+      }
+
+      // 查找标签ID
+      const tagIds = articleData.tags.map(tagName => {
+        const tag = popularTags.find(t => t.name === tagName);
+        return tag?.id || 0;
+      }).filter(id => id > 0);
+
+      const articlePayload: CreateArticleReq | UpdateArticleReq = {
+        title: articleData.title,
+        content: articleData.content,
+        summary: articleData.excerpt,
+        cover_image: articleData.coverImage,
+        status: 'published',
+        access_type: 'public',
+        is_original: 1,
+        is_top: 0,
+        category_id: categoryId,
+        tag_ids: tagIds,
+      };
+
+      if (currentArticleId) {
+        // 更新现有文章为发布状态
+        await UpdateArticle(currentArticleId, articlePayload);
+      } else {
+        // 创建并发布新文章
+        const response = await CreateArticle(articlePayload as CreateArticleReq);
+        if (response.code === 0) {
+          setCurrentArticleId(response.data.article_id);
+        }
+      }
 
       message.success('文章发布成功！');
       history.push('/my-articles');
     } catch (error) {
+      console.error('发布文章失败:', error);
       message.error('发布失败，请重试');
     } finally {
       setLoading(false);
     }
-  }, [articleData]);
+  }, [articleData, categories, popularTags, currentArticleId]);
 
   // 返回上一页
   const handleBack = useCallback(() => {
@@ -280,8 +400,8 @@ const WritePage: React.FC = () => {
               tags: articleData.tags,
             }}
             newTag={newTag}
-            categories={categories}
-            popularTags={popularTags}
+            categories={categories.map(cat => cat.name)}
+            popularTags={popularTags.map(tag => tag.name)}
             onDataChange={(data: Partial<ArticleData>) =>
               setArticleData((prev) => ({ ...prev, ...data }))
             }

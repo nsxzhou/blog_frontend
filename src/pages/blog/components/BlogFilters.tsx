@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  CalendarOutlined,
-  EyeOutlined,
-  HeartOutlined,
+  AppstoreOutlined,
+  ClockCircleOutlined,
+  FireOutlined,
   TagOutlined,
 } from '@ant-design/icons';
 import { itemVariants, activeButtonVariants, hoverScale, hoverScaleSmall } from '@/constants/animations';
@@ -30,9 +30,9 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
   onSortChange,
 }) => {
   const sortOptions = [
-    { key: 'date', label: '最新发布', icon: <CalendarOutlined /> },
-    { key: 'views', label: '最多阅读', icon: <EyeOutlined /> },
-    { key: 'likes', label: '最多点赞', icon: <HeartOutlined /> }
+    { key: 'all', label: '全部文章', icon: <AppstoreOutlined /> },
+    { key: 'latest', label: '最新文章', icon: <ClockCircleOutlined /> },
+    { key: 'hot', label: '热门文章', icon: <FireOutlined /> }
   ];
 
   return (
@@ -61,8 +61,8 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
             key={tag}
             onClick={() => onTagToggle(tag)}
             className={`px-3 py-1 text-xs rounded-full border transition-all duration-200 ${selectedTags.includes(tag)
-                ? 'bg-blue-100 border-blue-300 text-blue-700'
-                : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+              ? 'bg-blue-100 border-blue-300 text-blue-700'
+              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
               }`}
             {...hoverScaleSmall}
           >
@@ -79,8 +79,8 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
             key={sort.key}
             onClick={() => onSortChange(sort.key)}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${sortBy === sort.key
-                ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                : 'text-gray-600 hover:bg-gray-50'
+              ? 'bg-blue-100 text-blue-700 border border-blue-200'
+              : 'text-gray-600 hover:bg-gray-50'
               }`}
             {...hoverScale}
           >
