@@ -3,12 +3,11 @@ import { request } from '@umijs/max';
 import type {
   CreateCategoryReq,
   CreateCategoryRes,
-  DeleteCategoryRes,
   GetCategoryDetailRes,
   GetCategoryListReq,
   GetCategoryListRes,
-  GetHotCategoriesRes,
   UpdateCategoryReq,
+  GetHotCategoryRes,
   UpdateCategoryRes,
 } from './type';
 
@@ -30,7 +29,7 @@ export function UpdateCategory(id: number, data: UpdateCategoryReq) {
 
 // 删除分类
 export function DeleteCategory(id: number) {
-  return request<baseResponse<DeleteCategoryRes>>(`/api/categories/${id}`, {
+  return request<baseResponse<string>>(`/api/categories/${id}`, {
     method: 'DELETE',
   });
 }
@@ -52,7 +51,7 @@ export function GetCategoryList(params?: GetCategoryListReq) {
 
 // 获取热门分类
 export function GetHotCategories() {
-  return request<baseResponse<GetHotCategoriesRes>>('/api/categories/hot', {
+  return request<baseResponse<GetHotCategoryRes>>('/api/categories/hot', {
     method: 'GET',
   });
 }

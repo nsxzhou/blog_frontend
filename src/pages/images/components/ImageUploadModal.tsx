@@ -209,13 +209,11 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               className="w-full"
               disabled={uploading}
             >
-              {USAGE_TYPES.filter((type) => type.value !== 'all').map(
-                (type) => (
-                  <Select.Option key={type.value} value={type.value}>
-                    {type.label}
-                  </Select.Option>
-                ),
-              )}
+              {USAGE_TYPES.map((type) => (
+                <Select.Option key={type.value} value={type.value}>
+                  {type.label}
+                </Select.Option>
+              ))}
             </Select>
           </div>
           <div>
@@ -228,13 +226,11 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               className="w-full"
               disabled={uploading}
             >
-              {STORAGE_TYPES.filter((type) => type.value !== 'all').map(
-                (type) => (
-                  <Select.Option key={type.value} value={type.value}>
-                    {type.label}
-                  </Select.Option>
-                ),
-              )}
+              {STORAGE_TYPES.map((type) => (
+                <Select.Option key={type.value} value={type.value}>
+                  {type.label}
+                </Select.Option>
+              ))}
             </Select>
           </div>
         </div>

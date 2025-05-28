@@ -1,15 +1,20 @@
 // 图片信息接口
 export interface ImageInfo {
   id: number;
-  filename: string;
-  original_name: string;
   url: string;
+  path: string;
+  filename: string;
   size: number;
+  width: number;
+  height: number;
   mime_type: string;
-  usage_type: string; // cover, avatar, content 等
-  article_id?: number;
-  storage_type: string; // cos, local 等
-  is_external: number; // 0: 本地, 1: 外部
+  user_id: number;
+  user_name: string;
+  user_avatar: string;
+  usage_type: string;
+  article_id: number;
+  is_external: number;
+  storage_type: string;
   created_at: string;
   updated_at: string;
 }
@@ -25,17 +30,15 @@ export interface UploadImageReq {
 // 上传图片响应数据
 export interface UploadImageRes {
   id: number;
-  filename: string;
-  original_name: string;
   url: string;
+  path: string;
+  filename: string;
   size: number;
+  width: number;
+  height: number;
   mime_type: string;
   usage_type: string;
-  article_id?: number;
   storage_type: string;
-  is_external: number;
-  created_at: string;
-  updated_at: string;
 }
 
 // 更新图片信息请求参数
@@ -44,54 +47,9 @@ export interface UpdateImageReq {
   article_id?: number;
 }
 
-// 更新图片信息响应数据
-export interface UpdateImageRes {
-  id: number;
-  filename: string;
-  original_name: string;
-  url: string;
-  size: number;
-  mime_type: string;
-  usage_type: string;
-  article_id?: number;
-  storage_type: string;
-  is_external: number;
-  created_at: string;
-  updated_at: string;
-}
-
-// 删除图片响应数据
-export interface DeleteImageRes {
-  success: boolean;
-  message?: string;
-}
-
 // 批量删除图片请求参数
 export interface BatchDeleteImageReq {
   image_ids: number[];
-}
-
-// 批量删除图片响应数据
-export interface BatchDeleteImageRes {
-  success: boolean;
-  deleted_count: number;
-  message?: string;
-}
-
-// 获取图片详情响应数据
-export interface GetImageDetailRes {
-  id: number;
-  filename: string;
-  original_name: string;
-  url: string;
-  size: number;
-  mime_type: string;
-  usage_type: string;
-  article_id?: number;
-  storage_type: string;
-  is_external: number;
-  created_at: string;
-  updated_at: string;
 }
 
 // 获取图片列表请求参数
@@ -105,31 +63,20 @@ export interface GetImageListReq {
   usage_type?: string;
 }
 
-// 分页信息接口
-export interface PaginationInfo {
-  current_page: number;
-  per_page: number;
-  total: number;
-  total_pages: number;
-}
-
 // 获取图片列表响应数据
 export interface GetImageListRes {
-  images: ImageInfo[];
-  pagination: PaginationInfo;
+  items: ImageInfo[];
+  total: number;
 }
 
 // 存储配置信息
 export interface StorageConfig {
-  storage_type: string;
+  local_enabled: boolean;
+  cos_enabled: boolean;
+  default_storage: string;
   max_file_size: number;
-  allowed_extensions: string[];
-  upload_path: string;
-}
-
-// 获取存储配置响应数据
-export interface GetStorageConfigRes {
-  configs: StorageConfig[];
+  allowed_types: string[];
+  local_upload_path: string;
 }
 
 // 根据类型获取图片请求参数
@@ -159,16 +106,18 @@ export interface GetImagesByArticleReq {
 export interface ImageStatistics {
   total_images: number;
   total_size: number;
-  by_usage_type: Record<string, number>;
-  by_storage_type: Record<string, number>;
-  by_month: Array<{
-    month: string;
-    count: number;
-    size: number;
-  }>;
-}
-
-// 获取图片统计响应数据
-export interface GetImageStatisticsRes {
-  statistics: ImageStatistics;
+  local_images: number;
+  cos_images: number;
+  avatar_images: number;
+  cover_images: number;
+  content_images: number;
+  daily_stats: [
+    {
+      date: string;
+      count: number;
+      size: number;
+      local: number;
+      cos: number;
+    },
+  ];
 }

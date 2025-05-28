@@ -89,19 +89,15 @@ export interface UploadProgress {
 
 // 使用类型选项
 export const USAGE_TYPES = [
-  { value: 'all', label: '全部类型' },
   { value: 'cover', label: '封面图' },
   { value: 'avatar', label: '头像' },
   { value: 'content', label: '内容图片' },
-  { value: 'banner', label: '横幅' },
 ] as const;
 
 // 存储类型选项
 export const STORAGE_TYPES = [
-  { value: 'all', label: '全部存储' },
   { value: 'local', label: '本地存储' },
   { value: 'cos', label: '腾讯云COS' },
-  { value: 'oss', label: '阿里云OSS' },
 ] as const;
 
 // 排序选项

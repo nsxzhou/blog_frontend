@@ -46,18 +46,19 @@ const TagManagementPage: React.FC = () => {
         keyword: searchTerm || undefined,
         ...params,
       });
+      console.log(response);
 
       if (response.code === 0 && response.data) {
         // 确保 tags 数组存在
-        const tags = response.data.tags || [];
+        const tags = response.data.list || [];
         setTags(tags);
 
         // 安全地处理分页信息
-        if (response.data.pagination) {
+        if (response.data.total) {
           setPagination((prev) => ({
             ...prev,
-            total: response.data.pagination.total || 0,
-            current: response.data.pagination.current_page || 1,
+            total: response.data.total || 0,
+            current: params?.page || pagination.current,
           }));
         } else {
           // 如果没有分页信息，使用默认值
@@ -267,6 +268,9 @@ const TagManagementPage: React.FC = () => {
                       <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                         {tag.name}
                       </h3>
+                      <div className="text-xs text-blue-600 mb-1 font-medium">
+                        {tag.article_count} 篇文章
+                      </div>
                       <div className="text-xs text-gray-400 mb-3">
                         {new Date(tag.created_at).toLocaleDateString()}
                       </div>

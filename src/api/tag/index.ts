@@ -3,7 +3,6 @@ import { request } from '@umijs/max';
 import type {
   CreateTagReq,
   CreateTagRes,
-  DeleteTagRes,
   GetTagDetailRes,
   GetTagListReq,
   GetTagListRes,
@@ -29,7 +28,7 @@ export function UpdateTag(id: number, data: UpdateTagReq) {
 
 // 删除标签
 export function DeleteTag(id: number) {
-  return request<baseResponse<DeleteTagRes>>(`/api/tags/${id}`, {
+  return request<baseResponse<string>>(`/api/tags/${id}`, {
     method: 'DELETE',
   });
 }

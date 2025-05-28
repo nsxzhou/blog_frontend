@@ -8,20 +8,17 @@ import {
   CloseOutlined,
   EditOutlined,
   FileTextOutlined,
-  FolderOutlined,
   GithubOutlined,
   LinkedinOutlined,
   SearchOutlined,
-  TagsOutlined,
   TwitterOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import {
   Link,
-  history,
   useDispatch,
   useLocation,
-  useModel,
+  useNavigate,
   useSelector,
 } from '@umijs/max';
 import { Input } from 'antd';
@@ -50,21 +47,15 @@ const Header: React.FC<HeaderProps> = () => {
   const location = useLocation();
   const { scrollY } = useScroll();
   const dispatch = useDispatch();
-
-  // 从全局状态获取用户信息 - 优先使用 initialState
-  const { initialState } = useModel('@@initialState');
-  const { currentUser: userFromDva, isLoggedIn: isLoggedInFromDva } =
-    useSelector((state: any) => state.user);
-
-  // 使用 initialState 的用户信息，如果没有则使用 dva 的
-  const currentUser = initialState?.currentUser || userFromDva;
-  const isLoggedIn = initialState?.isLoggedIn || isLoggedInFromDva;
+  const navigate = useNavigate();
+  const currentUser = useSelector((state: any) => state.currentUser);
+  const isLoggedIn = useSelector((state: any) => state.isLoggedIn);
 
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
   // 处理登录
   const handleLogin = () => {
-    history.push('/login');
+    navigate('/login');
   };
 
   // 处理登出
@@ -110,10 +101,11 @@ const Header: React.FC<HeaderProps> = () => {
                 initial="idle"
                 whileHover="hover"
                 whileTap="tap"
-                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${location.pathname === item.key
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                  }`}
+                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${
+                  location.pathname === item.key
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                }`}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-500">{item.icon}</span>

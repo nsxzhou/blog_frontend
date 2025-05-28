@@ -55,7 +55,7 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
   const statsCards = [
     {
       title: '图片总数',
-      value: formatNumber(statistics.total_images),
+      value: formatNumber(statistics.total_images || 0),
       icon: PictureOutlined,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
@@ -64,7 +64,7 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
     },
     {
       title: '总存储空间',
-      value: formatFileSize(statistics.total_size),
+      value: formatFileSize(statistics.total_size || 0),
       icon: CloudUploadOutlined,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
@@ -72,10 +72,15 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
       changeColor: 'text-green-600',
     },
     {
-      title: '本月上传',
+      title: '使用分类',
       value: formatNumber(
-        statistics.by_month[statistics.by_month.length - 1]?.count || 0,
+        (statistics.avatar_images || 0) +
+          (statistics.cover_images || 0) +
+          (statistics.content_images || 0),
       ),
+      subtitle: `头像:${statistics.avatar_images || 0} · 封面:${
+        statistics.cover_images || 0
+      } · 内容:${statistics.content_images || 0}`,
       icon: BarChartOutlined,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
@@ -83,8 +88,13 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
       changeColor: 'text-green-600',
     },
     {
-      title: '存储类型',
-      value: Object.keys(statistics.by_storage_type).length.toString(),
+      title: '存储分布',
+      value: formatNumber(
+        (statistics.local_images || 0) + (statistics.cos_images || 0),
+      ),
+      subtitle: `本地:${statistics.local_images || 0} · COS:${
+        statistics.cos_images || 0
+      }`,
       icon: DatabaseOutlined,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
@@ -101,23 +111,30 @@ const ImageStats: React.FC<ImageStatsProps> = ({ statistics, loading }) => {
       {statsCards.map((card, index) => (
         <motion.div
           key={card.title}
-          variants={cardHover}
+          {...cardHover}
           className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-medium text-gray-600 mb-1">
                 {card.title}
               </p>
-              <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-              <div className="flex items-center mt-2">
+              <p className="text-2xl font-bold text-gray-900 mb-1">
+                {card.value}
+              </p>
+              {(card as any).subtitle && (
+                <p className="text-xs text-gray-500 mb-2 leading-relaxed">
+                  {(card as any).subtitle}
+                </p>
+              )}
+              <div className="flex items-center">
                 <span className={`text-xs ${card.changeColor} font-medium`}>
                   {card.change}
                 </span>
                 <span className="text-xs text-gray-500 ml-1">vs 上月</span>
               </div>
             </div>
-            <div className={`p-3 rounded-lg ${card.bgColor}`}>
+            <div className={`p-3 rounded-lg ${card.bgColor} ml-3`}>
               <card.icon className={`text-xl ${card.color}`} />
             </div>
           </div>

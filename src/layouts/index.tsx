@@ -1,10 +1,10 @@
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { getRouteAccess } from '@/utils/routeAccess';
 import { Outlet, useDispatch, useLocation, useModel } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import StagewiseWrapper from '../components/StagewiseWrapper';
 import { Footer, Header } from './components';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { getRouteAccess } from '@/utils/routeAccess';
 
 const GlobalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,7 +22,7 @@ const GlobalLayout: React.FC = () => {
     setSidebarOpen(false);
   };
 
-  // 同步全局初始状态到用户模型
+  // 仅在首次加载且有initialState时同步到DVA
   useEffect(() => {
     if (initialState?.isLoggedIn && initialState?.currentUser) {
       dispatch({
@@ -35,7 +35,7 @@ const GlobalLayout: React.FC = () => {
         },
       });
     }
-  }, [initialState, dispatch]);
+  }, [initialState?.isLoggedIn]); // 只依赖登录状态变化
 
   useEffect(() => {
     closeSidebar();

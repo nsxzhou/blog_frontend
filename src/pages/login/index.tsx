@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { history } from '@umijs/max';
-import { LoginForm, RegisterForm } from './components';
 import {
   containerVariants,
-  fadeInUp,
+  delayedEntry,
   fadeInDown,
+  fadeInUp,
   floatingAnimation,
   hoverScaleSmall,
   scaleIn,
-  delayedEntry
 } from '@/constants/animations';
+import { useNavigate } from '@umijs/max';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { LoginForm, RegisterForm } from './components';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
-
+  const navigate = useNavigate();
   const handleAuthSuccess = () => {
-    history.push('/');
+    navigate('/');
   };
 
   const handleSwitchMode = () => {
@@ -25,7 +25,6 @@ const AuthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8 relative overflow-hidden">
-
       {/* 简化的背景装饰 - 减少动画元素提升性能 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -52,10 +51,7 @@ const AuthPage: React.FC = () => {
           {...scaleIn}
         >
           {/* 头部标题 */}
-          <motion.div
-            className="text-center mb-8"
-            {...fadeInDown}
-          >
+          <motion.div className="text-center mb-8" {...fadeInDown}>
             <motion.div
               key={isLogin ? 'login-title' : 'register-title'}
               {...fadeInUp}

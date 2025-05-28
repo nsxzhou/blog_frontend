@@ -25,7 +25,7 @@ interface UserState {
   loading: boolean;
 }
 
-// 初始状态 
+// 初始状态
 const initialState: UserState = {
   currentUser: null,
   token: null,
@@ -134,6 +134,7 @@ export default {
           localStorage.removeItem('refresh_token');
         }
         yield put({ type: 'clearUserInfo' });
+
         console.error('登出API调用失败:', error);
         message.success('已退出登录');
       }

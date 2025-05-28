@@ -13,6 +13,18 @@ import { SORT_OPTIONS, STORAGE_TYPES, USAGE_TYPES } from './types';
 const { Search } = Input;
 const { RangePicker } = DatePicker;
 
+// 添加'all'选项的使用类型
+const USAGE_TYPES_WITH_ALL = [
+  { value: 'all', label: '全部类型' },
+  ...USAGE_TYPES,
+];
+
+// 添加'all'选项的存储类型
+const STORAGE_TYPES_WITH_ALL = [
+  { value: 'all', label: '全部存储' },
+  ...STORAGE_TYPES,
+];
+
 const ImageFilters: React.FC<ImageFiltersProps> = ({
   searchTerm,
   onSearchChange,
@@ -63,7 +75,7 @@ const ImageFilters: React.FC<ImageFiltersProps> = ({
             className="min-w-[120px]"
             placeholder="使用类型"
           >
-            {USAGE_TYPES.map((type) => (
+            {USAGE_TYPES_WITH_ALL.map((type) => (
               <Select.Option key={type.value} value={type.value}>
                 {type.label}
               </Select.Option>
@@ -78,7 +90,7 @@ const ImageFilters: React.FC<ImageFiltersProps> = ({
             className="min-w-[120px]"
             placeholder="存储类型"
           >
-            {STORAGE_TYPES.map((type) => (
+            {STORAGE_TYPES_WITH_ALL.map((type) => (
               <Select.Option key={type.value} value={type.value}>
                 {type.label}
               </Select.Option>
@@ -140,7 +152,7 @@ const ImageFilters: React.FC<ImageFiltersProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="flex items-center gap-2"
             >
-              <motion.div variants={hoverScale}>
+              <motion.div {...hoverScale}>
                 <Button
                   type="primary"
                   danger

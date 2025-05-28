@@ -63,15 +63,15 @@ const CategoryManagementPage: React.FC = () => {
 
       if (response.code === 0 && response.data) {
         // 确保 categories 数组存在
-        const categories = response.data.categories || [];
+        const categories = response.data.list || [];
         setCategories(categories);
 
         // 安全地处理分页信息
-        if (response.data.pagination) {
+        if (response.data.total) {
           setPagination((prev) => ({
             ...prev,
-            total: response.data.pagination.total || 0,
-            current: response.data.pagination.current_page || 1,
+            total: response.data.total || 0,
+            current: params?.page || pagination.current,
           }));
         } else {
           // 如果没有分页信息，使用默认值
@@ -182,6 +182,9 @@ const CategoryManagementPage: React.FC = () => {
     try {
       const response = await UpdateCategory(category.id, {
         is_visible: category.is_visible === 1 ? 0 : 1,
+        name: category.name,
+        description: category.description,
+        icon: category.icon,
       });
 
       if (response.code === 0) {

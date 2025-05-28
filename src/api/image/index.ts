@@ -2,17 +2,14 @@ import type { baseResponse } from '@/api';
 import { request } from '@umijs/max';
 import type {
   BatchDeleteImageReq,
-  BatchDeleteImageRes,
-  DeleteImageRes,
-  GetImageDetailRes,
   GetImageListReq,
   GetImageListRes,
   GetImagesByArticleReq,
   GetImagesByTypeReq,
-  GetImageStatisticsRes,
-  GetStorageConfigRes,
+  ImageInfo,
+  ImageStatistics,
+  StorageConfig,
   UpdateImageReq,
-  UpdateImageRes,
   UploadImageReq,
   UploadImageRes,
 } from './type';
@@ -30,15 +27,16 @@ export function UploadImage(data: UploadImageReq) {
   return request<baseResponse<UploadImageRes>>('/api/images/upload', {
     method: 'POST',
     data: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+    // 不要手动设置 Content-Type，让浏览器自动设置
+    // headers: {
+    //   'Content-Type': 'multipart/form-data',
+    // },
   });
 }
 
 // 更新图片信息
 export function UpdateImage(id: number, data: UpdateImageReq) {
-  return request<baseResponse<UpdateImageRes>>(`/api/images/${id}`, {
+  return request<baseResponse<string>>(`/api/images/${id}`, {
     method: 'PUT',
     data,
   });
@@ -46,25 +44,22 @@ export function UpdateImage(id: number, data: UpdateImageReq) {
 
 // 删除图片
 export function DeleteImage(id: number) {
-  return request<baseResponse<DeleteImageRes>>(`/api/images/${id}`, {
+  return request<baseResponse<string>>(`/api/images/${id}`, {
     method: 'DELETE',
   });
 }
 
 // 批量删除图片
 export function BatchDeleteImages(data: BatchDeleteImageReq) {
-  return request<baseResponse<BatchDeleteImageRes>>(
-    '/api/images/batch-delete',
-    {
-      method: 'POST',
-      data,
-    },
-  );
+  return request<baseResponse<string>>('/api/images/batch-delete', {
+    method: 'POST',
+    data,
+  });
 }
 
 // 获取图片详情
 export function GetImageDetail(id: number) {
-  return request<baseResponse<GetImageDetailRes>>(`/api/images/${id}`, {
+  return request<baseResponse<ImageInfo>>(`/api/images/${id}`, {
     method: 'GET',
   });
 }
@@ -79,7 +74,7 @@ export function GetImageList(params?: GetImageListReq) {
 
 // 获取存储配置
 export function GetStorageConfig() {
-  return request<baseResponse<GetStorageConfigRes>>('/api/images/config', {
+  return request<baseResponse<StorageConfig>>('/api/images/config', {
     method: 'GET',
   });
 }
@@ -111,12 +106,9 @@ export function GetImagesByArticle(
 
 // 获取图片统计数据
 export function GetImageStatistics() {
-  return request<baseResponse<GetImageStatisticsRes>>(
-    '/api/images/statistics',
-    {
-      method: 'GET',
-    },
-  );
+  return request<baseResponse<ImageStatistics>>('/api/images/statistics', {
+    method: 'GET',
+  });
 }
 
 // 统一导出图片相关的API和类型

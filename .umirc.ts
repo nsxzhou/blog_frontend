@@ -42,7 +42,7 @@ export default defineConfig({
     {
       path: '/categories',
       component: '@/pages/category',
-    },  
+    },
     {
       path: '/tags',
       component: '@/pages/tag',

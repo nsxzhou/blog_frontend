@@ -22,6 +22,7 @@
     "@umijs/max": "^4.4.11",
     "antd": "^5.4.0",
     "clsx": "^2.1.1",
+    "core-js": "^3.34.0",
     "framer-motion": "^12.12.2",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.1",
