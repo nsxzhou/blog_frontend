@@ -1,327 +1,200 @@
-﻿import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useParams } from '@umijs/max';
-import { Spin, Result, Button } from 'antd';
+﻿import { GetArticleDetail, GetArticles } from '@/api/article';
+import type {
+  Article as ApiArticle,
+  ArticleListItem,
+} from '@/api/article/type';
+import { GetCommentList } from '@/api/comment';
+import type { CommentItem as ApiComment } from '@/api/comment/type';
+import { containerVariants, pageVariants } from '@/constants/animations';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { history } from '@umijs/max';
+import { history, useParams, useRequest } from '@umijs/max';
+import { Button, message, Result, Spin } from 'antd';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import {
-  ArticleHeader,
   ArticleContent,
-  TableOfContents,
-  RelatedArticles,
+  ArticleHeader,
   CommentSection,
+  RelatedArticles,
+  TableOfContents,
 } from './components';
-import { pageVariants, containerVariants } from '@/constants/animations';
-import type { Article, RelatedArticle, Comment } from './types';
+import type { Article, Comment, RelatedArticle } from './types';
 
 const ArticleDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [article, setArticle] = useState<Article | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [tocVisible, setTocVisible] = useState(false);
 
-  // 模拟文章数据
-  const mockArticle: Article = {
-    id: parseInt(id || '1'),
-    title: "深入理解React 18的并发特性：从理论到实践",
-    content: `# React 18 并发特性详解
-
-React 18 带来了许多激动人心的新特性，其中最重要的就是并发特性。这些特性不仅提升了用户体验，还为开发者提供了更好的开发工具。
-
-## 什么是并发渲染？
-
-并发渲染是 React 18 引入的一个重要概念。它允许 React 在渲染过程中暂停、恢复或放弃渲染任务，从而保持应用的响应性。
-
-\`\`\`javascript
-// 使用 createRoot 启用并发特性
-import { createRoot } from 'react-dom/client';
-
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<App />);
-\`\`\`
-
-### 主要特性
-
-#### 1. 自动批处理 (Automatic Batching)
-
-React 18 扩展了批处理的范围，现在在 Promise、setTimeout 和原生事件处理器中的状态更新也会被自动批处理。
-
-\`\`\`javascript
-function App() {
-  const [count, setCount] = useState(0);
-  const [flag, setFlag] = useState(false);
-
-  function handleClick() {
-    // React 18 会自动批处理这些更新
-    setTimeout(() => {
-      setCount(c => c + 1);
-      setFlag(f => !f);
-      // 只会触发一次重新渲染
-    }, 1000);
-  }
-
-  return (
-    <div>
-      <button onClick={handleClick}>Next</button>
-      <h1 style={{ color: flag ? "blue" : "black" }}>{count}</h1>
-    </div>
+  // 获取文章详情
+  const {
+    data: articleResponse,
+    loading: articleLoading,
+    error: articleError,
+  } = useRequest(
+    () => {
+      if (!id) return Promise.reject(new Error('文章ID不能为空'));
+      return GetArticleDetail(parseInt(id));
+    },
+    {
+      refreshDeps: [id],
+      onError: (error) => {
+        console.error('获取文章详情失败:', error);
+        message.error('获取文章详情失败');
+      },
+    },
   );
-}
-\`\`\`
 
-#### 2. Suspense 改进
-
-React 18 对 Suspense 进行了重大改进，使其更加稳定和功能强大。
-
-\`\`\`javascript
-import { Suspense, lazy } from 'react';
-
-const LazyComponent = lazy(() => import('./LazyComponent'));
-
-function App() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LazyComponent />
-    </Suspense>
-  );
-}
-\`\`\`
-
-#### 3. useTransition Hook
-
-\`useTransition\` 允许你将某些状态更新标记为"过渡"，从而告诉 React 这些更新的优先级较低。
-
-\`\`\`javascript
-import { useState, useTransition } from 'react';
-
-function SearchResults() {
-  const [isPending, startTransition] = useTransition();
-  const [input, setInput] = useState('');
-  const [list, setList] = useState([]);
-
-  function handleChange(e) {
-    setInput(e.target.value);
-    
-    // 将列表更新标记为过渡
-    startTransition(() => {
-      setList(generateList(e.target.value));
-    });
-  }
-
-  return (
-    <div>
-      <input value={input} onChange={handleChange} />
-      {isPending && <div>Loading...</div>}
-      <ul>
-        {list.map(item => <li key={item}>{item}</li>)}
-      </ul>
-    </div>
-  );
-}
-\`\`\`
-
-## 实际应用场景
-
-### 大列表渲染优化
-
-对于包含大量数据的列表，并发特性可以显著提升用户体验：
-
-\`\`\`javascript
-function BigList({ items }) {
-  const [filter, setFilter] = useState('');
-  const [isPending, startTransition] = useTransition();
-  
-  const filteredItems = useMemo(() => {
-    return items.filter(item => 
-      item.name.toLowerCase().includes(filter.toLowerCase())
-    );
-  }, [items, filter]);
-
-  const handleFilterChange = (e) => {
-    const value = e.target.value;
-    setFilter(value);
-    
-    // 如果列表很大，使用 transition 来避免阻塞输入
-    if (items.length > 1000) {
-      startTransition(() => {
-        setFilter(value);
+  // 获取评论列表
+  const { data: commentsResponse, refresh: refreshComments } = useRequest(
+    () => {
+      if (!id) return Promise.reject(new Error('文章ID不能为空'));
+      return GetCommentList({
+        article_id: parseInt(id),
+        status: 'approved',
+        page: 1,
+        page_size: 50,
+        order_by: 'created_at',
+        order: 'desc',
       });
-    }
-  };
-
-  return (
-    <div>
-      <input 
-        value={filter} 
-        onChange={handleFilterChange}
-        placeholder="搜索..."
-      />
-      {isPending && <div>筛选中...</div>}
-      <ul>
-        {filteredItems.map(item => (
-          <li key={item.id}>{item.name}</li>
-        ))}
-      </ul>
-    </div>
+    },
+    {
+      refreshDeps: [id],
+      onError: (error) => {
+        console.error('获取评论列表失败:', error);
+        message.error('获取评论列表失败');
+      },
+    },
   );
-}
-\`\`\`
 
-## 性能对比
+  // 获取相关文章
+  const { data: relatedResponse } = useRequest(
+    async () => {
+      if (!articleResponse?.category_id) return null;
 
-让我们通过一个表格来看看 React 18 并发特性带来的性能提升：
+      // 获取同分类的其他文章作为相关文章
+      const response = await GetArticles({
+        category_id: articleResponse.category_id,
+        status: 'published',
+        access_type: 'public',
+        page: 1,
+        page_size: 5,
+        sort_by: 'view_count',
+        order: 'desc',
+      });
 
-| 特性 | React 17 | React 18 | 提升 |
-|------|----------|----------|------|
-| 批处理范围 | 仅事件处理器 | 所有更新 | 更少重渲染 |
-| 中断能力 | 无 | 支持 | 更好响应性 |
-| 优先级调度 | 基础 | 高级 | 更智能更新 |
-
-## 最佳实践
-
-1. **合理使用 useTransition**：只对非紧急的状态更新使用
-2. **Suspense 边界**：在合适的位置设置 Suspense 边界
-3. **渐进式迁移**：可以逐步将现有应用迁移到 React 18
-
-> **注意**：并发特性是向后兼容的，现有的 React 应用可以无缝升级到 React 18。
-
-## 总结
-
-React 18 的并发特性代表了 React 发展的一个重要里程碑。通过引入可中断的渲染、优先级调度和改进的 Suspense，React 18 为构建高性能、响应式的用户界面提供了强大的工具。
-
-这些特性不仅提升了用户体验，也为开发者提供了更多的控制权和灵活性。随着生态系统的不断发展，我们可以期待看到更多基于这些特性的创新应用。
-
----
-
-*本文深入探讨了 React 18 的核心并发特性，希望能帮助开发者更好地理解和应用这些新功能。*`,
-    excerpt: "探索React 18引入的并发渲染、Suspense边界和自动批处理等革命性特性，以及它们如何改变我们构建用户界面的方式。",
-    coverImage: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=1200&h=600&fit=crop",
-    author: {
-      name: "张三",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      bio: "前端架构师，React 专家"
-    },
-    publishDate: "2024-01-15",
-    readTime: 12,
-    views: 1234,
-    likes: 89,
-    comments: 23,
-    tags: ["React", "JavaScript", "前端", "性能优化"],
-    category: "前端开发",
-    featured: true
-  };
-
-  // 模拟相关文章数据
-  const mockRelatedArticles: RelatedArticle[] = [
-    {
-      id: 2,
-      title: "现代CSS布局技术详解",
-      excerpt: "从Flexbox到Grid，全面了解现代CSS布局技术的最佳实践和使用场景。",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
-      date: "2024-01-12",
-      views: 2156,
-      readTime: 8,
-      category: "前端开发",
-      tags: ["CSS", "布局", "设计"]
+      return response;
     },
     {
-      id: 3,
-      title: "TypeScript 5.0新特性解析",
-      excerpt: "TypeScript 5.0带来了哪些激动人心的新特性？深入了解最新的开发体验。",
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop",
-      date: "2024-01-10",
-      views: 1876,
-      readTime: 10,
-      category: "编程语言",
-      tags: ["TypeScript", "JavaScript", "开发工具"]
+      refreshDeps: [articleResponse?.category_id, id],
+      ready: !!articleResponse?.category_id,
     },
-    {
-      id: 4,
-      title: "微前端架构实战指南",
-      excerpt: "如何在大型项目中实施微前端架构，解决团队协作和技术栈统一的难题。",
-      image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=600&h=400&fit=crop",
-      date: "2024-01-08",
-      views: 987,
-      readTime: 15,
-      category: "系统架构",
-      tags: ["微前端", "架构", "工程化"]
-    }
-  ];
+  );
 
-  // 模拟评论数据
-  const mockComments: Comment[] = [
-    {
-      id: 1,
-      author: {
-        name: "李四",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
-      },
-      content: "非常详细的文章！React 18的并发特性确实带来了很大的性能提升，特别是在处理大量数据时。useTransition 这个hook在我的项目中非常有用。",
-      date: "2024-01-16 14:30",
-      likes: 12,
-      isLiked: false,
-      replies: [
-        {
-          id: 2,
-          author: {
-            name: "王五",
-            avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face"
-          },
-          content: "同感！我在公司项目中也开始使用React 18了，自动批处理真的减少了很多不必要的渲染。",
-          date: "2024-01-16 15:15",
-          likes: 5,
-          isLiked: true
-        }
-      ]
-    },
-    {
-      id: 3,
-      author: {
-        name: "赵六",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-      },
-      content: "文章写得很好，代码示例也很清晰。不过我想问一下，在什么情况下不建议使用并发特性？",
-      date: "2024-01-16 16:45",
-      likes: 8,
-      isLiked: false
-    }
-  ];
-
-  // 获取文章数据
+  // 转换API数据为组件所需格式
   useEffect(() => {
-    const fetchArticleData = async () => {
-      setLoading(true);
-      try {
-        // 模拟 API 调用
-        await new Promise(resolve => setTimeout(resolve, 1000));
+    if (articleResponse) {
+      const apiArticle: ApiArticle = articleResponse;
 
-        if (id && parseInt(id) === mockArticle.id) {
-          setArticle(mockArticle);
-          setRelatedArticles(mockRelatedArticles);
-          setComments(mockComments);
-        } else {
-          setError('文章不存在');
-        }
-      } catch (err) {
-        setError('加载文章失败');
-      } finally {
-        setLoading(false);
-      }
-    };
+      const convertedArticle: Article = {
+        id: apiArticle.id,
+        title: apiArticle.title,
+        content: apiArticle.content,
+        excerpt: apiArticle.summary,
+        coverImage: apiArticle.cover_image,
+        author: {
+          name: apiArticle.author_name,
+          avatar: apiArticle.author_avatar,
+          bio: '', // API中没有bio字段，使用空字符串
+        },
+        publishDate: apiArticle.published_at
+          ? new Date(apiArticle.published_at).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
+        readTime: Math.ceil(apiArticle.word_count / 200), // 假设每分钟阅读200字
+        views: apiArticle.view_count,
+        likes: apiArticle.like_count,
+        comments: apiArticle.comment_count,
+        tags: apiArticle.tags.map((tag) => tag.name),
+        category: apiArticle.category_name,
+        featured: apiArticle.is_top === 1,
+      };
 
-    fetchArticleData();
-  }, [id]);
+      setArticle(convertedArticle);
+    }
+  }, [articleResponse]);
+
+  // 转换相关文章数据
+  useEffect(() => {
+    if (relatedResponse?.data?.list) {
+      // 过滤掉当前文章
+      const filtered = relatedResponse.data.list.filter(
+        (item: ArticleListItem) => item.id !== parseInt(id || '0'),
+      );
+      const convertedRelated: RelatedArticle[] = filtered
+        .slice(0, 3)
+        .map((item: ArticleListItem) => ({
+          id: item.id,
+          title: item.title,
+          excerpt: item.summary,
+          image: item.cover_image,
+          date: item.published_at
+            ? new Date(item.published_at).toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0],
+          views: item.view_count,
+          readTime: Math.ceil(item.word_count / 200),
+          category: item.category_name,
+          tags: item.tags.map((tag) => tag.name),
+        }));
+
+      setRelatedArticles(convertedRelated);
+    }
+  }, [relatedResponse, id]);
+
+  // 转换评论数据
+  useEffect(() => {
+    if (commentsResponse?.list) {
+      const convertedComments: Comment[] = commentsResponse.list.map(
+        (item: ApiComment) => ({
+          id: item.id,
+          author: {
+            name: item.user.nickname || item.user.username,
+            avatar: item.user.avatar,
+          },
+          content: item.content,
+          date: new Date(item.created_at).toLocaleString('zh-CN'),
+          likes: item.like_count,
+          isLiked: item.liked_by_me,
+          replies:
+            item.children?.map((child) => ({
+              id: child.id,
+              author: {
+                name: child.user.nickname || child.user.username,
+                avatar: child.user.avatar,
+              },
+              content: child.content,
+              date: new Date(child.created_at).toLocaleString('zh-CN'),
+              likes: child.like_count,
+              isLiked: false, // API中children没有liked_by_me字段
+            })) || [],
+        }),
+      );
+
+      setComments(convertedComments);
+    }
+  }, [commentsResponse]);
 
   // 返回按钮
   const handleBack = () => {
     history.back();
   };
 
-  if (loading) {
+  // 评论更新回调
+  const handleCommentUpdate = () => {
+    refreshComments(); // 刷新评论列表
+  };
+
+  if (articleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spin size="large" />
@@ -329,13 +202,17 @@ React 18 的并发特性代表了 React 发展的一个重要里程碑。通过�
     );
   }
 
-  if (error || !article) {
+  if (articleError || !article) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Result
           status="404"
           title="文章未找到"
-          subTitle={error || "抱歉，您访问的文章不存在"}
+          subTitle={
+            typeof articleError === 'string'
+              ? articleError
+              : articleError?.message || '抱歉，您访问的文章不存在'
+          }
           extra={
             <Button type="primary" onClick={handleBack}>
               返回上一页
@@ -388,10 +265,7 @@ React 18 的并发特性代表了 React 发展的一个重要里程碑。通过�
       />
 
       {/* 文章内容 */}
-      <ArticleContent
-        content={article.content}
-        onContentLoaded={() => { }}
-      />
+      <ArticleContent content={article.content} onContentLoaded={() => {}} />
 
       {/* 相关文章 */}
       <RelatedArticles
@@ -403,6 +277,7 @@ React 18 的并发特性代表了 React 发展的一个重要里程碑。通过�
       <CommentSection
         comments={comments}
         articleId={article.id}
+        onCommentUpdate={handleCommentUpdate}
       />
 
       {/* 目录导航 */}

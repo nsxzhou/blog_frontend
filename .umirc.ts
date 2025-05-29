@@ -56,6 +56,10 @@ export default defineConfig({
       component: '@/pages/images',
     },
     {
+      path: '/comments',
+      component: '@/pages/comments',
+    },
+    {
       path: '/403',
       component: '@/pages/403',
     },
