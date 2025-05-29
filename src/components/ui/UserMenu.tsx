@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import { hoverScale } from '@/constants';
+import {
+  FileTextOutlined,
+  LoginOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import { Link } from '@umijs/max';
 import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import {
-  UserOutlined,
-  SettingOutlined,
-  FileTextOutlined,
-  LogoutOutlined,
-  LoginOutlined,
-} from '@ant-design/icons';
-import { Avatar } from './Avatar';
-import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from './DropdownMenu';
-import { hoverScale } from '@/constants';
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from './DropdownMenu';
+import { UserAvatar } from './UserAvatar';
 
 interface User {
   id: string;
@@ -28,7 +33,7 @@ interface UserMenuProps {
 export const UserMenu: React.FC<UserMenuProps> = ({
   user,
   onLogin,
-  onLogout
+  onLogout,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -50,17 +55,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       </motion.button>
     );
   }
-
-  // 已登录状态
-  const userFallback = user.name ? user.name.charAt(0).toUpperCase() : '用';
-
+  
   const trigger = (
     <div className="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-50 transition-colors">
-      <Avatar
-        src={user.avatar}
-        alt={user.name}
+      <UserAvatar
         size="sm"
-        fallback={userFallback}
+        user={user}
       />
       <div className="hidden sm:block text-left">
         <div className="text-sm font-medium text-gray-800 truncate max-w-24">
@@ -77,13 +77,13 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors"
         {...hoverScale}
       >
-        <Avatar
-          src={user.avatar}
-          alt={user.name}
+        <UserAvatar
           size="sm"
-          fallback={userFallback}
+          user={user}
         />
-        <span className="hidden sm:block font-medium">{user.name || '用户'}</span>
+        <span className="hidden sm:block font-medium">
+          {user.name || '用户'}
+        </span>
       </motion.button>
 
       {/* 下拉菜单 */}
@@ -92,8 +92,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           <DropdownMenu trigger={trigger} align="right">
             <DropdownMenuLabel>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-800">{user.name}</span>
-                <span className="text-xs text-gray-500 truncate">{user.email}</span>
+                <span className="text-sm font-medium text-gray-800">
+                  {user.name}
+                </span>
+                <span className="text-xs text-gray-500 truncate">
+                  {user.email}
+                </span>
               </div>
             </DropdownMenuLabel>
 
@@ -133,4 +137,4 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   );
 };
 
-export default UserMenu; 
+export default UserMenu;

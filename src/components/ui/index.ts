@@ -1,7 +1,12 @@
 export { default as Button } from './Button';
 export { default as Card } from './Card';
-export { default as Avatar } from './Avatar';
+export {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from './DropdownMenu';
+export { default as PageContainer } from './PageContainer';
+export { default as UserAvatar } from './UserAvatar';
 export { default as UserMenu } from './UserMenu';
 export { default as UserSidebar } from './UserSidebar';
-export { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from './DropdownMenu'; 
-export { default as PageContainer } from './PageContainer';

@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui';
+import { UserAvatar, Button } from '@/components/ui';
 import {
   fadeInUp,
   headerVariants,
@@ -23,7 +23,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import UserSidebar from '../../components/ui/UserSidebar';
 
 interface HeaderProps {
@@ -144,11 +144,7 @@ const Header: React.FC<HeaderProps> = () => {
             >
               {isLoggedIn && currentUser ? (
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                    {currentUser.nickname?.charAt(0)?.toUpperCase() ||
-                      currentUser.username?.charAt(0)?.toUpperCase() ||
-                      'U'}
-                  </div>
+                  <UserAvatar user={currentUser} size="sm" />
                   <span className="hidden sm:block text-sm font-medium text-gray-800">
                     {currentUser.nickname || currentUser.username}
                   </span>

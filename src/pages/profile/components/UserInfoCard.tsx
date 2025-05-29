@@ -1,5 +1,5 @@
 import type { UserInfo } from '@/api/user';
-import { Avatar } from '@/components/ui/Avatar';
+import { UserAvatar } from '@/components/ui';
 import { hoverScale, itemVariants } from '@/constants';
 import {
   EditOutlined,
@@ -35,14 +35,12 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user, onEdit }) => {
           <EditOutlined />
           <span>编辑</span>
         </motion.button>
-      </div>
+      </div>  
 
       <div className="flex items-center space-x-6 mb-6">
-        <Avatar
-          src={user.avatar}
-          alt={user.nickname || user.username}
-          size="xl"
-          fallback={userFallback}
+        <UserAvatar
+          size="lg"
+          user={user}
         />
         <div className="flex-1">
           <h3 className="text-2xl font-bold text-gray-900 mb-2">

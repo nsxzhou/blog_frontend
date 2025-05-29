@@ -17,6 +17,14 @@ import type {
   ViewMode,
 } from '../types';
 
+interface globalStats {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  likes: number;
+}
+
 interface UseCommentsManageState {
   // 基础状态
   viewMode: ViewMode;
@@ -84,6 +92,13 @@ export const useCommentsManage = (): UseCommentsManageState => {
   const [selectedCommentIds, setSelectedCommentIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 12;
+  const [globalStats, setGlobalStats] = useState<globalStats>({
+    total: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+    likes: 0,
+  });
 
   // 获取文章列表
   const {
@@ -106,15 +121,53 @@ export const useCommentsManage = (): UseCommentsManageState => {
     },
   );
 
-  // 获取全局评论统计
-  const { data: globalStatsData } = useRequest(
-    () =>
-      GetCommentList({
+  // 获取全局评论统计 - 优化为只获取基本统计信息
+  useRequest(
+    async () => {
+      // 获取各种状态的评论数量
+      const [approvedData, pendingData, rejectedData] = await Promise.all([
+        GetCommentList({
+          page: 1,
+          page_size: 1, // 只获取第一条来获取总数
+          status: 'approved',
+          order_by: 'created_at',
+          order: 'desc',
+        }),
+        GetCommentList({
+          page: 1,
+          page_size: 1,
+          status: 'pending',
+          order_by: 'created_at',
+          order: 'desc',
+        }),
+        GetCommentList({
+          page: 1,
+          page_size: 1,
+          status: 'rejected',
+          order_by: 'created_at',
+          order: 'desc',
+        }),
+      ]);
+
+      // 获取总评论数
+      const totalData = await GetCommentList({
         page: 1,
-        page_size: 1000,
+        page_size: 1,
         order_by: 'created_at',
         order: 'desc',
-      }),
+      });
+
+      const stats = {
+        total: totalData.data?.total || 0,
+        approved: approvedData.data?.total || 0,
+        pending: pendingData.data?.total || 0,
+        rejected: rejectedData.data?.total || 0,
+        likes: 0,
+      };
+
+      setGlobalStats(stats);
+      return stats;
+    },
     {
       cacheKey: 'global-comment-stats',
       staleTime: 30000, // 30秒缓存
@@ -188,25 +241,18 @@ export const useCommentsManage = (): UseCommentsManageState => {
 
   // 全局统计数据
   const articleStats = useMemo(() => {
-    if (!globalStatsData?.list) {
+    if (!globalStats) {
       return { total: 0, approved: 0, pending: 0, rejected: 0, likes: 0 };
     }
 
-    const comments = globalStatsData.list;
     return {
-      total: comments.length,
-      approved: comments.filter((c: CommentItem) => c.status === 'approved')
-        .length,
-      pending: comments.filter((c: CommentItem) => c.status === 'pending')
-        .length,
-      rejected: comments.filter((c: CommentItem) => c.status === 'rejected')
-        .length,
-      likes: comments.reduce(
-        (sum: number, c: CommentItem) => sum + (c.like_count || 0),
-        0,
-      ),
+      total: globalStats?.total || 0,
+      approved: globalStats.approved || 0,
+      pending: globalStats.pending || 0,
+      rejected: globalStats.rejected || 0,
+      likes: globalStats.likes || 0,
     };
-  }, [globalStatsData]);
+  }, [globalStats]);
 
   // 当前文章评论统计
   const commentStats = useMemo(() => {

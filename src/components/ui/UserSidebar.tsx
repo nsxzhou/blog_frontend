@@ -26,7 +26,7 @@ import {
 import { Link } from '@umijs/max';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
-import { Avatar } from './Avatar';
+import { UserAvatar } from './UserAvatar';
 
 interface UserSidebarProps {
   isOpen: boolean;
@@ -107,11 +107,9 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
               {user ? (
                 <div className="text-center">
                   <div className="mb-4">
-                    <Avatar
-                      src={user.avatar}
-                      alt={user.nickname || user.username}
+                    <UserAvatar
                       size="lg"
-                      fallback={userFallback}
+                      user={user}
                       className="mx-auto"
                     />
                   </div>

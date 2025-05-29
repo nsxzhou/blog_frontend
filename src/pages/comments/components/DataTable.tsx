@@ -1,5 +1,6 @@
 import type { ArticleListItem } from '@/api/article';
-import { Avatar, Button, Pagination, Space, Table, Tag } from 'antd';
+import { UserAvatar } from '@/components/ui';
+import { Button, Pagination, Table, Tag } from 'antd';
 import {
   Calendar,
   CheckCircle,
@@ -56,28 +57,38 @@ export const DataTable: React.FC<DataTableProps> = ({
       title: '文章信息',
       key: 'article',
       render: (record: ArticleListItem) => (
-        <div className="flex items-start space-x-3">
-          <Avatar
-            size={48}
+        <div className="flex items-start space-x-4 p-4">
+          <UserAvatar
+            size="sm"
             src={record.cover_image}
-            icon={<MessageSquare />}
-            className="bg-blue-100"
+            user={{
+              name: record.author_name,
+            }}
+            className="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-100 shadow-sm"
           />
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium text-gray-900 truncate">
-              {record.title}
-            </h4>
-            <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-              {record.summary || '暂无摘要'}
-            </p>
-            <div className="flex items-center space-x-2 mt-2">
-              <Tag color="blue" className="text-xs">
-                <User className="w-3 h-3 inline mr-1" />
+          <div className="flex-1 min-w-0 space-y-3">
+            <div>
+              <h4 className="text-base font-semibold text-gray-900 truncate leading-tight">
+                {record.title}
+              </h4>
+              <p className="text-sm text-gray-600 mt-1.5 line-clamp-2 leading-relaxed">
+                {record.summary || '暂无摘要'}
+              </p>
+            </div>
+            <div className="flex items-center flex-wrap gap-2">
+              <Tag
+                color="blue"
+                className="text-xs px-2 py-1 rounded-full border-0 bg-blue-50 text-blue-700 font-medium"
+              >
+                <User className="w-3 h-3 inline mr-1.5" />
                 {record.author_name}
               </Tag>
-              <Tag color="green" className="text-xs">
-                <Calendar className="w-3 h-3 inline mr-1" />
-                {record.published_at}
+              <Tag
+                color="green"
+                className="text-xs px-2 py-1 rounded-full border-0 bg-emerald-50 text-emerald-700 font-medium"
+              >
+                <Calendar className="w-3 h-3 inline mr-1.5" />
+                {new Date(record.published_at).toLocaleDateString('zh-CN')}
               </Tag>
             </div>
           </div>
@@ -89,27 +100,30 @@ export const DataTable: React.FC<DataTableProps> = ({
       key: 'stats',
       width: 120,
       render: (record: ArticleListItem) => (
-        <div className="text-center">
-          <div className="text-lg font-bold text-blue-600">
+        <div className="text-center py-4">
+          <div className="text-2xl font-bold text-blue-600 mb-1">
             {record.comment_count || 0}
           </div>
-          <div className="text-xs text-gray-500">条评论</div>
+          <div className="text-xs text-gray-500 font-medium">条评论</div>
         </div>
       ),
     },
     {
       title: '操作',
       key: 'actions',
-      width: 100,
+      width: 120,
       render: (record: ArticleListItem) => (
-        <Button
-          type="primary"
-          size="small"
-          icon={<Eye className="w-4 h-4" />}
-          onClick={() => onSelectArticle?.(record)}
-        >
-          查看评论
-        </Button>
+        <div className="py-4">
+          <Button
+            type="primary"
+            size="middle"
+            icon={<Eye className="w-4 h-4" />}
+            onClick={() => onSelectArticle?.(record)}
+            className="bg-blue-600 hover:bg-blue-700 border-0 shadow-sm hover:shadow-md transition-all duration-200"
+          >
+            查看评论
+          </Button>
+        </div>
       ),
     },
   ];
@@ -120,39 +134,75 @@ export const DataTable: React.FC<DataTableProps> = ({
       title: '评论信息',
       key: 'comment',
       render: (record: ManageComment) => (
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Avatar size={24} icon={<User />} className="bg-gray-100" />
-            <span className="text-sm font-medium">{record.user_name}</span>
+        <div className="space-y-4 p-1">
+          {/* 用户信息和状态行 */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <UserAvatar
+                size="sm"
+                user={record.user}
+                className="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-white shadow-sm"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-gray-900">
+                  {record.user_name}
+                </span>
+                <span className="text-xs text-gray-500">
+                  <Calendar className="w-3 h-3 inline mr-1.5" />
+                  {new Date(record.created_at).toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </div>
+            </div>
             <Tag
               color={
                 record.status === 'approved'
-                  ? 'green'
+                  ? 'success'
                   : record.status === 'pending'
-                  ? 'orange'
-                  : 'red'
+                  ? 'warning'
+                  : 'error'
               }
-              className="text-xs"
+              className={`text-xs font-medium px-3 py-1 rounded-full border-0 ${
+                record.status === 'approved'
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : record.status === 'pending'
+                  ? 'bg-amber-50 text-amber-700'
+                  : 'bg-red-50 text-red-700'
+              }`}
             >
               {record.status === 'approved'
-                ? '已通过'
+                ? '✓ 已通过'
                 : record.status === 'pending'
-                ? '待审核'
-                : '已拒绝'}
+                ? '⏳ 待审核'
+                : '✗ 已拒绝'}
             </Tag>
           </div>
-          <div className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
-            {record.content}
+
+          {/* 评论内容 */}
+          <div className="relative">
+            <div className="text-sm text-gray-800 bg-gradient-to-r from-gray-50 to-gray-100/50 p-4 rounded-xl border border-gray-200/50 leading-relaxed shadow-sm">
+              <div className="absolute top-0 left-4 w-1 h-full bg-gradient-to-b from-blue-400 to-blue-600 rounded-full transform -translate-y-1"></div>
+              <div className="pl-3">{record.content}</div>
+            </div>
           </div>
-          <div className="flex items-center space-x-4 text-xs text-gray-500">
-            <span>
-              <Calendar className="w-3 h-3 inline mr-1" />
-              {record.created_at}
-            </span>
-            <span>
-              <ThumbsUp className="w-3 h-3 inline mr-1" />
-              {record.like_count || 0} 赞
-            </span>
+
+          {/* 统计信息 */}
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1.5 text-xs text-gray-600 bg-gray-100/80 px-2.5 py-1.5 rounded-full">
+                <ThumbsUp className="w-3.5 h-3.5 text-red-500" />
+                <span className="font-medium">{record.like_count || 0} 赞</span>
+              </div>
+              <div className="flex items-center space-x-1.5 text-xs text-gray-600 bg-gray-100/80 px-2.5 py-1.5 rounded-full">
+                <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
+                <span className="font-medium">ID: {record.id}</span>
+              </div>
+            </div>
           </div>
         </div>
       ),
@@ -160,18 +210,20 @@ export const DataTable: React.FC<DataTableProps> = ({
     {
       title: '操作',
       key: 'actions',
-      width: 200,
+      width: 180,
       render: (record: ManageComment) => (
-        <Space direction="vertical" size="small" className="w-full">
-          <Space size="small">
+        <div className="space-y-3 p-2">
+          {/* 审核操作 */}
+          <div className="flex flex-col space-y-2">
             {record.status !== 'approved' && (
               <Button
                 type="primary"
                 size="small"
                 icon={<CheckCircle className="w-4 h-4" />}
                 onClick={() => onApprove?.(record.id)}
+                className="bg-emerald-600 hover:bg-emerald-700 border-0 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg font-medium h-8"
               >
-                通过
+                通过审核
               </Button>
             )}
             {record.status !== 'rejected' && (
@@ -179,21 +231,26 @@ export const DataTable: React.FC<DataTableProps> = ({
                 size="small"
                 icon={<XCircle className="w-4 h-4" />}
                 onClick={() => onReject?.(record.id)}
+                className="bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg font-medium h-8"
               >
-                拒绝
+                拒绝审核
               </Button>
             )}
-          </Space>
-          <Button
-            danger
-            size="small"
-            icon={<Trash2 className="w-4 h-4" />}
-            onClick={() => onDelete?.(record.id)}
-            className="w-full"
-          >
-            删除
-          </Button>
-        </Space>
+          </div>
+
+          {/* 删除操作 */}
+          <div className="border-t border-gray-100 pt-2">
+            <Button
+              danger
+              size="small"
+              icon={<Trash2 className="w-4 h-4" />}
+              onClick={() => onDelete?.(record.id)}
+              className="w-full bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:border-red-300 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg font-medium h-8"
+            >
+              删除评论
+            </Button>
+          </div>
+        </div>
       ),
     },
   ];
