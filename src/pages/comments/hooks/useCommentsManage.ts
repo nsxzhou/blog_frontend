@@ -167,11 +167,7 @@ export const useCommentsManage = (): UseCommentsManageState => {
 
       setGlobalStats(stats);
       return stats;
-    },
-    {
-      cacheKey: 'global-comment-stats',
-      staleTime: 30000, // 30秒缓存
-    },
+    }
   );
 
   // 获取特定文章的评论
