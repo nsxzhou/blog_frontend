@@ -2,6 +2,7 @@ import type { baseResponse } from '@/api';
 import { request } from '@umijs/max';
 import type {
   BatchDeleteImageReq,
+  ImageDetailRes,
   GetImageListReq,
   GetImageListRes,
   GetImagesByArticleReq,
@@ -59,7 +60,7 @@ export function BatchDeleteImages(data: BatchDeleteImageReq) {
 
 // 获取图片详情
 export function GetImageDetail(id: number) {
-  return request<baseResponse<ImageInfo>>(`/api/images/${id}`, {
+  return request<baseResponse<ImageDetailRes>>(`/api/images/${id}`, {
     method: 'GET',
   });
 }

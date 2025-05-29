@@ -8,7 +8,7 @@ import {
   CommentOutlined,
   FireOutlined,
 } from '@ant-design/icons';
-import { Card } from '@/components/ui';
+import { UserAvatar } from '@/components/ui';
 import {
   itemVariants,
   cardHover,
@@ -127,9 +127,8 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
           {/* 作者和统计信息 */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div className="flex items-center gap-2">
-              <img
-                src={post.author.avatar}
-                alt={post.author.name}
+              <UserAvatar
+                user={post.author}
                 className="w-6 h-6 rounded-full object-cover"
               />
               <span className="text-sm text-gray-600">{post.author.name}</span>

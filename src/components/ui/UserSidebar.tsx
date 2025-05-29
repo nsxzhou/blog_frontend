@@ -62,12 +62,6 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
   onLogin,
   onLogout,
 }) => {
-  const userFallback = user?.nickname
-    ? user.nickname.charAt(0).toUpperCase()
-    : user?.username
-    ? user.username.charAt(0).toUpperCase()
-    : '用';
-
   return (
     <AnimatePresence>
       {isOpen && (

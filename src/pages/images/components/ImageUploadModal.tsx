@@ -84,7 +84,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                   ...item,
                   progress: 100,
                   status: 'success',
-                  url: response.data.url,
+                  url: response.data.image.url,
                 }
               : item,
           ),

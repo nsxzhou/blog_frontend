@@ -50,7 +50,7 @@ const BlogPage: React.FC = () => {
 
   // 数据状态
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<string[]>(['全部']);
+  const [categories, setCategories] = useState<string[]>(['']);
   const [allTags, setAllTags] = useState<string[]>([]);
 
   // 加载状态
@@ -68,11 +68,13 @@ const BlogPage: React.FC = () => {
    */
   const fetchCategories = async () => {
     try {
-      const response = await GetCategoryList();
+      const response = await GetCategoryList({ is_visible: 1 });
+      console.log(response);
       if (response.code === 0 && response.data) {
+        console.log(response.data.list);
         const categoryNames =
           response.data.list?.map((item: CategoryInfo) => item.name) || [];
-        setCategories(['全部', ...categoryNames]);
+        setCategories([...categoryNames]);
       }
     } catch (err) {
       console.error('获取分类列表失败:', err);

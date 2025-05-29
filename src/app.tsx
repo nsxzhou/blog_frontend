@@ -11,6 +11,7 @@ export async function getInitialState() {
   const baseState = {
     name: 'blog-web',
     isLoggedIn: false,
+    currentUser: null,
   };
 
   const token = getTokenFromStorage();

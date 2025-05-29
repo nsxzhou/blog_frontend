@@ -19,6 +19,10 @@ export interface ImageInfo {
   updated_at: string;
 }
 
+export interface ImageDetailRes {
+  image: ImageInfo;
+}
+
 // 上传图片请求参数
 export interface UploadImageReq {
   image: File;
@@ -28,7 +32,7 @@ export interface UploadImageReq {
 }
 
 // 上传图片响应数据
-export interface UploadImageRes {
+export interface UploadImageInfo {
   id: number;
   url: string;
   path: string;
@@ -39,6 +43,10 @@ export interface UploadImageRes {
   mime_type: string;
   usage_type: string; // avatar, cover, content
   storage_type: string; // local, cos
+}
+
+export interface UploadImageRes {
+  image: UploadImageInfo;
 }
 
 // 更新图片信息请求参数

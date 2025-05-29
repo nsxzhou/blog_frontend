@@ -8,5 +8,4 @@ export {
 } from './DropdownMenu';
 export { default as PageContainer } from './PageContainer';
 export { default as UserAvatar } from './UserAvatar';
-export { default as UserMenu } from './UserMenu';
 export { default as UserSidebar } from './UserSidebar';
