@@ -29,7 +29,6 @@ const convertArticleData = (apiArticle: ArticleListItem): MyArticle => {
     image: apiArticle.cover_image,
     date: apiArticle.published_at || apiArticle.created_at,
     lastModified: apiArticle.updated_at,
-    readTime: `${Math.ceil(apiArticle.word_count / 200)} 分钟`,
     views: apiArticle.view_count,
     likes: apiArticle.like_count,
     comments: apiArticle.comment_count,
@@ -42,7 +41,7 @@ const convertArticleData = (apiArticle: ArticleListItem): MyArticle => {
 
 const MyArticlesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterType, setFilterType] = useState<FilterType>('');
   const [sortType, setSortType] = useState<SortType>('date');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(20); // 设置为20，小于后端限制的50
@@ -58,7 +57,7 @@ const MyArticlesPage: React.FC = () => {
         page: currentPage,
         page_size: pageSize,
         keyword: searchTerm || undefined,
-        status: filterType === 'all' ? undefined : filterType,
+        status: filterType === '' ? '' : filterType as any,
         order_by:
           sortType === 'date'
             ? 'published_at'
@@ -229,7 +228,7 @@ const MyArticlesPage: React.FC = () => {
               <Spin size="large" />
             </div>
           ) : articles.length === 0 ? (
-            searchTerm || filterType !== 'all' ? (
+            searchTerm || filterType !== '' ? (
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description="没有找到符合条件的文章"

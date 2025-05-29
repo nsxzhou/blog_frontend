@@ -204,7 +204,7 @@ export interface UpdateCommentStatus {
     status: number;
     last_login_at: string;
     last_login_ip: string;
-    is_verified: number;
+    is_verified: number; 
     phone: string;
     is_phone_verified: number;
   };

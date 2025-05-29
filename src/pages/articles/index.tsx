@@ -44,12 +44,12 @@ const ArticleManagementPage: React.FC = () => {
 
   const [filters, setFilters] = useState<FilterParams>({
     keyword: '',
-    status: 'all',
+    status: '',
     category_id: undefined,
     tag_id: undefined,
-    access_type: 'all',
-    is_top: undefined,
-    is_original: undefined,
+    access_type: '',
+    is_top: 2,
+    is_original: 2,
     start_date: '',
     end_date: '',
     author_id: undefined,
@@ -68,15 +68,22 @@ const ArticleManagementPage: React.FC = () => {
         page: pagination.current,
         page_size: pagination.pageSize,
         keyword: filters.keyword || undefined,
-        status: filters.status === 'all' ? undefined : (filters.status as any),
+        // 字符串状态字段：不传则获取所有
+        status: filters.status === '' ? '' : filters.status as any,
         category_id: filters.category_id,
         tag_id: filters.tag_id,
+        // 字符串状态字段：不传则获取所有
         access_type:
-          filters.access_type === 'all'
-            ? undefined
+          filters.access_type === ''
+            ? ''
             : (filters.access_type as any),
-        is_top: filters.is_top as 0 | 1 | undefined,
-        is_original: filters.is_original as 0 | 1 | undefined,
+        // 数字状态字段：传2获取全部，传具体值获取对应状态
+        is_top:
+          filters.is_top === 2 ? 2 : (filters.is_top as any),
+        is_original:
+          filters.is_original === 2
+            ? 2
+            : (filters.is_original as any),
         start_date: filters.start_date || undefined,
         end_date: filters.end_date || undefined,
         author_id: filters.author_id,
@@ -200,7 +207,7 @@ const ArticleManagementPage: React.FC = () => {
 
   const handleStatusChange = async (
     id: number,
-    status: 'draft' | 'published' | 'archived',
+    status: 'draft' | 'published',
   ) => {
     try {
       const response = await UpdateArticleStatus(id, { status });
@@ -266,7 +273,7 @@ const ArticleManagementPage: React.FC = () => {
   };
 
   const handleBatchStatusChange = async (
-    status: 'draft' | 'published' | 'archived',
+    status: 'draft' | 'published',
   ) => {
     if (selectedArticles.length === 0) {
       message.warning('请先选择要操作的文章');

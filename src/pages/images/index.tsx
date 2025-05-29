@@ -43,8 +43,9 @@ const ImagesManagementPage: React.FC = () => {
   const [images, setImages] = useState<ImageInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [usageTypeFilter, setUsageTypeFilter] = useState<string>('all');
-  const [storageTypeFilter, setStorageTypeFilter] = useState<string>('all');
+  const [isExternalFilter, setIsExternalFilter] = useState<0 | 1 | 2>(2);
+  const [usageTypeFilter, setUsageTypeFilter] = useState<string>('');
+  const [storageTypeFilter, setStorageTypeFilter] = useState<string>('');
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
   const [sortBy, setSortBy] = useState<'date' | 'size' | 'name'>('date');
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -65,7 +66,8 @@ const ImagesManagementPage: React.FC = () => {
       const response = await GetImageList({
         page: pagination.current,
         page_size: pagination.pageSize,
-        usage_type: usageTypeFilter === 'all' ? undefined : usageTypeFilter,
+        is_external: isExternalFilter,
+        usage_type: usageTypeFilter === '' ? '' : usageTypeFilter,
         start_date: dateRange?.[0],
         end_date: dateRange?.[1],
         ...params,
@@ -82,7 +84,7 @@ const ImagesManagementPage: React.FC = () => {
         }
 
         // 客户端存储类型过滤
-        if (storageTypeFilter !== 'all') {
+        if (storageTypeFilter !== '') {
           imageList = imageList.filter(
             (image) => image.storage_type === storageTypeFilter,
           );

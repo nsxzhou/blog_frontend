@@ -38,7 +38,6 @@ export const MyArticleCard: React.FC<MyArticleCardProps> = ({
     article,
     onEdit,
     onDelete,
-    onShare,
     onClick,
 }) => {
     const [showActions, setShowActions] = useState(false);
@@ -50,8 +49,6 @@ export const MyArticleCard: React.FC<MyArticleCardProps> = ({
                 return 'text-green-600 bg-green-50';
             case 'draft':
                 return 'text-yellow-600 bg-yellow-50';
-            case 'archived':
-                return 'text-gray-600 bg-gray-50';
             default:
                 return 'text-gray-600 bg-gray-50';
         }
@@ -63,8 +60,6 @@ export const MyArticleCard: React.FC<MyArticleCardProps> = ({
                 return '已发布';
             case 'draft':
                 return '草稿';
-            case 'archived':
-                return '已归档';
             default:
                 return '未知';
         }

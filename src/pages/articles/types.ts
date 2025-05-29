@@ -1,12 +1,12 @@
 // 筛选参数类型
 export interface FilterParams {
   keyword: string;
-  status: 'all' | 'draft' | 'published' | 'archived';
+  status: '' | 'draft' | 'published';
   category_id?: number;
   tag_id?: number;
-  access_type: 'all' | 'public' | 'private' | 'password';
-  is_top?: number;
-  is_original?: number;
+  access_type: '' | 'public' | 'private' | 'password';
+  is_top?: 0 | 1 | 2;
+  is_original?: 0 | 1 | 2;
   start_date: string;
   end_date: string;
   author_id?: number;
@@ -37,7 +37,7 @@ export interface StatsCardData {
 }
 
 // 批量操作类型
-export type BatchAction = 'delete' | 'publish' | 'draft' | 'archive';
+export type BatchAction = 'delete' | 'publish' | 'draft';
 
 // 文章状态标签颜色类型
 export interface StatusConfig {

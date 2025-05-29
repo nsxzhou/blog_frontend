@@ -6,7 +6,7 @@
 import { history, useSearchParams } from '@umijs/max';
 import { message, Modal } from 'antd';
 import { motion } from 'framer-motion';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // 导入真正的API接口
 import {
   CreateArticle,
@@ -60,7 +60,12 @@ const WritePage: React.FC = () => {
   const loadCategories = useCallback(async () => {
     setCategoriesLoading(true);
     try {
-      const response = await GetCategoryList({ page: 1, page_size: 100 });
+      const response = await GetCategoryList({
+        page: 1,
+        page_size: 50,
+        is_visible: 1,
+      });
+      console.log(response);
       if (response.code === 0) {
         setCategories(response.data.list);
       }
@@ -76,7 +81,7 @@ const WritePage: React.FC = () => {
   const loadTags = useCallback(async () => {
     setTagsLoading(true);
     try {
-      const response = await GetTagList({ page: 1, page_size: 100 });
+      const response = await GetTagList({ page: 1, page_size: 50 });
       if (response.code === 0) {
         setPopularTags(response.data.list);
       }
@@ -326,17 +331,6 @@ const WritePage: React.FC = () => {
     } else {
       history.back();
     }
-  }, [articleData]);
-
-  // 预览功能
-  const previewContent = useMemo(() => {
-    return {
-      title: articleData.title || '无标题',
-      excerpt: articleData.excerpt || '暂无摘要',
-      content: articleData.content,
-      tags: articleData.tags,
-      category: articleData.category || '未分类',
-    };
   }, [articleData]);
 
   if (loading) {

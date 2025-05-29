@@ -6,7 +6,6 @@ export interface MyArticle {
   image?: string;
   date: string;
   lastModified: string;
-  readTime: string;
   views: number;
   likes: number;
   comments: number;
@@ -26,4 +25,4 @@ export interface ArticleStats {
 }
 
 export type SortType = 'date' | 'views' | 'likes' | 'title';
-export type FilterType = 'all' | 'published' | 'draft';
+export type FilterType = '' | 'published' | 'draft';

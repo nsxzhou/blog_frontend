@@ -1,6 +1,7 @@
 import { GetLatestArticles, type ArticleListItem } from '@/api/article';
 import { Button } from '@/components/ui';
 import { containerVariants, itemVariants } from '@/constants/animations';
+import EmptyState from '@/pages/blog/components/EmptyState';
 import BlogCard from '@/pages/blog/components/BlogCard';
 import type { BlogPost } from '@/pages/blog/components/types';
 import { ArrowRightOutlined } from '@ant-design/icons';
@@ -91,9 +92,7 @@ const BlogSection: React.FC = () => {
    * 渲染空状态
    */
   const renderEmpty = () => (
-    <div className="flex justify-center items-center py-20">
-      <Empty description="暂无文章" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-    </div>
+    <EmptyState />
   );
 
   /**

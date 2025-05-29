@@ -34,15 +34,14 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
 
   // 状态选项
   const statusOptions = [
-    { value: 'all', label: '全部状态', color: 'default' },
+    { value: '', label: '全部状态', color: 'default' },
     { value: 'published', label: '已发布', color: 'green' },
     { value: 'draft', label: '草稿', color: 'orange' },
-    { value: 'archived', label: '已归档', color: 'red' },
   ];
 
   // 访问权限选项
   const accessOptions = [
-    { value: 'all', label: '全部权限', color: 'default' },
+    { value: '', label: '全部权限', color: 'default' },
     { value: 'public', label: '公开', color: 'green' },
     { value: 'private', label: '私有', color: 'orange' },
     { value: 'password', label: '密码访问', color: 'blue' },
@@ -62,10 +61,10 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
   const handleClearFilters = () => {
     onFilterChange({
       keyword: '',
-      status: 'all',
+      status: '',
       category_id: undefined,
       tag_id: undefined,
-      access_type: 'all',
+      access_type: '',
       is_top: undefined,
       is_original: undefined,
       start_date: '',
@@ -77,10 +76,10 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
   // 检查是否有活动的筛选条件
   const hasActiveFilters =
     filters.keyword ||
-    filters.status !== 'all' ||
+    filters.status !== '' ||
     filters.category_id ||
     filters.tag_id ||
-    filters.access_type !== 'all' ||
+    filters.access_type !== '' ||
     filters.is_top !== undefined ||
     filters.is_original !== undefined ||
     filters.start_date ||
@@ -332,10 +331,10 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
                     关键词: {filters.keyword}
                   </Tag>
                 )}
-                {filters.status !== 'all' && (
+                {filters.status !== '' && (
                   <Tag
                     closable
-                    onClose={() => onFilterChange({ status: 'all' })}
+                    onClose={() => onFilterChange({ status: '' })}
                     color="green"
                   >
                     状态:{' '}
@@ -345,10 +344,10 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
                     }
                   </Tag>
                 )}
-                {filters.access_type !== 'all' && (
+                {filters.access_type !== '' && (
                   <Tag
                     closable
-                    onClose={() => onFilterChange({ access_type: 'all' })}
+                    onClose={() => onFilterChange({ access_type: '' })}
                     color="orange"
                   >
                     权限:{' '}

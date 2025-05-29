@@ -5,7 +5,7 @@ export interface CategoryInfo {
   description: string;
   icon: string;
   article_count: number;
-  is_visible: number; // 0: 不可见, 1: 可见
+  is_visible: 0 | 1 ; // 0: 不可见, 1: 可见
   created_at: string;
   updated_at: string;
 }
@@ -15,7 +15,7 @@ export interface CreateCategoryReq {
   name: string;
   description: string;
   icon: string;
-  is_visible: number;
+  is_visible: 0 | 1 ;
 }
 
 // 创建分类响应数据
@@ -28,7 +28,7 @@ export interface UpdateCategoryReq {
   name?: string;
   description?: string;
   icon?: string;
-  is_visible?: number;
+  is_visible?: 0 | 1 ;
 }
 
 // 更新分类响应数据
@@ -48,7 +48,7 @@ export interface GetCategoryListReq {
   keyword?: string;
   order_by?: string;
   order?: 'asc' | 'desc';
-  is_visible?: number; // 可见性筛选
+  is_visible?: 0 | 1 | 2; // 可见性筛选
 }
 
 // 获取分类列表响应数据

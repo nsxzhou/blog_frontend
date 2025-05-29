@@ -50,7 +50,7 @@ interface ArticleTableProps {
     onEdit: (id: number) => void;
     onView: (id: number) => void;
     onDelete: (id: number) => void;
-    onStatusChange: (id: number, status: 'draft' | 'published' | 'archived') => void;
+    onStatusChange: (id: number, status: 'draft' | 'published') => void;
     onAccessChange: (id: number, access_type: 'public' | 'private' | 'password', password?: string) => void;
 }
 
@@ -285,13 +285,7 @@ const ArticleTable: React.FC<ArticleTableProps> = ({
                                         label: '草稿',
                                         icon: <EditOutlined />,
                                         onClick: () => onStatusChange(record.id, 'draft'),
-                                    },
-                                    {
-                                        key: 'archived',
-                                        label: '归档',
-                                        icon: <DeleteOutlined />,
-                                        onClick: () => onStatusChange(record.id, 'archived'),
-                                    },
+                                    }
                                 ],
                             }}
                             trigger={['click']}

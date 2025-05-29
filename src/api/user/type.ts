@@ -1,5 +1,3 @@
-
-
 // 注册请求参数
 export interface RegisterReq {
     email: string;

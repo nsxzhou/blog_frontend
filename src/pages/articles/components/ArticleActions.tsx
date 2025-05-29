@@ -19,7 +19,7 @@ interface ArticleActionsProps {
     selectedCount: number;
     onToggleBatchMode: () => void;
     onBatchDelete: () => void;
-    onBatchStatusChange: (status: 'draft' | 'published' | 'archived') => void;
+    onBatchStatusChange: (status: 'draft' | 'published') => void;
     onClearSelection: () => void;
 }
 
@@ -45,13 +45,6 @@ const ArticleActions: React.FC<ArticleActionsProps> = ({
             label: '移至草稿',
             icon: <EditOutlined />,
             onClick: () => onBatchStatusChange('draft'),
-            disabled: selectedCount === 0,
-        },
-        {
-            key: 'archive',
-            label: '批量归档',
-            icon: <InboxOutlined />,
-            onClick: () => onBatchStatusChange('archived'),
             disabled: selectedCount === 0,
         },
         {

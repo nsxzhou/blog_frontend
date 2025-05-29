@@ -11,10 +11,10 @@ export interface ImageInfo {
   user_id: number;
   user_name: string;
   user_avatar: string;
-  usage_type: string;
+  usage_type: string; // avatar, cover, content
   article_id: number;
-  is_external: number;
-  storage_type: string;
+  is_external: 0 | 1 ;
+  storage_type: string; // local, cos
   created_at: string;
   updated_at: string;
 }
@@ -22,9 +22,9 @@ export interface ImageInfo {
 // 上传图片请求参数
 export interface UploadImageReq {
   image: File;
-  usage_type: string;
+  usage_type: string; // avatar, cover, content
   article_id?: number;
-  storage_type: string;
+  storage_type: string; // local, cos
 }
 
 // 上传图片响应数据
@@ -37,13 +37,13 @@ export interface UploadImageRes {
   width: number;
   height: number;
   mime_type: string;
-  usage_type: string;
-  storage_type: string;
+  usage_type: string; // avatar, cover, content
+  storage_type: string; // local, cos
 }
 
 // 更新图片信息请求参数
 export interface UpdateImageReq {
-  usage_type?: string;
+  usage_type?: string; // avatar, cover, content
   article_id?: number;
 }
 
@@ -57,7 +57,7 @@ export interface GetImageListReq {
   page?: number;
   page_size?: number;
   article_id?: number;
-  is_external?: number;
+  is_external?: 0 | 1 | 2;
   start_date?: string;
   end_date?: string;
   usage_type?: string;
@@ -85,10 +85,10 @@ export interface GetImagesByTypeReq {
   page?: number;
   page_size?: number;
   article_id?: number;
-  is_external?: number;
+  is_external?: 0 | 1 | 2;
   start_date?: string;
   end_date?: string;
-  usage_type?: string;
+  usage_type?: string; // avatar, cover, content
 }
 
 // 根据文章ID获取图片请求参数
@@ -96,10 +96,10 @@ export interface GetImagesByArticleReq {
   article_id: number;
   page?: number;
   page_size?: number;
-  is_external?: number;
+  is_external?: 0 | 1 | 2;
   start_date?: string;
   end_date?: string;
-  usage_type?: string;
+  usage_type?: string; // avatar, cover, content
 }
 
 // 图片统计数据

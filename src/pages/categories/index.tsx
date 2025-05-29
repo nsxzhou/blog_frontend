@@ -31,9 +31,7 @@ const CategoryManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [visibilityFilter, setVisibilityFilter] = useState<
-    'all' | 'visible' | 'hidden'
-  >('all');
+  const [visibilityFilter, setVisibilityFilter] = useState<0 | 1 | 2>(2);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryInfo | null>(
     null,
@@ -53,11 +51,7 @@ const CategoryManagementPage: React.FC = () => {
         page_size: pagination.pageSize,
         keyword: searchTerm || undefined,
         is_visible:
-          visibilityFilter === 'all'
-            ? undefined
-            : visibilityFilter === 'visible'
-            ? 1
-            : 0,
+          visibilityFilter,
         ...params,
       });
 

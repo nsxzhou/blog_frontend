@@ -24,10 +24,10 @@ export interface Article {
   comment_count: number;
   favorite_count: number;
   word_count: number;
-  status: string;
-  access_type: string;
-  is_top: number;
-  is_original: number;
+  status: string; // draft, published
+  access_type: string; // public, private, password
+  is_top: 0 | 1 ; // 0, 1
+  is_original: 0 | 1 ; // 0, 1
   source_url: string;
   source_name: string;
   tags: {
@@ -50,11 +50,11 @@ export interface CreateArticleReq {
   content: string;
   summary: string;
   cover_image?: string;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published';
   access_type: 'public' | 'private' | 'password';
   password?: string;
-  is_original: number;
-  is_top: number;
+  is_original: 0 | 1;
+  is_top: 0 | 1;
   source_name?: string;
   source_url?: string;
   category_id: number;
@@ -72,11 +72,11 @@ export interface UpdateArticleReq {
   content?: string;
   summary?: string;
   cover_image?: string;
-  status?: 'draft' | 'published' | 'archived';
+  status?: 'draft' | 'published';
   access_type?: 'public' | 'private' | 'password';
   password?: string;
-  is_original?: number;
-  is_top?: number;
+  is_original?: 0 | 1;
+  is_top?: 0 | 1;
   source_name?: string;
   source_url?: string;
   category_id?: number;
@@ -95,11 +95,11 @@ export interface ArticleListQuery {
   keyword?: string;
   order_by?: string;
   order?: 'asc' | 'desc';
-  is_top?: number;
-  is_original?: number;
+  is_top?: 0 | 1 | 2;
+  is_original?: 0 | 1 | 2;
   start_date?: string;
   end_date?: string;
-  status?: 'draft' | 'published' | 'archived';
+  status?: 'draft' | 'published';
   category_id?: number;
   tag_id?: number;
   author_id?: number;
@@ -123,8 +123,8 @@ export interface ArticleListItem {
   word_count: number;
   status: string;
   access_type: string;
-  is_top: number;
-  is_original: number;
+  is_top: 0 | 1;
+  is_original: 0 | 1;
   tags: {
     id: number;
     name: string;
@@ -168,13 +168,13 @@ export interface ArticleStatsRes {
 
 // 更新文章状态请求参数
 export interface UpdateArticleStatusReq {
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published';
 }
 
 // 更新文章状态响应数据
 export interface UpdateArticleStatusRes {
   article_id: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published';
 }
 
 // 更新文章访问权限请求参数
@@ -197,10 +197,10 @@ export interface SearchArticleQuery {
   author_id?: number;
   tag_id?: number;
   category_id?: number;
-  status?: 'draft' | 'published' | 'archived';
+  status?: 'draft' | 'published';
   access_type?: 'public' | 'private' | 'password';
-  is_top?: 0 | 1;
-  is_original?: 0 | 1;
+  is_top?: 0 | 1 | 2;
+  is_original?: 0 | 1 | 2;
   start_date?: string;
   end_date?: string;
   sort_by?:

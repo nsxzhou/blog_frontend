@@ -7,8 +7,8 @@ import { fadeInUp } from '@/constants/animations';
 interface SearchAndFilterProps {
     searchTerm: string;
     onSearchChange: (value: string) => void;
-    visibilityFilter: 'all' | 'visible' | 'hidden';
-    onVisibilityFilterChange: (value: 'all' | 'visible' | 'hidden') => void;
+    visibilityFilter: 0 | 1 | 2;
+    onVisibilityFilterChange: (value: 0 | 1 | 2) => void;
 }
 
 const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
@@ -43,9 +43,9 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
                         placeholder="筛选可见性"
                         suffixIcon={<FilterOutlined className="text-gray-400" />}
                         options={[
-                            { value: 'all', label: '全部分类' },
-                            { value: 'visible', label: '可见分类' },
-                            { value: 'hidden', label: '隐藏分类' },
+                            { value: 2, label: '全部分类' },
+                            { value: 1, label: '可见分类' },
+                            { value: 0, label: '隐藏分类' },
                         ]}
                     />
                 </div>
