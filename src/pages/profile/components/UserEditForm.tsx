@@ -1,9 +1,14 @@
+import { GetImagesByType, type ImageInfo } from '@/api/image';
 import type { UpdateUserInfoReq, UserInfo } from '@/api/user';
 import { hoverScale, itemVariants } from '@/constants';
-import { CloseOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Upload, message } from 'antd';
+import {
+  CloseOutlined,
+  PictureOutlined,
+  SaveOutlined,
+} from '@ant-design/icons';
+import { Button, Empty, Form, Image, Input, Modal, Spin, message } from 'antd';
 import { motion } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface UserEditFormProps {
   user: UserInfo;
@@ -19,45 +24,56 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
   loading = false,
 }) => {
   const [form] = Form.useForm();
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [avatarImages, setAvatarImages] = useState<ImageInfo[]>([]);
   const [avatarLoading, setAvatarLoading] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(user.avatar);
 
   const handleFinish = async (values: any) => {
     try {
-      await onSave(values);
+      await onSave({
+        ...values,
+        avatar: selectedAvatar,
+      });
       message.success('信息更新成功');
     } catch (error) {
       message.error('更新失败，请重试');
     }
   };
 
-  const handleAvatarUpload = (info: any) => {
-    if (info.file.status === 'uploading') {
-      setAvatarLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      setAvatarLoading(false);
-      // 这里应该处理上传成功后的逻辑
-      const imageUrl = info.file.response?.url || info.file.response?.data?.url;
-      if (imageUrl) {
-        form.setFieldsValue({ avatar: imageUrl });
-        message.success('头像上传成功');
+  // 获取头像图片列表
+  const fetchAvatarImages = async () => {
+    setAvatarLoading(true);
+    try {
+      const response = await GetImagesByType('avatar', {
+        page: 1,
+        page_size: 50,
+      });
+      if (response.code === 200) {
+        setAvatarImages(response.data.list);
       }
-    }
-    if (info.file.status === 'error') {
+    } catch (error) {
+      message.error('获取图片列表失败');
+    } finally {
       setAvatarLoading(false);
-      message.error('头像上传失败');
     }
   };
 
-  const uploadButton = (
-    <div>
-      <UploadOutlined />
-      <div style={{ marginTop: 8 }}>
-        {avatarLoading ? '上传中...' : '选择文件'}
-      </div>
-    </div>
-  );
+  const handleOpenAvatarModal = () => {
+    setIsAvatarModalOpen(true);
+    fetchAvatarImages();
+  };
+
+  const handleSelectAvatar = (imageUrl: string) => {
+    setSelectedAvatar(imageUrl);
+    form.setFieldsValue({ avatar: imageUrl });
+    setIsAvatarModalOpen(false);
+    message.success('头像选择成功');
+  };
+
+  useEffect(() => {
+    setSelectedAvatar(user.avatar);
+  }, [user.avatar]);
 
   return (
     <motion.div
@@ -126,40 +142,32 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
 
           <div className="space-y-4">
             <Form.Item label="头像" name="avatar">
-              <Upload
-                name="avatar"
-                listType="picture-card"
-                className="avatar-uploader"
-                showUploadList={false}
-                action="/api/upload/avatar"
-                beforeUpload={(file) => {
-                  const isJpgOrPng =
-                    file.type === 'image/jpeg' || file.type === 'image/png';
-                  if (!isJpgOrPng) {
-                    message.error('只能上传 JPG/PNG 格式的图片!');
-                  }
-                  const isLt2M = file.size / 1024 / 1024 < 2;
-                  if (!isLt2M) {
-                    message.error('图片大小不能超过 2MB!');
-                  }
-                  return isJpgOrPng && isLt2M;
-                }}
-                onChange={handleAvatarUpload}
-              >
-                {form.getFieldValue('avatar') ? (
-                  <img
-                    src={form.getFieldValue('avatar')}
-                    alt="avatar"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                ) : (
-                  uploadButton
-                )}
-              </Upload>
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  {selectedAvatar ? (
+                    <Image
+                      src={selectedAvatar}
+                      alt="当前头像"
+                      width={120}
+                      height={120}
+                      className="rounded-full object-cover border-2 border-gray-200"
+                      style={{ width: 120, height: 120, objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div className="w-[120px] h-[120px] rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                      <PictureOutlined className="text-3xl text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="primary"
+                  icon={<PictureOutlined />}
+                  onClick={handleOpenAvatarModal}
+                  className="px-6"
+                >
+                  选择头像
+                </Button>
+              </div>
             </Form.Item>
           </div>
         </div>
@@ -193,6 +201,58 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
           </motion.div>
         </div>
       </Form>
+
+      {/* 头像选择模态框 */}
+      <Modal
+        title="选择头像"
+        open={isAvatarModalOpen}
+        onCancel={() => setIsAvatarModalOpen(false)}
+        footer={null}
+        width={800}
+        className="avatar-select-modal"
+      >
+        <div className="py-4">
+          {avatarLoading ? (
+            <div className="flex justify-center py-8">
+              <Spin size="large" />
+            </div>
+          ) : avatarImages.length > 0 ? (
+            <div className="grid grid-cols-4 gap-4">
+              {avatarImages.map((image) => (
+                <motion.div
+                  key={image.id}
+                  className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedAvatar === image.url
+                      ? 'border-blue-500 ring-2 ring-blue-200'
+                      : 'border-gray-200 hover:border-blue-300'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleSelectAvatar(image.url)}
+                >
+                  <Image
+                    src={image.url}
+                    alt={image.filename}
+                    width="100%"
+                    height={120}
+                    style={{ width: '100%', height: 120, objectFit: 'cover' }}
+                    preview={false}
+                  />
+                  {selectedAvatar === image.url && (
+                    <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <Empty description="暂无可选择的头像图片" className="py-8" />
+          )}
+        </div>
+      </Modal>
     </motion.div>
   );
 };
