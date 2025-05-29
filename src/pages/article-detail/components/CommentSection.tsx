@@ -272,7 +272,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       initial="initial"
       whileInView="animate"
       viewport={{ once: true }}
-      className="mt-20 max-w-5xl mx-auto px-4"
+      className="my-20 max-w-5xl mx-auto px-4"
     >
       {/* 标题 */}
       <motion.div variants={itemVariants} className="mb-8">

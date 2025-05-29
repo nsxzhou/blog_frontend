@@ -3,9 +3,10 @@ export const routeAccessMap: Record<string, string> = {
   '/write': 'canAccess',
   '/profile': 'canAccess',
   '/my-articles': 'canAccess',
-  '/categories': 'canAccess',
-  '/tags': 'canAccess',
-  '/images': 'canAccess',
+  '/categories': 'isAdmin',
+  '/tags': 'isAdmin',
+  '/images': 'isAdmin',
+  '/comments': 'isAdmin',
 };
 
 // 检查路由是否需要权限

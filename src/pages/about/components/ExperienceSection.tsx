@@ -6,28 +6,12 @@ import { sectionVariants, itemVariants } from '@/constants/animations';
 const ExperienceSection: React.FC = () => {
   const experiences = [
     {
-      title: '高级前端工程师',
-      company: 'TechCorp',
-      location: '北京',
-      period: '2022.01 - 至今',
-      description: '负责公司核心产品的前端架构设计和开发，带领团队完成多个大型项目。',
-      skills: ['React', 'TypeScript', 'Next.js', 'GraphQL']
-    },
-    {
-      title: '前端工程师',
-      company: 'StartupXYZ',
-      location: '上海',
-      period: '2020.06 - 2021.12',
-      description: '从零搭建公司前端技术栈，开发多个用户端和管理端应用。',
-      skills: ['Vue.js', 'Node.js', 'MongoDB', 'Docker']
-    },
-    {
-      title: '初级前端开发',
-      company: 'WebStudio',
+      title: '全栈开发工程师',
+      company: '深圳美藤科技',
       location: '深圳',
-      period: '2019.03 - 2020.05',
-      description: '参与多个企业级项目开发，学习现代前端开发技术和最佳实践。',
-      skills: ['JavaScript', 'CSS3', 'jQuery', 'Bootstrap']
+      period: '2025.03 - 2025.05',
+      description: '参与多个企业级项目开发，学习全栈开发。',
+      skills: ['React', 'Vue', 'TypeScript', 'Golang', 'MySQL', 'Redis', 'Docker']
     }
   ];
 

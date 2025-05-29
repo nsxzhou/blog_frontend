@@ -16,6 +16,7 @@ import {
     hoverScale,
     fadeInUp,
 } from '@/constants/animations';
+import { UserAvatar } from '@/components/ui';
 
 interface ArticleHeaderProps {
     title: string;
@@ -92,10 +93,11 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({
                 >
                     {/* 作者信息 */}
                     <div className="flex items-center gap-4">
-                        <img
-                            src={author.avatar}
+                        <UserAvatar
+                            size="md"
                             alt={author.name}
-                            className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-lg"
+                            src={author.avatar}
+                            user={author}
                         />
                         <div>
                             <h3 className="font-semibold text-gray-900">{author.name}</h3>
@@ -113,7 +115,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({
                     </div>
 
                     {/* 操作按钮 */}
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                         <motion.div {...hoverScale}>
                             <Button
                                 type="text"
@@ -141,7 +143,7 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({
                                 分享
                             </Button>
                         </motion.div>
-                    </div>
+                    </div> */}
                 </motion.div>
 
                 {/* 统计信息 */}

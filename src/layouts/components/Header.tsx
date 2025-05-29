@@ -1,4 +1,4 @@
-import { UserAvatar, Button } from '@/components/ui';
+import { Button, QRCodeModal, UserAvatar } from '@/components/ui';
 import {
   fadeInUp,
   headerVariants,
@@ -10,10 +10,10 @@ import {
   EditOutlined,
   FileTextOutlined,
   GithubOutlined,
-  LinkedinOutlined,
+  QqOutlined,
   SearchOutlined,
-  TwitterOutlined,
   UserOutlined,
+  WechatOutlined,
 } from '@ant-design/icons';
 import { Link, useDispatch, useLocation, useNavigate } from '@umijs/max';
 import { Input } from 'antd';
@@ -40,6 +40,8 @@ const navigationItems = [
 const Header: React.FC<HeaderProps> = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrType, setQrType] = useState<'wechat' | 'qq' | null>(null);
   const location = useLocation();
   const { scrollY } = useScroll();
   const navigate = useNavigate();
@@ -62,6 +64,23 @@ const Header: React.FC<HeaderProps> = () => {
       await syncLogoutState();
     } catch (error) {
       console.error('登出失败:', error);
+    }
+  };
+
+  // 处理社交媒体点击
+  const handleSocialClick = (type: 'github' | 'wechat' | 'qq') => {
+    switch (type) {
+      case 'github':
+        window.open('https://github.com/nsxzhou', '_blank');
+        break;
+      case 'wechat':
+        setQrType('wechat');
+        setQrModalOpen(true);
+        break;
+      case 'qq':
+        setQrType('qq');
+        setQrModalOpen(true);
+        break;
     }
   };
 
@@ -126,11 +145,25 @@ const Header: React.FC<HeaderProps> = () => {
           <div className="flex items-center space-x-2">
             <div className="hidden md:flex items-center space-x-1">
               {[
-                { icon: <GithubOutlined />, href: '#' },
-                { icon: <TwitterOutlined />, href: '#' },
-                { icon: <LinkedinOutlined />, href: '#' },
+                {
+                  icon: <GithubOutlined />,
+                  type: 'github' as const,
+                },
+                {
+                  icon: <WechatOutlined />,
+                  type: 'wechat' as const,
+                },
+                {
+                  icon: <QqOutlined />,
+                  type: 'qq' as const,
+                },
               ].map((social, index) => (
-                <Button key={index} className="p-2 rounded-lg" variant="ghost">
+                <Button
+                  key={index}
+                  className="p-2 rounded-lg"
+                  variant="ghost"
+                  onClick={() => handleSocialClick(social.type)}
+                >
                   {social.icon}
                 </Button>
               ))}
@@ -184,6 +217,16 @@ const Header: React.FC<HeaderProps> = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 二维码模态框 */}
+      <QRCodeModal
+        isOpen={qrModalOpen}
+        onClose={() => {
+          setQrModalOpen(false);
+          setQrType(null);
+        }}
+        type={qrType}
+      />
 
       {/* 用户侧边栏 */}
       <UserSidebar

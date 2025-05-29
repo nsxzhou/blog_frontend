@@ -27,7 +27,8 @@
 
   /* 粒子动画 */
   @keyframes particle-float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px) translateX(0px);
     }
     25% {
@@ -47,7 +48,8 @@
 
   /* 悬浮效果 */
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
@@ -61,7 +63,8 @@
 
   /* 脉冲发光效果 */
   @keyframes pulse-glow {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
     }
     50% {

@@ -7,7 +7,6 @@ import {
   containerVariants,
   itemVariants,
   floatingAnimation,
-  scaleIn,
   letterVariants
 } from '@/constants/animations';
 

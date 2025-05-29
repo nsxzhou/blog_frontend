@@ -11,12 +11,10 @@ export default function access(
     | undefined,
 ) {
   const { isLoggedIn } = initialState || { isLoggedIn: false };
-
-  console.log('权限检查 - initialState:', initialState);
-  console.log('权限检查 - isLoggedIn:', isLoggedIn);
-
   return {
     // 是否已登录
     canAccess: !!isLoggedIn,
+    // 是否是管理员
+    isAdmin: initialState?.currentUser?.role === 'admin',
   };
 }

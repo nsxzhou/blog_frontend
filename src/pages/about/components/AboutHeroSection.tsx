@@ -1,30 +1,51 @@
-import React from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Button } from 'antd';
-import { DownloadOutlined, MailOutlined, GithubOutlined, LinkedinOutlined } from '@ant-design/icons';
+import avatar from '@/assets/avatar.jpg';
+import { QRCodeModal } from '@/components/ui';
 import {
-  heroVariants,
-  itemVariants,
   floatingVariants,
-  iconHover
+  heroVariants,
+  iconHover,
+  itemVariants,
 } from '@/constants/animations';
+import {
+  DownloadOutlined,
+  GithubOutlined,
+  QqOutlined,
+  WechatOutlined,
+} from '@ant-design/icons';
+import { Button } from 'antd';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useState } from 'react';
 
 const AboutHeroSection: React.FC = () => {
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrType, setQrType] = useState<'wechat' | 'qq' | null>(null);
+
   const { scrollYProgress } = useScroll();
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const avatarY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
 
+  const handleSocialClick = (type: 'github' | 'wechat' | 'qq') => {
+    switch (type) {
+      case 'github':
+        window.open('https://github.com/nsxzhou', '_blank');
+        break;
+      case 'wechat':
+        setQrType('wechat');
+        setQrModalOpen(true);
+        break;
+      case 'qq':
+        setQrType('qq');
+        setQrModalOpen(true);
+        break;
+    }
+  };
   return (
     <motion.section
       style={{ y: heroY }}
       className="relative min-h-screen flex items-center justify-center px-4 py-20"
     >
       <div className="relative z-10 max-w-4xl mx-auto text-center">
-        <motion.div
-          variants={heroVariants}
-          initial="initial"
-          animate="animate"
-        >
+        <motion.div variants={heroVariants} initial="initial" animate="animate">
           {/* 头像区域 */}
           <motion.div
             variants={itemVariants}
@@ -43,8 +64,8 @@ const AboutHeroSection: React.FC = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"
-                    alt="周子瑞的头像"
+                    src={avatar}
+                    alt="NSZHOU的头像"
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
@@ -63,7 +84,7 @@ const AboutHeroSection: React.FC = () => {
           <motion.div variants={itemVariants} className="mb-8">
             <h1 className="text-5xl md:text-6xl font-bold mb-4 text-gray-900">
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                周子瑞
+                NSZHOU
               </span>
             </h1>
             <div className="text-xl md:text-2xl text-gray-600 mb-2 font-light">
@@ -71,13 +92,13 @@ const AboutHeroSection: React.FC = () => {
             </div>
             <div className="text-lg text-gray-500">
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full mr-2 mb-2">
-                前端架构师
+                Golang 开发
               </span>
               <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full mr-2 mb-2">
-                React 专家
+                React Vue
               </span>
               <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full mb-2">
-                开源贡献者
+                Github 开源贡献者
               </span>
             </div>
           </motion.div>
@@ -85,14 +106,18 @@ const AboutHeroSection: React.FC = () => {
           {/* 个人简介 */}
           <motion.div variants={itemVariants} className="mb-10">
             <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              热爱编程，专注于现代 Web 技术栈。擅长 React、TypeScript、Node.js 等技术，
+              热爱编程，专注于现代 Web 技术栈。擅长
+              React、Vue、TypeScript、Golang 等技术，
               致力于构建用户体验优秀的前端应用和高性能的后端服务。喜欢分享技术知识，
               相信代码可以让世界变得更美好。
             </p>
           </motion.div>
 
           {/* 操作按钮 */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
+          >
             <Button
               type="primary"
               size="large"
@@ -101,20 +126,15 @@ const AboutHeroSection: React.FC = () => {
             >
               下载简历
             </Button>
-            <Button
-              type="default"
-              size="large"
-              icon={<MailOutlined />}
-              className="h-12 px-8 rounded-full"
-            >
-              联系我
-            </Button>
           </motion.div>
 
           {/* 社交链接 */}
-          <motion.div variants={itemVariants} className="flex items-center justify-center gap-6">
+          <motion.div
+            variants={itemVariants}
+            className="flex items-center justify-center gap-6"
+          >
             <motion.a
-              href="https://github.com/zhouzirui"
+              href="https://github.com/nsxzhou"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="访问 GitHub 主页"
@@ -123,27 +143,32 @@ const AboutHeroSection: React.FC = () => {
             >
               <GithubOutlined />
             </motion.a>
-            <motion.a
-              href="https://linkedin.com/in/zhouzirui"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="访问 LinkedIn 主页"
+            <motion.button
               className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg transition-colors hover:bg-blue-700"
               {...iconHover}
+              onClick={() => handleSocialClick('wechat')}
             >
-              <LinkedinOutlined />
-            </motion.a>
-            <motion.a
-              href="mailto:zhouzirui@example.com"
-              aria-label="发送邮件"
+              <WechatOutlined />
+            </motion.button>
+            <motion.button
               className="w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center text-lg transition-colors hover:bg-red-600"
               {...iconHover}
+              onClick={() => handleSocialClick('qq')}
             >
-              <MailOutlined />
-            </motion.a>
+              <QqOutlined />
+            </motion.button>
           </motion.div>
         </motion.div>
       </div>
+      {/* 二维码模态框 */}
+      <QRCodeModal
+        isOpen={qrModalOpen}
+        onClose={() => {
+          setQrModalOpen(false);
+          setQrType(null);
+        }}
+        type={qrType}
+      />
 
       {/* 背景装饰 */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -157,7 +182,7 @@ const AboutHeroSection: React.FC = () => {
           transition={{
             duration: 10,
             repeat: Infinity,
-            ease: "linear",
+            ease: 'linear',
           }}
         />
         <motion.div
@@ -170,7 +195,7 @@ const AboutHeroSection: React.FC = () => {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "linear",
+            ease: 'linear',
           }}
         />
       </div>
@@ -178,4 +203,4 @@ const AboutHeroSection: React.FC = () => {
   );
 };
 
-export default AboutHeroSection; 
+export default AboutHeroSection;

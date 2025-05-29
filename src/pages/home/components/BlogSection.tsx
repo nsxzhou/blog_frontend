@@ -106,7 +106,7 @@ const BlogSection: React.FC = () => {
   );
 
   return (
-    <motion.section variants={itemVariants} className="py-20 px-4">
+    <motion.section variants={itemVariants} className="pb-20 px-4">
       <div className="max-w-6xl mx-auto">
         <motion.div variants={itemVariants} className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">

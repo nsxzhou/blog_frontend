@@ -10,30 +10,15 @@ const HobbiesSection: React.FC = () => {
       description: '喜欢弹吉他和钢琴，偶尔创作一些小曲子'
     },
     {
-      icon: '📚',
-      title: '阅读',
-      description: '热爱技术书籍和科幻小说，保持持续学习'
-    },
-    {
       icon: '🏃‍♂️',
       title: '运动',
       description: '跑步和健身是我保持活力的秘诀'
-    },
-    {
-      icon: '📷',
-      title: '摄影',
-      description: '用镜头记录生活中的美好瞬间'
     },
     {
       icon: '🎮',
       title: '游戏',
       description: '偶尔玩玩独立游戏放松身心'
     },
-    {
-      icon: '✈️',
-      title: '旅行',
-      description: '喜欢探索不同的城市和文化'
-    }
   ];
 
   return (

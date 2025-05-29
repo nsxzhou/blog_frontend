@@ -17,7 +17,7 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ blogPosts }) => {
   const totalLikes = blogPosts.reduce((sum, post) => sum + post.likes, 0);
 
   return (
-    <motion.section variants={itemVariants} className="relative py-20 px-4">
+    <motion.section variants={itemVariants} className="relative pt-20 px-4">
       <div className="max-w-6xl mx-auto text-center">
         <motion.div
           {...scaleIn}

@@ -16,7 +16,7 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, delay = 0 }) => {
         setDisplayText(prev => prev + text[currentIndex]);
         setCurrentIndex(prev => prev + 1);
       }
-    }, delay + currentIndex * 80);
+    }, delay + currentIndex * 10);
 
     return () => clearTimeout(timer);
   }, [currentIndex, text, delay]);

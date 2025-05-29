@@ -7,8 +7,7 @@ import {
   EnvironmentOutlined,
   WechatOutlined,
   GithubOutlined,
-  LinkedinOutlined,
-  SendOutlined
+  QqOutlined,
 } from '@ant-design/icons';
 import { sectionVariants, itemVariants, iconHover } from '@/constants/animations';
 
@@ -20,21 +19,19 @@ const ContactSection: React.FC = () => {
     {
       icon: <MailOutlined />,
       label: '邮箱',
-      value: 'zhouzirui@example.com',
-      link: 'mailto:zhouzirui@example.com',
-      color: 'text-red-500'
+      value: '1790146932@qq.com',
+      color: 'text-blue-500'
     },
     {
       icon: <PhoneOutlined />,
       label: '电话',
-      value: '+86 138-0000-0000',
-      link: 'tel:+8613800000000',
+      value: '+86 13407017688',
       color: 'text-green-500'
     },
     {
       icon: <EnvironmentOutlined />,
       label: '位置',
-      value: '北京，中国',
+      value: '安徽 淮南',
       color: 'text-blue-500'
     }
   ];
@@ -43,13 +40,13 @@ const ContactSection: React.FC = () => {
     {
       icon: <GithubOutlined />,
       label: 'GitHub',
-      url: 'https://github.com/zhouzirui',
+      url: 'https://github.com/nsxzhou',
       color: 'bg-gray-800 hover:bg-gray-700'
     },
     {
-      icon: <LinkedinOutlined />,
-      label: 'LinkedIn',
-      url: 'https://linkedin.com/in/zhouzirui',
+      icon: <QqOutlined />,
+      label: 'QQ',
+      url: '#',
       color: 'bg-blue-600 hover:bg-blue-700'
     },
     {
@@ -106,25 +103,16 @@ const ContactSection: React.FC = () => {
                   <div className={`text-2xl ${item.color}`}>{item.icon}</div>
                   <div>
                     <div className="text-sm text-gray-500">{item.label}</div>
-                    {item.link ? (
-                      <a
-                        href={item.link}
-                        className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                      >
-                        {item.value}
-                      </a>
-                    ) : (
-                      <div className="text-lg font-medium text-gray-900">
-                        {item.value}
-                      </div>
-                    )}
+                    <div className="text-lg font-medium text-gray-900">
+                      {item.value}
+                    </div>
                   </div>
                 </motion.div>
               ))}
             </div>
 
             {/* 社交媒体 */}
-            <div className="mt-8">
+            {/* <div className="mt-8">
               <h4 className="text-lg font-semibold text-gray-900 mb-4">社交媒体</h4>
               <div className="flex gap-4">
                 {socialLinks.map((social, index) => (
@@ -140,7 +128,7 @@ const ContactSection: React.FC = () => {
                   </motion.a>
                 ))}
               </div>
-            </div>
+            </div> */}
           </motion.div>
 
           {/* CTA区域 */}
@@ -152,16 +140,7 @@ const ContactSection: React.FC = () => {
               我正在寻找新的机会和挑战。如果您有有趣的项目或职位机会，
               请不要犹豫联系我。我很乐意与您讨论如何为您的团队贡献价值。
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                type="primary"
-                size="large"
-                icon={<MailOutlined />}
-                className="bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700"
-                onClick={() => window.location.href = 'mailto:zhouzirui@example.com'}
-              >
-                发送邮件
-              </Button>
+            {/* <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 type="default"
                 size="large"
@@ -169,7 +148,7 @@ const ContactSection: React.FC = () => {
               >
                 查看作品集
               </Button>
-            </div>
+            </div> */}
           </motion.div>
         </div>
       </div>

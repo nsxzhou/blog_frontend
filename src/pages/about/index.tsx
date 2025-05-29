@@ -20,7 +20,7 @@ const AboutPage: React.FC = () => {
       <AboutHeroSection />
 
       {/* 个人信息区域 */}
-      <PersonalInfoSection />
+      {/* <PersonalInfoSection /> */}
 
       {/* 技能展示区域 */}
       <SkillsSection />
