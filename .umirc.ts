@@ -60,6 +60,14 @@ export default defineConfig({
       component: '@/pages/comments',
     },
     {
+      path: '/users',
+      component: '@/pages/users',
+    },
+    {
+      path: '/favorites',
+      component: '@/pages/favorites',
+    },
+    {
       path: '/403',
       component: '@/pages/403',
     },

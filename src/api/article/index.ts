@@ -68,9 +68,13 @@ export function ArticleAction(id: number, data: ArticleActionReq) {
 }
 
 // 获取用户文章收藏列表
-export function GetFavoriteArticles() {
+export function GetFavoriteArticles(page?: number, page_size?: number) {
   return request<baseResponse<ArticleListRes>>('/api/articles/favorites', {
     method: 'GET',
+    params: {
+      page,
+      page_size,
+    },
   });
 }
 
