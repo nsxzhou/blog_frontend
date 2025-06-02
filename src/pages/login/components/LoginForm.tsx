@@ -54,7 +54,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     e.preventDefault();
 
     if (!validateForm()) return;
-
+    console.log(formData);
     try {
       const result = (await dispatch({
         type: 'user/login',
@@ -187,7 +187,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             onChange={(e) => handleInputChange('remember', e.target.checked)}
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             whileTap={{ scale: 0.9 }}
-          />
+          />  
           <span className="ml-2 text-sm text-gray-600">记住我</span>
         </label>
         <motion.button

@@ -43,9 +43,6 @@ export function RefreshToken(data: RefreshTokenReq) {
   return request<baseResponse<RefreshTokenRes>>('/api/users/refresh', {
     method: 'POST',
     data,
-    headers: {
-      Authorization: `Bearer ${data.refresh_token}`,
-    },
   });
 }
 
@@ -54,9 +51,6 @@ export function Logout(data: LogoutReq) {
   return request<baseResponse<any>>('/api/users/logout', {
     method: 'POST',
     data,
-    headers: {
-      Authorization: `Bearer ${data.access_token}`,
-    },
   });
 }
 

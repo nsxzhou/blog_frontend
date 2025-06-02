@@ -1,4 +1,4 @@
-import { useDispatch, useModel, useSelector } from '@umijs/max';
+import { useDispatch, useModel, useSelector, useNavigate } from '@umijs/max';
 
 /**
  * 用户认证状态同步hook
@@ -7,7 +7,7 @@ export const useAuthSync = () => {
   const dispatch = useDispatch();
   const { initialState, setInitialState } = useModel('@@initialState');
   const userState = useSelector((state: any) => state.user);
-
+  const navigate = useNavigate();
   // 同步登录状态
   const syncLoginState = async (userData: any) => {
     const { access_token, refresh_token, user } = userData;
@@ -44,6 +44,7 @@ export const useAuthSync = () => {
     }));
 
     dispatch({ type: 'user/clearUserState' });
+    navigate('/');
   };
 
   const state = initialState as any;

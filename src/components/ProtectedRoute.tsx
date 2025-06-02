@@ -15,11 +15,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallback,
 }) => {
   const accessMap = useAccess();
-  const { initialState } = useModel('@@initialState');
-
-  console.log('ProtectedRoute - access:', access);
-  console.log('ProtectedRoute - accessMap:', accessMap);
-  console.log('ProtectedRoute - initialState:', initialState);
 
   // 如果没有指定权限要求，直接渲染
   if (!access) {
@@ -28,7 +23,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // 检查权限
   const hasPermission = accessMap[access as keyof typeof accessMap];
-  console.log('ProtectedRoute - hasPermission:', hasPermission);
 
   if (!hasPermission) {
     // 如果有自定义fallback，使用它

@@ -49,12 +49,9 @@ const BlogSection: React.FC = () => {
         page_size: 6, // 只获取前6篇文章
       });
 
-      console.log('API响应:', response); // 调试日志
-
       if (response.code === 0 && response.data) {
         // 正确访问list属性
         const articles = response.data.list || [];
-        console.log('文章列表:', articles); // 调试日志
 
         if (articles.length > 0) {
           const transformedPosts = articles.map(transformArticleToPost);

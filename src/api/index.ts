@@ -1,7 +1,12 @@
+import {
+  clearAuthTokens,
+  getRefreshTokenFromStorage,
+  getTokenFromStorage,
+  isTokenExpiringSoon,
+} from '@/utils/auth';
 import type { RequestConfig, RequestOptions } from '@umijs/max';
 import { request as umiRequest } from '@umijs/max';
 import { message } from 'antd';
-import { RefreshToken } from './user'; // 从用户API导入
 
 // 定义基础响应数据接口
 export interface baseResponse<T> {
@@ -13,6 +18,7 @@ export interface baseResponse<T> {
 // 防止重复刷新token的标志
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: Function; reject: Function }> = [];
+let refreshPromise: Promise<any> | null = null;
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -28,16 +34,109 @@ const processQueue = (error: any, token: string | null = null) => {
 
 const redirectToLogin = () => {
   console.log('清除token并跳转到登录页');
-  localStorage.removeItem('token');
-  localStorage.removeItem('refresh_token');
+  clearAuthTokens();
   window.location.href = '/login';
+};
+
+// 无感刷新token函数
+const silentRefreshToken = async (): Promise<string | null> => {
+  const refreshToken = getRefreshTokenFromStorage();
+  if (!refreshToken) {
+    redirectToLogin();
+    return null;
+  }
+
+  try {
+    // 使用直接的umiRequest调用，避免拦截器干扰
+    const refreshRes = await umiRequest('/api/users/refresh', {
+      method: 'POST',
+      data: { refresh_token: refreshToken },
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    });
+
+    if (refreshRes?.code === 0 && refreshRes?.data?.access_token) {
+      const {
+        access_token,
+        refresh_token: newRefreshToken,
+        expires_at,
+      } = refreshRes.data;
+
+      // 保存新token
+      localStorage.setItem('token', access_token);
+      if (newRefreshToken) {
+        localStorage.setItem('refresh_token', newRefreshToken);
+      }
+      if (expires_at) {
+        localStorage.setItem('token_expires_at', expires_at.toString());
+      }
+
+      return access_token;
+    } else {
+      redirectToLogin();
+      return null;
+    }
+  } catch (error) {
+    console.error('Silent refresh failed:', error);
+    redirectToLogin();
+    return null;
+  }
 };
 
 export const request: RequestConfig = {
   requestInterceptors: [
-    (config: RequestOptions) => {
-      // 从 localStorage 读取 token
-      const token = localStorage.getItem('token');
+    async (config: RequestOptions) => {
+      // 安全检查：确保 config.url 存在
+      if (
+        config.url &&
+        typeof config.url === 'string' &&
+        config.url.includes('/refresh')
+      ) {
+        // 如果是刷新token接口，使用refresh_token
+        const refreshToken = getRefreshTokenFromStorage();
+        if (refreshToken) {
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${refreshToken}`,
+          };
+        }
+        return config;
+      }
+
+      // 检查token是否即将过期
+      if (isTokenExpiringSoon()) {
+        console.log('Token即将过期，尝试无感刷新...');
+
+        // 如果已经在刷新中，等待刷新完成
+        if (isRefreshing) {
+          if (refreshPromise) {
+            try {
+              await refreshPromise;
+            } catch (error) {
+              console.error('等待token刷新失败:', error);
+            }
+          }
+        } else {
+          // 开始刷新token
+          isRefreshing = true;
+          refreshPromise = silentRefreshToken().finally(() => {
+            isRefreshing = false;
+            refreshPromise = null;
+          });
+
+          try {
+            await refreshPromise;
+            console.log('Token刷新成功');
+          } catch (error) {
+            console.error('Token刷新失败:', error);
+            // 如果刷新失败，让原始请求继续，会在errorHandler中处理
+          }
+        }
+      }
+
+      // 使用最新的token
+      const token = getTokenFromStorage();
       if (token) {
         config.headers = {
           ...config.headers,
@@ -63,11 +162,19 @@ export const request: RequestConfig = {
         return Promise.reject(error);
       }
 
-      // 只处理401错误
-      if (error?.response?.status === 401 && !opts?.skipAuthRefresh) {
+      // 安全检查401错误
+      const isUnauthorized =
+        error?.response?.data?.code === 401 || error?.response?.status === 401;
+
+      if (isUnauthorized && !opts?.skipAuthRefresh) {
+        console.log('401 error detected, 开始静默处理:', error?.response?.data);
         try {
           // 避免死循环：如果当前请求是刷新token接口，直接跳转登录
-          if (error?.config?.url?.includes('/refresh')) {
+          if (
+            error?.config?.url &&
+            typeof error.config.url === 'string' &&
+            error.config.url.includes('/refresh')
+          ) {
             message.error('登录已过期，请重新登录');
             redirectToLogin();
             return;
@@ -79,7 +186,9 @@ export const request: RequestConfig = {
               failedQueue.push({ resolve, reject });
             })
               .then((token) => {
-                error.config.headers['Authorization'] = `Bearer ${token}`;
+                if (error.config && error.config.headers) {
+                  error.config.headers['Authorization'] = `Bearer ${token}`;
+                }
                 return umiRequest(error.config);
               })
               .catch((err) => {
@@ -87,50 +196,46 @@ export const request: RequestConfig = {
               });
           }
 
-          const refreshToken = localStorage.getItem('refresh_token');
+          const refreshToken = getRefreshTokenFromStorage();
           if (!refreshToken) {
-            message.error('登录已过期，请重新登录');
+            console.log('没有refresh token，跳转登录');
             redirectToLogin();
             return;
           }
 
           isRefreshing = true;
 
-          // 调用刷新token接口
-          const refreshRes = await RefreshToken({
-            refresh_token: refreshToken,
-          });
+          try {
+            // 使用无感刷新函数
+            const newToken = await silentRefreshToken();
 
-          if (refreshRes.code === 0 && refreshRes.data.access_token) {
-            // 保存新token
-            const newToken = refreshRes.data.access_token;
-            localStorage.setItem('token', newToken);
+            if (newToken) {
+              // 更新原始请求的authorization header
+              if (error.config && error.config.headers) {
+                error.config.headers['Authorization'] = `Bearer ${newToken}`;
+              }
 
-            if (refreshRes.data.refresh_token) {
-              localStorage.setItem(
-                'refresh_token',
-                refreshRes.data.refresh_token,
-              );
+              // 处理队列中的请求
+              processQueue(null, newToken);
+
+              isRefreshing = false;
+
+              // 重新发起原始请求
+              return umiRequest(error.config);
+            } else {
+              // 刷新失败，静默跳转登录
+              processQueue(new Error('Token refresh failed'), null);
+              isRefreshing = false;
+              return;
             }
-
-            // 更新原始请求的authorization header
-            error.config.headers['Authorization'] = `Bearer ${newToken}`;
-
-            // 处理队列中的请求
-            processQueue(null, newToken);
-
+          } catch (refreshError) {
+            console.error('静默刷新token失败:', refreshError);
+            processQueue(refreshError, null);
             isRefreshing = false;
-
-            // 重新发起原始请求
-            return umiRequest(error.config);
-          } else {
-            message.error('登录已过期，请重新登录');
-            processQueue(new Error('Token refresh failed'), null);
-            redirectToLogin();
             return;
           }
         } catch (e) {
-          message.error('登录已过期，请重新登录');
+          console.error('处理401错误失败:', e);
           processQueue(e, null);
           isRefreshing = false;
           redirectToLogin();
@@ -138,9 +243,14 @@ export const request: RequestConfig = {
         }
       }
 
-      // 其他错误
+      // 其他错误处理
       if (!opts?.skipErrorHandler) {
-        message.error(error.message || '请求发生错误');
+        // 如果是网络错误或其他非认证错误，才显示错误消息
+        if (!isUnauthorized) {
+          const errorMessage =
+            error?.response?.data?.message || error?.message || '请求发生错误';
+          message.error(errorMessage);
+        }
       }
       throw error;
     },

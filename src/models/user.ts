@@ -47,9 +47,10 @@ export default {
         const response: any = yield call(Login, payload);
 
         if (response.code === 0) {
-          const { access_token, refresh_token, user } = response.data;
+          const { access_token, refresh_token, user, expires_at } =
+            response.data;
 
-          setAuthTokens(access_token, refresh_token);
+          setAuthTokens(access_token, refresh_token, expires_at);
 
           yield put({
             type: 'setUserState',
@@ -60,6 +61,14 @@ export default {
               isLoggedIn: true,
             },
           });
+
+          // 启动token刷新定时器
+          if (typeof window !== 'undefined') {
+            const { startTokenRefreshTimer } = yield import(
+              '@/utils/tokenRefreshTimer'
+            );
+            startTokenRefreshTimer();
+          }
 
           message.success('登录成功！');
           return { success: true, data: response.data };
@@ -112,8 +121,17 @@ export default {
       } catch (error) {
         console.warn('登出API失败:', error);
       } finally {
+        // 停止token刷新定时器
+        if (typeof window !== 'undefined') {
+          const { stopTokenRefreshTimer } = yield import(
+            '@/utils/tokenRefreshTimer'
+          );
+          stopTokenRefreshTimer();
+        }
+
         yield put({ type: 'clearUserState' });
         message.success('已安全退出');
+        
       }
     },
 
