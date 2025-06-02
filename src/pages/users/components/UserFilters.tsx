@@ -35,7 +35,7 @@ const UserFilters: React.FC<UserFiltersProps> = ({
     onFilterChange({
       keyword: '',
       role: '',
-      status: undefined,
+      status: 2, // 全部状态
     });
     onSortChange({
       order_by: 'created_at',
@@ -45,7 +45,7 @@ const UserFilters: React.FC<UserFiltersProps> = ({
 
   // 检查是否有激活的筛选条件
   const hasActiveFilters =
-    filters.keyword || filters.role || filters.status !== undefined;
+    filters.keyword || filters.role || filters.status !== 2;
 
   return (
     <motion.div variants={itemVariants}>
@@ -93,6 +93,12 @@ const UserFilters: React.FC<UserFiltersProps> = ({
                   className="min-w-[120px]"
                   size="middle"
                 >
+                  <Option value="">
+                    <Space>
+                      <UserOutlined className="text-blue-500" />
+                      全部
+                    </Space>
+                  </Option>
                   <Option value="admin">
                     <Space>
                       <CrownOutlined className="text-orange-500" />
@@ -118,6 +124,12 @@ const UserFilters: React.FC<UserFiltersProps> = ({
                   className="min-w-[120px]"
                   size="middle"
                 >
+                  <Option value={2}>
+                    <Space>
+                      <UserOutlined className="text-blue-500" />
+                      全部
+                    </Space>
+                  </Option>
                   <Option value={1}>
                     <Space>
                       <CheckCircleOutlined className="text-green-500" />
@@ -146,13 +158,11 @@ const UserFilters: React.FC<UserFiltersProps> = ({
                   onChange={(value) =>
                     onSortChange({ ...sorting, order_by: value })
                   }
-                  className="min-w-[100px]"
+                  className="min-w-[120px]"
                   size="middle"
                 >
                   <Option value="created_at">创建时间</Option>
-                  <Option value="updated_at">更新时间</Option>
-                  <Option value="username">用户名</Option>
-                  <Option value="email">邮箱</Option>
+                  <Option value="last_login_at">最后登录</Option>
                 </Select>
               </motion.div>
 
@@ -210,7 +220,7 @@ const UserFilters: React.FC<UserFiltersProps> = ({
                 </motion.div>
               )}
 
-              {filters.status !== undefined && (
+              {filters.status !== 2 && (
                 <motion.div
                   variants={hoverScale}
                   className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm"

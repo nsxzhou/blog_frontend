@@ -1,13 +1,13 @@
-// 筛选参数类型
+// 筛选参数类型 - 精确匹配接口参数
 export interface FilterParams {
   keyword: string;
-  role: string;
-  status: number | undefined;
+  role: 'admin' | 'user' | ''; // 精确匹配接口要求
+  status: 0 | 1 | 2; // 0: 禁用, 1: 启用, 2: 全部
 }
 
-// 排序参数类型
+// 排序参数类型 - 精确匹配接口参数
 export interface SortParams {
-  order_by: string;
+  order_by: 'created_at' | 'last_login_at'; // 只支持这两个字段
   order: 'asc' | 'desc';
 }
 

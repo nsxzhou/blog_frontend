@@ -17,8 +17,7 @@ interface PaginationConfig {
 }
 
 interface BlogListProps {
-  filteredPosts: BlogPost[];
-  onTagClick: (tag: string) => void;
+  filteredPosts: BlogPost[];  
   filterKey: string;
   loading?: boolean;
   error?: string | null;
@@ -28,7 +27,6 @@ interface BlogListProps {
 
 const BlogList: React.FC<BlogListProps> = ({
   filteredPosts,
-  onTagClick,
   filterKey,
   loading = false,
   error = null,
@@ -98,7 +96,6 @@ const BlogList: React.FC<BlogListProps> = ({
                   key={post.id}
                   post={post}
                   index={index}
-                  onTagClick={onTagClick}
                 />
               ))}
             </motion.div>

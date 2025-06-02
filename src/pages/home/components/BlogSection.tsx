@@ -1,11 +1,11 @@
 import { GetLatestArticles, type ArticleListItem } from '@/api/article';
 import { Button } from '@/components/ui';
 import { containerVariants, itemVariants } from '@/constants/animations';
-import EmptyState from '@/pages/blog/components/EmptyState';
 import BlogCard from '@/pages/blog/components/BlogCard';
+import EmptyState from '@/pages/blog/components/EmptyState';
 import type { BlogPost } from '@/pages/blog/components/types';
 import { ArrowRightOutlined } from '@ant-design/icons';
-import { Empty, message, Spin } from 'antd';
+import { message, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 
@@ -88,9 +88,7 @@ const BlogSection: React.FC = () => {
   /**
    * 渲染空状态
    */
-  const renderEmpty = () => (
-    <EmptyState />
-  );
+  const renderEmpty = () => <EmptyState />;
 
   /**
    * 渲染错误状态
@@ -130,12 +128,7 @@ const BlogSection: React.FC = () => {
               exit="exit"
             >
               {blogPosts.map((post, index) => (
-                <BlogCard
-                  key={post.id}
-                  post={post}
-                  index={index}
-                  onTagClick={() => {}}
-                />
+                <BlogCard key={post.id} post={post} index={index} />
               ))}
             </motion.div>
 

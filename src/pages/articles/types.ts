@@ -20,7 +20,7 @@ export interface SortParams {
     | 'published_at'
     | 'view_count'
     | 'like_count'
-    | 'title';
+    | 'comments'
   order: 'asc' | 'desc';
 }
 

@@ -23,17 +23,11 @@ import type { BlogPost } from './types';
 interface BlogCardProps {
   post: BlogPost;
   index: number;
-  onTagClick: (tag: string) => void;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
+const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
   const handleCardClick = () => {
     history.push(`/article-detail/${post.id}`);
-  };
-
-  const handleTagClick = (e: React.MouseEvent, tag: string) => {
-    e.stopPropagation();
-    onTagClick(tag);
   };
 
   return (
@@ -117,7 +111,6 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onTagClick }) => {
                   transition: { duration: 0.1 }
                 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={(e) => handleTagClick(e, tag)}
               >
                 {tag}
               </motion.span>

@@ -54,7 +54,7 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
     { value: 'published_at', label: '发布时间' },
     { value: 'view_count', label: '浏览量' },
     { value: 'like_count', label: '点赞数' },
-    { value: 'title', label: '标题' },
+    { value: 'comments', label: '评论数' },
   ];
 
   // 清空筛选条件

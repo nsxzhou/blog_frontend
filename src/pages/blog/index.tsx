@@ -1,9 +1,7 @@
 import {
-  GetHotArticles,
-  GetLatestArticles,
-  SearchArticles,
+  GetArticles,
   type ArticleListItem,
-  type SearchArticleQuery,
+  type UnifiedArticleQuery,
 } from '@/api/article';
 import { GetCategoryList, type CategoryInfo } from '@/api/category';
 import { GetTagList, type TagInfo } from '@/api/tag';
@@ -50,8 +48,8 @@ const BlogPage: React.FC = () => {
 
   // 数据状态
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<string[]>(['']);
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
+  const [allTags, setAllTags] = useState<TagInfo[]>([]);
 
   // 加载状态
   const [loading, setLoading] = useState(true);
@@ -69,12 +67,8 @@ const BlogPage: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const response = await GetCategoryList({ is_visible: 1 });
-      console.log(response);
       if (response.code === 0 && response.data) {
-        console.log(response.data.list);
-        const categoryNames =
-          response.data.list?.map((item: CategoryInfo) => item.name) || [];
-        setCategories([...categoryNames]);
+        setCategories(response.data.list || []);
       }
     } catch (err) {
       console.error('获取分类列表失败:', err);
@@ -88,9 +82,7 @@ const BlogPage: React.FC = () => {
     try {
       const response = await GetTagList();
       if (response.code === 0 && response.data) {
-        const tagNames =
-          response.data.list?.map((item: TagInfo) => item.name) || [];
-        setAllTags(tagNames);
+        setAllTags(response.data.list || []);
       }
     } catch (err) {
       console.error('获取标签列表失败:', err);
@@ -98,40 +90,85 @@ const BlogPage: React.FC = () => {
   };
 
   /**
-   * 根据排序类型获取文章
+   * 构建查询参数
    */
-  const fetchArticlesBySortType = useCallback(
+  const buildQueryParams = useCallback(
+    (page: number = currentPage): UnifiedArticleQuery => {
+      const params: UnifiedArticleQuery = {
+        page,
+        page_size: pageSize,
+        status: 'published',
+        access_type: 'public',
+      };
+
+      // 搜索关键词
+      if (searchTerm.trim()) {
+        params.keyword = searchTerm.trim();
+      }
+
+      // 分类过滤
+      if (activeCategory !== '全部') {
+        const selectedCategoryId = categories.find(
+          (cat) => cat.name === activeCategory,
+        )?.id;
+        if (selectedCategoryId) {
+          params.category_id = selectedCategoryId;
+        }
+      }
+
+      // 标签过滤 - 只支持单个标签（API限制）
+      if (selectedTags.length > 0) {
+        const selectedTagId = allTags.find(
+          (tag) => tag.name === selectedTags[0],
+        )?.id;
+        if (selectedTagId) {
+          params.tag_id = selectedTagId;
+        }
+      }
+
+      // 排序设置
+      switch (sortBy) {
+        case 'latest':
+          params.sort_by = 'published_at';
+          params.order = 'desc';
+          break;
+        case 'hot':
+          params.sort_by = 'view_count';
+          params.order = 'desc';
+          break;
+        default:
+          // 默认按发布时间倒序
+          params.sort_by = 'published_at';
+          params.order = 'desc';
+          break;
+      }
+
+      return params;
+    },
+    [
+      currentPage,
+      pageSize,
+      searchTerm,
+      activeCategory,
+      selectedTags,
+      sortBy,
+      categories,
+      allTags,
+    ],
+  );
+
+  /**
+   * 获取文章列表
+   */
+  const fetchArticles = useCallback(
     async (resetPage = false) => {
       try {
         const targetPage = resetPage ? 1 : currentPage;
         setSearchLoading(true);
         setError(null);
 
-        let response;
-
-        if (sortBy === 'latest') {
-          // 获取最新文章
-          response = await GetLatestArticles({
-            page: targetPage,
-            page_size: pageSize,
-          });
-        } else if (sortBy === 'hot') {
-          // 获取热门文章
-          response = await GetHotArticles({
-            page: targetPage,
-            page_size: pageSize,
-          });
-        } else {
-          // 全部文章 - 使用搜索接口
-          const searchParams: SearchArticleQuery = {
-            page: targetPage,
-            page_size: pageSize,
-            keyword: searchTerm || undefined,
-            status: 'published',
-            access_type: 'public',
-          };
-          response = await SearchArticles(searchParams);
-        }
+        const params = buildQueryParams(targetPage);
+        const response = await GetArticles(params);
 
         if (response.code === 0 && response.data) {
           const articles = response.data.list || [];
@@ -155,7 +192,7 @@ const BlogPage: React.FC = () => {
         setSearchLoading(false);
       }
     },
-    [currentPage, searchTerm, pageSize, sortBy],
+    [currentPage, buildQueryParams],
   );
 
   /**
@@ -167,63 +204,71 @@ const BlogPage: React.FC = () => {
       try {
         // 并行获取分类、标签数据
         await Promise.all([fetchCategories(), fetchTags()]);
-
-        // 获取初始文章数据
-        await fetchArticlesBySortType();
       } finally {
         setLoading(false);
       }
     };
 
     initializeData();
-  }, []); // 空依赖数组，只在组件挂载时执行
+  }, []);
+
+  // 当分类和标签数据加载完成后，获取文章列表
+  useEffect(() => {
+    if (!loading && categories.length >= 0 && allTags.length >= 0) {
+      fetchArticles(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, categories.length, allTags.length]);
 
   // 搜索词变化时重新搜索
   useEffect(() => {
-    if (loading) return; // 如果正在初始化加载中，不执行搜索
+    if (loading) return;
 
     const timeoutId = setTimeout(() => {
-      fetchArticlesBySortType(true);
+      fetchArticles(true);
     }, 500); // 防抖
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, fetchArticlesBySortType]); // 依赖searchTerm和fetchArticlesBySortType
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
 
-  // 排序类型变化时重新获取数据
+  // 排序类型、分类、标签变化时重新获取数据
   useEffect(() => {
     if (!loading) {
-      fetchArticlesBySortType(true);
+      fetchArticles(true);
     }
-  }, [sortBy, fetchArticlesBySortType, loading]); // 依赖sortBy
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, activeCategory, selectedTags]);
 
   // 页码变化时搜索
   useEffect(() => {
     if (!loading && currentPage > 1) {
-      fetchArticlesBySortType();
+      fetchArticles();
     }
-  }, [currentPage, loading, fetchArticlesBySortType]); // 依赖currentPage、loading和fetchArticlesBySortType
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
-  // 客户端过滤逻辑（基于已获取的数据进行二次过滤）
-  const filteredPosts = useMemo(() => {
-    let filtered = blogPosts.filter((post) => {
-      const matchesCategory =
-        activeCategory === '全部' || post.category === activeCategory;
-      const matchesTags =
-        selectedTags.length === 0 ||
-        selectedTags.some((tag) => post.tags.includes(tag));
-
-      return matchesCategory && matchesTags;
-    });
-
-    // 注意：这里不再需要排序逻辑，因为已经通过API获取了排序后的数据
-    return filtered;
-  }, [blogPosts, activeCategory, selectedTags]);
-
+  // 处理标签选择（因为API只支持单个标签，这里限制只能选择一个）
   const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
+    setSelectedTags((prev) => {
+      if (prev.includes(tag)) {
+        return []; // 取消选择
+      } else {
+        return [tag]; // 只选择一个标签
+      }
+    });
   };
+
+  // 生成分类列表（包含"全部"选项）
+  const categoryOptions = useMemo(() => {
+    const categoryNames = categories.map((cat) => cat.name);
+    return ['全部', ...categoryNames];
+  }, [categories]);
+
+  // 生成标签列表
+  const tagOptions = useMemo(() => {
+    return allTags.map((tag) => tag.name);
+  }, [allTags]);
 
   const filterKey = `${activeCategory}-${searchTerm}-${selectedTags.join(
     ',',
@@ -248,7 +293,7 @@ const BlogPage: React.FC = () => {
       className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50"
     >
       {/* 头部区域 */}
-      <BlogHeader blogPosts={filteredPosts} />
+      <BlogHeader blogPosts={blogPosts} />
 
       {/* 搜索和过滤区域 */}
       <motion.section variants={itemVariants} className="px-4 pb-8">
@@ -262,10 +307,10 @@ const BlogPage: React.FC = () => {
 
           {/* 过滤器 */}
           <BlogFilters
-            categories={categories}
+            categories={categoryOptions}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
-            allTags={allTags}
+            allTags={tagOptions}
             selectedTags={selectedTags}
             onTagToggle={toggleTag}
             sortBy={sortBy}
@@ -278,13 +323,12 @@ const BlogPage: React.FC = () => {
       <motion.section variants={itemVariants} className="px-4 pb-20">
         <div className="max-w-6xl mx-auto">
           <BlogList
-            filteredPosts={filteredPosts}
+            filteredPosts={blogPosts}
             key={filterKey}
-            onTagClick={toggleTag}
             filterKey={filterKey}
             loading={searchLoading}
             error={error}
-            onRetry={() => fetchArticlesBySortType(true)}
+            onRetry={() => fetchArticles(true)}
             pagination={{
               current: currentPage,
               total,

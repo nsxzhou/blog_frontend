@@ -1,4 +1,5 @@
 import { type UserInfo } from '@/api/user';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { fadeInUp, hoverScale, itemVariants } from '@/constants/animations';
 import {
   CalendarOutlined,
@@ -17,7 +18,6 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import {
-  Avatar,
   Button,
   Dropdown,
   Empty,
@@ -33,7 +33,6 @@ import {
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { type RoleConfig, type StatusConfig } from '../types';
-import UserAvatar from '@/components/ui/UserAvatar';
 
 interface UserTableProps {
   users: UserInfo[];

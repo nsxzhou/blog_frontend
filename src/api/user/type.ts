@@ -132,9 +132,9 @@ export interface GetUsersReq {
   page?: number;
   page_size?: number;
   keyword?: string;
-  role?: string;
-  status?: number;
-  order_by?: string;
+  role?: 'admin' | 'user' | ''; // admin: 管理员, user: 普通用户, 空: 全部
+  status?: 0 | 1 | 2; //0: 禁用, 1: 启用 2: 全部
+  order_by?: 'created_at' | 'last_login_at'; // created_at: 创建时间, last_login_at: 最后登录时间 
   order?: 'asc' | 'desc';
 }
 
@@ -154,9 +154,9 @@ export interface UpdateUserStatusReq {
 export interface GetUserStatsRes {
   total_users: number;
   active_users: number;
-  inactive_users: number;
+  new_users: number;
   admin_users: number;
-  regular_users: number;
+  disabled_users: number;
 }
 
 // 重置用户密码请求参数

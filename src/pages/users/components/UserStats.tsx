@@ -34,7 +34,7 @@ const UserStats: React.FC<UserStatsProps> = ({ statistics, loading }) => {
     },
     {
       title: '禁用用户',
-      value: statistics?.inactive_users || 0,
+      value: statistics?.disabled_users || 0,
       icon: <StopOutlined className="text-red-500" />,
       color: 'border-red-200 bg-red-50',
       valueColor: 'text-red-600',
@@ -47,8 +47,8 @@ const UserStats: React.FC<UserStatsProps> = ({ statistics, loading }) => {
       valueColor: 'text-orange-600',
     },
     {
-      title: '普通用户',
-      value: statistics?.regular_users || 0,
+      title: '新用户',
+      value: statistics?.new_users || 0,
       icon: <UserOutlined className="text-purple-500" />,
       color: 'border-purple-200 bg-purple-50',
       valueColor: 'text-purple-600',

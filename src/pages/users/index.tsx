@@ -17,8 +17,8 @@ import { message, Modal, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { UserActions, UserFilters, UserStats, UserTable } from './components';
-import { FilterParams, SortParams } from './types';
 import './styles.css';
+import { FilterParams, SortParams } from './types';
 
 const UserManagementPage: React.FC = () => {
   // 状态管理
@@ -39,7 +39,7 @@ const UserManagementPage: React.FC = () => {
   const [filters, setFilters] = useState<FilterParams>({
     keyword: '',
     role: '',
-    status: 2,
+    status: 2, // 2 表示全部状态
   });
 
   const [sorting, setSorting] = useState<SortParams>({
@@ -54,16 +54,15 @@ const UserManagementPage: React.FC = () => {
       const query: GetUsersReq = {
         page: pagination.current,
         page_size: pagination.pageSize,
-        keyword: filters.keyword || undefined,
-        role: filters.role === '' ? undefined : filters.role,
-        status: filters.status,
+        keyword: filters.keyword || '',
+        role: filters.role === '' ? '' : filters.role,
+        status: filters.status === 2 ? 2 : filters.status,
         order_by: sorting.order_by,
         order: sorting.order,
         ...params,
       };
-      console.log(query);
+
       const response = await GetUsers(query);
-      console.log(response);
       if (response.code === 0 && response.data) {
         setUsers(response.data.list || []);
         setPagination((prev) => ({
@@ -221,9 +220,9 @@ const UserManagementPage: React.FC = () => {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="min-h-screen bg-gray-50 p-6"
+      className="min-h-screen bg-gray-50 p-8"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4">
         {/* 页面标题 */}
         <motion.div variants={itemVariants} className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">用户管理</h1>
