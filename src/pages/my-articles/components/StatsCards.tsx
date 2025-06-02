@@ -102,10 +102,10 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
                 <span className="text-lg">{item.icon}</span>
               </div>
 
-              <div className="flex items-center gap-1 text-xs font-medium text-gray-500">
+              {/* <div className="flex items-center gap-1 text-xs font-medium text-gray-500">
                 <RiseOutlined className="text-green-500" />
                 <span>+{todayIncrease}</span>
-              </div>
+              </div> */}
             </div>
 
             <div className="mb-2">

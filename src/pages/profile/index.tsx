@@ -183,26 +183,26 @@ const ProfilePage: React.FC = () => {
         />
       ),
     },
-    {
-      key: 'stats',
-      label: (
-        <span>
-          <BarChartOutlined />
-          数据统计
-        </span>
-      ),
-      children: <ProfileStats stats={mockStats} />,
-    },
-    {
-      key: 'activity',
-      label: (
-        <span>
-          <HistoryOutlined />
-          最近活动
-        </span>
-      ),
-      children: <ActivityTimeline activities={mockActivities} />,
-    },
+    // {
+    //   key: 'stats',
+    //   label: (
+    //     <span>
+    //       <BarChartOutlined />
+    //       数据统计
+    //     </span>
+    //   ),
+    //   children: <ProfileStats stats={mockStats} />,
+    // },
+    // {
+    //   key: 'activity',
+    //   label: (
+    //     <span>
+    //       <HistoryOutlined />
+    //       最近活动
+    //     </span>
+    //   ),
+    //   children: <ActivityTimeline activities={mockActivities} />,
+    // },
   ];
 
   if (loading) {

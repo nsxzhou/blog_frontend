@@ -9,11 +9,12 @@ import {
   floatingAnimation,
   letterVariants
 } from '@/constants/animations';
+import { useNavigate } from '@umijs/max';
 
 const HeroSection: React.FC = () => {
   const { scrollYProgress } = useScroll();
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-
+  const navigate = useNavigate();
   return (
     <motion.section
       style={{ y: heroY }}
@@ -69,14 +70,14 @@ const HeroSection: React.FC = () => {
           variants={itemVariants}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Button variant="primary" size="lg">
+          <Button variant="primary" size="lg" onClick={() => navigate('/blog')}>
             <span className="flex items-center gap-2">
               <BookOutlined />
               开始阅读
               <ArrowRightOutlined />
             </span>
           </Button>
-          <Button variant="secondary" size="lg">
+          <Button variant="secondary" size="lg" onClick={() => navigate('/about')}>
             <span className="flex items-center gap-2">
               <UserOutlined />
               了解更多

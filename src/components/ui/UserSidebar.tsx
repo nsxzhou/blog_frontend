@@ -24,6 +24,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { Link } from '@umijs/max';
+import { message } from 'antd';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { UserAvatar } from './UserAvatar';
@@ -37,12 +38,37 @@ interface UserSidebarProps {
 }
 
 const menuItems = [
-  { key: '/profile', label: '个人中心', icon: <UserOutlined /> },
-  { key: '/my-articles', label: '我的文章', icon: <FileTextOutlined /> },
-  { key: '/write', label: '写文章', icon: <EditOutlined /> },
-  { key: '/favorites', label: '收藏夹', icon: <HeartOutlined /> },
-  { key: '/reading-list', label: '阅读列表', icon: <BookOutlined /> },
-  { key: '/notifications', label: '通知', icon: <BellOutlined /> },
+  {
+    key: '/profile',
+    label: '个人中心',
+    icon: <UserOutlined />,
+    hasRoute: true,
+  },
+  {
+    key: '/my-articles',
+    label: '我的文章',
+    icon: <FileTextOutlined />,
+    hasRoute: true,
+  },
+  { key: '/write', label: '写文章', icon: <EditOutlined />, hasRoute: true },
+  {
+    key: '/favorites',
+    label: '收藏夹',
+    icon: <HeartOutlined />,
+    hasRoute: true,
+  },
+  {
+    key: '/reading-list',
+    label: '阅读列表',
+    icon: <BookOutlined />,
+    hasRoute: false,
+  },
+  {
+    key: '/notifications',
+    label: '通知',
+    icon: <BellOutlined />,
+    hasRoute: false,
+  },
 ];
 
 // 管理员专用菜单
@@ -62,6 +88,15 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
   onLogin,
   onLogout,
 }) => {
+  // 处理菜单项点击
+  const handleMenuClick = (item: any) => {
+    if (!item.hasRoute) {
+      message.info('敬请期待！');
+      return;
+    }
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -101,11 +136,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
               {user ? (
                 <div className="text-center">
                   <div className="mb-4">
-                    <UserAvatar
-                      size="lg"
-                      user={user}
-                      className="mx-auto"
-                    />
+                    <UserAvatar size="lg" user={user} className="mx-auto" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-800 mb-1">
                     {user.nickname || user.username}
@@ -155,17 +186,33 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
             {user && (
               <motion.div variants={itemVariants} className="px-3 pb-6">
                 <div className="space-y-1">
-                  {menuItems.map((item) => (
-                    <Link key={item.key} to={item.key} onClick={onClose}>
-                      <motion.div
-                        className="flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-blue-50 transition-colors"
-                        {...hoverSlideX}
-                      >
-                        <span className="text-lg">{item.icon}</span>
-                        <span className="font-medium">{item.label}</span>
-                      </motion.div>
-                    </Link>
-                  ))}
+                  {menuItems.map((item) => {
+                    if (item.hasRoute) {
+                      return (
+                        <Link key={item.key} to={item.key} onClick={onClose}>
+                          <motion.div
+                            className="flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-blue-50 transition-colors"
+                            {...hoverSlideX}
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="font-medium">{item.label}</span>
+                          </motion.div>
+                        </Link>
+                      );
+                    } else {
+                      return (
+                        <motion.div
+                          key={item.key}
+                          onClick={() => handleMenuClick(item)}
+                          className="flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-blue-50 transition-colors cursor-pointer"
+                          {...hoverSlideX}
+                        >
+                          <span className="text-lg">{item.icon}</span>
+                          <span className="font-medium">{item.label}</span>
+                        </motion.div>
+                      );
+                    }
+                  })}
 
                   {/* 管理员菜单 */}
                   {user.role === 'admin' && (

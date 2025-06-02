@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ThunderboltOutlined } from '@ant-design/icons';
 import { Button } from '@/components/ui';
 import { itemVariants } from '@/constants/animations';
+import { message } from 'antd';
 
 const SubscribeSection: React.FC = () => {
   return (
@@ -30,7 +31,7 @@ const SubscribeSection: React.FC = () => {
               placeholder="输入邮箱地址"
               className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
             />
-            <Button variant="primary" size="md">
+            <Button variant="primary" size="md" onClick={() => message.info('敬请期待')}>
               <span className="flex items-center gap-2">
                 <ThunderboltOutlined />
                 立即订阅

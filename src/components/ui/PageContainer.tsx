@@ -1,12 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Link } from '@umijs/max';
+import { hoverScale, itemVariants, pageContainerVariants } from '@/constants';
 import { RightOutlined } from '@ant-design/icons';
-import {
-  pageContainerVariants,
-  itemVariants,
-  hoverScale
-} from '@/constants';
+import { Link } from '@umijs/max';
+import { motion } from 'framer-motion';
+import React from 'react';
 
 interface BreadcrumbItem {
   label: string;
@@ -28,7 +24,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   breadcrumbs = [],
   children,
   action,
-  className = "",
+  className = '',
 }) => {
   return (
     <motion.div
@@ -44,7 +40,9 @@ export const PageContainer: React.FC<PageContainerProps> = ({
             <ol className="flex items-center space-x-2 text-sm text-gray-500">
               {breadcrumbs.map((crumb, index) => (
                 <li key={index} className="flex items-center">
-                  {index > 0 && <RightOutlined className="mx-2 text-gray-400" />}
+                  {index > 0 && (
+                    <RightOutlined className="mx-2 text-gray-400" />
+                  )}
                   {crumb.path ? (
                     <Link
                       to={crumb.path}
@@ -71,10 +69,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
               )}
             </div>
             {action && (
-              <motion.div
-                {...hoverScale}
-                className="mt-4 sm:mt-0"
-              >
+              <motion.div {...hoverScale} className="mt-4 sm:mt-0">
                 {action}
               </motion.div>
             )}
@@ -90,4 +85,4 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   );
 };
 
-export default PageContainer; 
+export default PageContainer;

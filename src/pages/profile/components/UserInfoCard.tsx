@@ -83,7 +83,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user, onEdit }) => {
           <div>
             <span className="font-medium">注册时间：</span>
             <span className="ml-1">
-              {new Date(user.created_at).toLocaleDateString()}
+              {user.created_at}
             </span>
           </div>
         </div>
