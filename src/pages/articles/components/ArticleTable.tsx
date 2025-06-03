@@ -487,6 +487,7 @@ const ArticleTable: React.FC<ArticleTableProps> = ({
                     dataSource={articles}
                     rowKey="id"
                     pagination={{
+                        position: ['bottomCenter'],
                         current: pagination.current,
                         pageSize: pagination.pageSize,
                         total: pagination.total,

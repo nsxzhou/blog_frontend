@@ -46,9 +46,9 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
 
   return (
     <Card className="shadow-sm">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-x-4 lg:space-y-0">
         {/* 搜索框 */}
-        <div className="flex-1 max-w-md">
+        <div className="flex-1">
           <AntSearch
             placeholder={getSearchPlaceholder()}
             allowClear
@@ -72,6 +72,7 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
                 style={{ width: 120 }}
                 suffixIcon={<Filter className="w-4 h-4" />}
               >
+                <Option value="">全部</Option>
                 <Option value="pending">待审核</Option>
                 <Option value="approved">已通过</Option>
                 <Option value="rejected">已拒绝</Option>
