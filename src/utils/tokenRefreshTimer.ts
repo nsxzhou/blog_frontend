@@ -5,6 +5,7 @@ import { RefreshToken } from '@/api/user';
 import {
   clearAuthTokens,
   getRefreshTokenFromStorage,
+  isTokenExpired,
   isTokenExpiringSoon,
 } from './auth';
 
@@ -17,12 +18,29 @@ export const startTokenRefreshTimer = () => {
     clearInterval(refreshTimer);
   }
 
+  // 检查token是否已过期，如果过期则不启动定时器
+  if (isTokenExpired()) {
+    console.log('Token已过期，不启动刷新定时器');
+    clearAuthTokens();
+    return;
+  }
+
   // 每5分钟检查一次token状态
   refreshTimer = setInterval(async () => {
     try {
       // 只在有refresh token的情况下检查
       const refreshToken = getRefreshTokenFromStorage();
       if (!refreshToken) {
+        console.log('没有refresh token，停止定时器');
+        stopTokenRefreshTimer();
+        return;
+      }
+
+      // 检查token是否已过期
+      if (isTokenExpired()) {
+        console.log('Token已过期，清除认证信息并停止定时器');
+        clearAuthTokens();
+        stopTokenRefreshTimer();
         return;
       }
 

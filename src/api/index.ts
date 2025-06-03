@@ -2,6 +2,7 @@ import {
   clearAuthTokens,
   getRefreshTokenFromStorage,
   getTokenFromStorage,
+  isTokenExpired,
   isTokenExpiringSoon,
 } from '@/utils/auth';
 import type { RequestConfig, RequestOptions } from '@umijs/max';
@@ -35,7 +36,10 @@ const processQueue = (error: any, token: string | null = null) => {
 const redirectToLogin = () => {
   console.log('清除token并跳转到登录页');
   clearAuthTokens();
-  window.location.href = '/login';
+  // 避免在应用初始化时进行重定向
+  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    window.location.href = '/login';
+  }
 };
 
 // 无感刷新token函数
@@ -104,6 +108,13 @@ export const request: RequestConfig = {
         return config;
       }
 
+      // 如果token已经过期，直接清除认证信息，不进行刷新
+      if (isTokenExpired()) {
+        console.log('Token已过期，清除认证信息');
+        clearAuthTokens();
+        return config;
+      }
+
       // 检查token是否即将过期
       if (isTokenExpiringSoon()) {
         console.log('Token即将过期，尝试无感刷新...');
@@ -162,84 +173,103 @@ export const request: RequestConfig = {
         return Promise.reject(error);
       }
 
+      // 检查是否是应用初始化阶段（通过检查URL是否为用户信息接口）
+      const isInitializationRequest =
+        error?.config?.url &&
+        typeof error.config.url === 'string' &&
+        error.config.url.includes('/users/me');
+
       // 安全检查401错误
       const isUnauthorized =
         error?.response?.data?.code === 401 || error?.response?.status === 401;
 
-      if (isUnauthorized && !opts?.skipAuthRefresh) {
-        console.log('401 error detected, 开始静默处理:', error?.response?.data);
-        try {
-          // 避免死循环：如果当前请求是刷新token接口，直接跳转登录
-          if (
-            error?.config?.url &&
-            typeof error.config.url === 'string' &&
-            error.config.url.includes('/refresh')
-          ) {
-            message.error('登录已过期，请重新登录');
-            redirectToLogin();
-            return;
-          }
+      if (isUnauthorized) {
+        // 如果是初始化阶段的401错误，静默处理，不进行刷新尝试
+        if (isInitializationRequest) {
+          console.log('应用初始化阶段检测到401错误，静默处理');
+          clearAuthTokens();
+          return Promise.reject(error);
+        }
 
-          // 如果正在刷新token，将请求加入队列
-          if (isRefreshing) {
-            return new Promise((resolve, reject) => {
-              failedQueue.push({ resolve, reject });
-            })
-              .then((token) => {
-                if (error.config && error.config.headers) {
-                  error.config.headers['Authorization'] = `Bearer ${token}`;
-                }
-                return umiRequest(error.config);
-              })
-              .catch((err) => {
-                return Promise.reject(err);
-              });
-          }
-
-          const refreshToken = getRefreshTokenFromStorage();
-          if (!refreshToken) {
-            console.log('没有refresh token，跳转登录');
-            redirectToLogin();
-            return;
-          }
-
-          isRefreshing = true;
-
+        // 对于非初始化阶段的401错误，进行正常的token刷新处理
+        if (!opts?.skipAuthRefresh) {
+          console.log(
+            '401 error detected, 开始静默处理:',
+            error?.response?.data,
+          );
           try {
-            // 使用无感刷新函数
-            const newToken = await silentRefreshToken();
+            // 避免死循环：如果当前请求是刷新token接口，直接跳转登录
+            if (
+              error?.config?.url &&
+              typeof error.config.url === 'string' &&
+              error.config.url.includes('/refresh')
+            ) {
+              message.error('登录已过期，请重新登录');
+              redirectToLogin();
+              return;
+            }
 
-            if (newToken) {
-              // 更新原始请求的authorization header
-              if (error.config && error.config.headers) {
-                error.config.headers['Authorization'] = `Bearer ${newToken}`;
+            // 如果正在刷新token，将请求加入队列
+            if (isRefreshing) {
+              return new Promise((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+              })
+                .then((token) => {
+                  if (error.config && error.config.headers) {
+                    error.config.headers['Authorization'] = `Bearer ${token}`;
+                  }
+                  return umiRequest(error.config);
+                })
+                .catch((err) => {
+                  return Promise.reject(err);
+                });
+            }
+
+            const refreshToken = getRefreshTokenFromStorage();
+            if (!refreshToken) {
+              console.log('没有refresh token，跳转登录');
+              redirectToLogin();
+              return;
+            }
+
+            isRefreshing = true;
+
+            try {
+              // 使用无感刷新函数
+              const newToken = await silentRefreshToken();
+
+              if (newToken) {
+                // 更新原始请求的authorization header
+                if (error.config && error.config.headers) {
+                  error.config.headers['Authorization'] = `Bearer ${newToken}`;
+                }
+
+                // 处理队列中的请求
+                processQueue(null, newToken);
+
+                isRefreshing = false;
+
+                // 重新发起原始请求
+                return umiRequest(error.config);
+              } else {
+                // 刷新失败，静默跳转登录
+                processQueue(new Error('Token refresh failed'), null);
+                isRefreshing = false;
+                return;
               }
-
-              // 处理队列中的请求
-              processQueue(null, newToken);
-
-              isRefreshing = false;
-
-              // 重新发起原始请求
-              return umiRequest(error.config);
-            } else {
-              // 刷新失败，静默跳转登录
-              processQueue(new Error('Token refresh failed'), null);
+            } catch (refreshError) {
+              console.error('静默刷新token失败:', refreshError);
+              processQueue(refreshError, null);
               isRefreshing = false;
               return;
             }
-          } catch (refreshError) {
-            console.error('静默刷新token失败:', refreshError);
-            processQueue(refreshError, null);
+          } catch (e) {
+            console.error('处理401错误失败:', e);
+            processQueue(e, null);
             isRefreshing = false;
+            redirectToLogin();
             return;
           }
-        } catch (e) {
-          console.error('处理401错误失败:', e);
-          processQueue(e, null);
-          isRefreshing = false;
-          redirectToLogin();
-          return;
         }
       }
 
@@ -249,7 +279,10 @@ export const request: RequestConfig = {
         if (!isUnauthorized) {
           const errorMessage =
             error?.response?.data?.message || error?.message || '请求发生错误';
-          message.error(errorMessage);
+          // 在应用初始化阶段不显示错误消息
+          if (!isInitializationRequest) {
+            message.error(errorMessage);
+          }
         }
       }
       throw error;
