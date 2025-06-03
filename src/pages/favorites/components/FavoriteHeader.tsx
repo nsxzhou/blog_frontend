@@ -1,4 +1,4 @@
-import { fadeInUp, itemVariants } from '@/constants/animations';
+import { cardHover, fadeInUp, itemVariants } from '@/constants/animations';
 import { motion } from 'framer-motion';
 import React from 'react';
 
@@ -12,7 +12,7 @@ const StatCard: React.FC<{
 }> = ({ title, value }) => (
   <motion.div
     variants={itemVariants}
-    whileHover={{ y: -2, scale: 1.02 }}
+    {...cardHover}
     className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
   >
     <div className="flex items-center justify-between">

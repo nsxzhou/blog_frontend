@@ -1,5 +1,5 @@
 import { type GetUserStatsRes } from '@/api/user';
-import { containerVariants, itemVariants } from '@/constants/animations';
+import { cardHover, itemVariants } from '@/constants/animations';
 import {
   CheckCircleOutlined,
   CrownOutlined,
@@ -69,7 +69,7 @@ const UserStats: React.FC<UserStatsProps> = ({ statistics, loading }) => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={itemVariants}
       initial="hidden"
       animate="visible"
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
@@ -77,9 +77,8 @@ const UserStats: React.FC<UserStatsProps> = ({ statistics, loading }) => {
       {statsCards.map((stat, index) => (
         <motion.div
           key={stat.title}
-          variants={itemVariants}
-          whileHover={{ y: -4, scale: 1.02 }}
-          className={`p-6 rounded-lg border-2 ${stat.color} transition-all duration-200 cursor-pointer`}
+          {...cardHover}
+          className={`p-6 rounded-lg border-2 ${stat.color} cursor-pointer`}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="text-2xl">{stat.icon}</div>

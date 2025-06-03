@@ -7,6 +7,7 @@ export const routeAccessMap: Record<string, string> = {
   '/tags': 'isAdmin',
   '/images': 'isAdmin',
   '/comments': 'isAdmin',
+  '/login': 'shouldNotAccess',
 };
 
 // 检查路由是否需要权限

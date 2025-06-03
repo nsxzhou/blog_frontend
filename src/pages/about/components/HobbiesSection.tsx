@@ -1,23 +1,27 @@
-import React from 'react';
+import {
+  cardHover,
+  itemVariants,
+  sectionVariants,
+} from '@/constants/animations';
 import { motion } from 'framer-motion';
-import { sectionVariants, itemVariants } from '@/constants/animations';
+import React from 'react';
 
 const HobbiesSection: React.FC = () => {
   const hobbies = [
     {
       icon: '🎸',
       title: '音乐',
-      description: '喜欢弹吉他和钢琴，偶尔创作一些小曲子'
+      description: '喜欢弹吉他和钢琴，偶尔创作一些小曲子',
     },
     {
       icon: '🏃‍♂️',
       title: '运动',
-      description: '跑步和健身是我保持活力的秘诀'
+      description: '跑步和健身是我保持活力的秘诀',
     },
     {
       icon: '🎮',
       title: '游戏',
-      description: '偶尔玩玩独立游戏放松身心'
+      description: '偶尔玩玩独立游戏放松身心',
     },
   ];
 
@@ -41,8 +45,7 @@ const HobbiesSection: React.FC = () => {
               key={index}
               variants={itemVariants}
               className="bg-white p-6 rounded-lg shadow-sm border border-gray-100"
-              whileHover={{ scale: 1.02, y: -4 }}
-              transition={{ duration: 0.2 }}
+              {...cardHover}
             >
               <div className="text-4xl mb-4">{hobby.icon}</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -57,4 +60,4 @@ const HobbiesSection: React.FC = () => {
   );
 };
 
-export default HobbiesSection; 
+export default HobbiesSection;

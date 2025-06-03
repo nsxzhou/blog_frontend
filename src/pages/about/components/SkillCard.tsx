@@ -1,5 +1,6 @@
-import React from 'react';
+import { cardHover } from '@/constants/animations';
 import { motion } from 'framer-motion';
+import React from 'react';
 
 interface SkillCardProps {
   skill: {
@@ -18,7 +19,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, delay = 0 }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      whileHover={{ y: -5, scale: 1.02 }}
+      {...cardHover}
       className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 group"
       role="progressbar"
       aria-valuenow={skill.level}
@@ -28,16 +29,14 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, delay = 0 }) => {
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">
-            {skill.icon}
-          </span>
+          <span className="text-2xl">{skill.icon}</span>
           <h4 className="font-semibold text-gray-800">{skill.name}</h4>
         </div>
         <span className="text-sm font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded-md">
           {skill.level}%
         </span>
       </div>
-      
+
       <div className="relative">
         <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
           <motion.div
@@ -45,25 +44,24 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, delay = 0 }) => {
             initial={{ width: 0 }}
             whileInView={{ width: `${skill.level}%` }}
             viewport={{ once: true }}
-            transition={{ 
-              duration: 1.5, 
+            transition={{
+              duration: 1.5,
               delay: delay + 0.2,
-              ease: "easeOut"
+              ease: 'easeOut',
             }}
-          >
-          </motion.div>
+          ></motion.div>
         </div>
-        
+
         {/* 进度点 */}
         <motion.div
           className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-gradient-to-r ${skill.color} rounded-full shadow-lg border-2 border-green-500`}
           initial={{ left: 0 }}
           whileInView={{ left: `calc(${skill.level}% - 8px)` }}
           viewport={{ once: true }}
-          transition={{ 
-            duration: 1.5, 
+          transition={{
+            duration: 1.5,
             delay: delay + 0.2,
-            ease: "easeOut"
+            ease: 'easeOut',
           }}
         />
       </div>
@@ -71,4 +69,4 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, delay = 0 }) => {
   );
 };
 
-export default SkillCard; 
+export default SkillCard;

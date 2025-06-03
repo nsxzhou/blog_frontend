@@ -1,7 +1,11 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import {
+  cardHover,
+  itemVariants,
+  sectionVariants,
+} from '@/constants/animations';
 import { CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons';
-import { sectionVariants, itemVariants } from '@/constants/animations';
+import { motion } from 'framer-motion';
+import React from 'react';
 
 const ExperienceSection: React.FC = () => {
   const experiences = [
@@ -11,8 +15,16 @@ const ExperienceSection: React.FC = () => {
       location: '深圳',
       period: '2025.03 - 2025.05',
       description: '参与多个企业级项目开发，学习全栈开发。',
-      skills: ['React', 'Vue', 'TypeScript', 'Golang', 'MySQL', 'Redis', 'Docker']
-    }
+      skills: [
+        'React',
+        'Vue',
+        'TypeScript',
+        'Golang',
+        'MySQL',
+        'Redis',
+        'Docker',
+      ],
+    },
   ];
 
   return (
@@ -37,22 +49,28 @@ const ExperienceSection: React.FC = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              className={`relative flex items-center mb-12 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                }`}
+              className={`relative flex items-center mb-12 ${
+                index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+              }`}
             >
               {/* 时间点 */}
               <div className="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-blue-600 rounded-full border-4 border-white shadow-lg z-10"></div>
 
               {/* 内容卡片 */}
-              <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'} ml-12 md:ml-0`}>
+              <div
+                className={`w-full md:w-5/12 ${
+                  index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
+                } ml-12 md:ml-0`}
+              >
                 <motion.div
                   className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100"
-                  whileHover={{ scale: 1.02, y: -4 }}
-                  transition={{ duration: 0.2 }}
+                  {...cardHover}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{exp.title}</h3>
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {exp.title}
+                      </h3>
                       <p className="text-blue-600 font-medium">{exp.company}</p>
                     </div>
                     <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded">
@@ -89,4 +107,4 @@ const ExperienceSection: React.FC = () => {
   );
 };
 
-export default ExperienceSection; 
+export default ExperienceSection;

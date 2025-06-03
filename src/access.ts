@@ -27,5 +27,8 @@ export default function access(
     canDelete:
       !!isLoggedIn &&
       (currentUser?.role === 'admin' || currentUser?.role === 'editor'),
+
+    // 已登录用户不应该访问的页面（如登录页）
+    shouldNotAccess: !isLoggedIn,
   };
 }

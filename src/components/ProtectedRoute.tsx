@@ -1,7 +1,7 @@
-import { history, useAccess, useModel } from '@umijs/max';
+import { history, useAccess } from '@umijs/max';
 import { Button, Result } from 'antd';
 import { motion } from 'framer-motion';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -24,7 +24,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // 检查权限
   const hasPermission = accessMap[access as keyof typeof accessMap];
 
+  // 特殊处理：如果是shouldNotAccess权限且用户已登录，重定向到首页
+  useEffect(() => {
+    if (access === 'shouldNotAccess' && !hasPermission) {
+      history.push('/');
+    }
+  }, [access, hasPermission]);
+
   if (!hasPermission) {
+    // 如果是shouldNotAccess权限，返回null（会被重定向）
+    if (access === 'shouldNotAccess') {
+      return null;
+    }
     // 如果有自定义fallback，使用它
     if (fallback) {
       return <>{fallback}</>;

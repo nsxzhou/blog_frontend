@@ -1,4 +1,4 @@
-import { itemVariants } from '@/constants';
+import { cardHover, itemVariants } from '@/constants';
 import {
   EyeOutlined,
   FileTextOutlined,
@@ -96,8 +96,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ stats }) => {
           <motion.div
             key={item.key}
             className="flex items-center p-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            {...cardHover}
           >
             <div
               className={`p-3 rounded-full ${item.bgColor} ${item.color} mr-4`}
