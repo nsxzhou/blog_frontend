@@ -1,14 +1,13 @@
 import type { LoginReq } from '@/api/user';
 import { Button } from '@/components/ui';
 import { fadeInUp, hoverScale, hoverScaleSmall } from '@/constants/animations';
-import { useAuthSync } from '@/hooks/useAuthSync';
+import useUserModel from '@/models/user';
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
   LockOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { useDispatch } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
@@ -21,8 +20,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSuccess,
   onSwitchToRegister,
 }) => {
-  const dispatch = useDispatch();
-  const { syncLoginState } = useAuthSync();
+  const { login } = useUserModel();
 
   const [formData, setFormData] = useState<LoginReq>({
     username: '',
@@ -32,6 +30,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginReq>>({});
+  const [loading, setLoading] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<LoginReq> = {};
@@ -54,16 +53,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
     e.preventDefault();
 
     if (!validateForm()) return;
-    console.log(formData);
+
+    setLoading(true);
     try {
-      const result = (await dispatch({
-        type: 'user/login',
-        payload: formData,
-      })) as unknown as { success: boolean; data?: any; message?: string };
+      const result = await login(formData);
 
       if (result?.success) {
-        await syncLoginState(result.data);
-
         // 清空表单数据
         setFormData({
           username: '',
@@ -74,11 +69,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
         setTimeout(() => {
           onSuccess();
         }, 100);
-      } else {
-        console.error('登录失败:', result?.message);
       }
     } catch (error) {
       console.error('登录异常:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -187,7 +182,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             onChange={(e) => handleInputChange('remember', e.target.checked)}
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             whileTap={{ scale: 0.9 }}
-          />  
+          />
           <span className="ml-2 text-sm text-gray-600">记住我</span>
         </label>
         <motion.button
@@ -201,7 +196,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       {/* 登录按钮 */}
       <motion.div>
-        <Button variant="primary" type="submit" className="w-full py-3">
+        <Button
+          variant="primary"
+          type="submit"
+          className="w-full py-3"
+          disabled={loading}
+        >
           登录
         </Button>
       </motion.div>

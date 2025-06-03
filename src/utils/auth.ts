@@ -43,17 +43,6 @@ export const clearAuthTokens = (): void => {
   localStorage.removeItem('token_expires_at');
 };
 
-// 检查token是否即将过期（提前5分钟刷新）
-export const isTokenExpiringSoon = (): boolean => {
-  const expiresAt = getTokenExpiresAt();
-  if (!expiresAt) return false;
-
-  const now = Math.floor(Date.now() / 1000); // 当前时间戳（秒）
-  const bufferTime = 5 * 60; // 提前5分钟刷新
-
-  return expiresAt - now <= bufferTime;
-};
-
 // 检查token是否已过期
 export const isTokenExpired = (): boolean => {
   const expiresAt = getTokenExpiresAt();
@@ -70,15 +59,5 @@ export const isAuthError = (error: any): boolean => {
     error?.code === 401 ||
     error?.code === 40001 ||
     error?.code === 40002
-  );
-};
-
-// 判断是否为网络错误
-export const isNetworkError = (error: any): boolean => {
-  return (
-    !error?.response ||
-    error?.code === 'NETWORK_ERROR' ||
-    error?.message?.includes('Network Error') ||
-    error?.message?.includes('fetch')
   );
 };

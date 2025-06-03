@@ -4,7 +4,7 @@ import {
   headerVariants,
   navItemVariants,
 } from '@/constants/animations';
-import { useAuthSync } from '@/hooks/useAuthSync';
+import useUserModel from '@/models/user';
 import {
   CloseOutlined,
   EditOutlined,
@@ -15,7 +15,7 @@ import {
   UserOutlined,
   WechatOutlined,
 } from '@ant-design/icons';
-import { Link, useDispatch, useLocation, useNavigate } from '@umijs/max';
+import { Link, useLocation, useNavigate } from '@umijs/max';
 import { Input } from 'antd';
 import {
   AnimatePresence,
@@ -45,10 +45,9 @@ const Header: React.FC<HeaderProps> = () => {
   const location = useLocation();
   const { scrollY } = useScroll();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  // 使用 useAuthSync hook 获取统一的状态
-  const { currentUser, isLoggedIn, syncLogoutState } = useAuthSync();
+  // 获取当前用户信息和logout方法
+  const { currentUser, logout } = useUserModel();
 
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
@@ -60,8 +59,9 @@ const Header: React.FC<HeaderProps> = () => {
   // 处理登出
   const handleLogout = async () => {
     try {
-      await dispatch({ type: 'user/logout' });
-      await syncLogoutState();
+      await logout();
+      // 跳转到首页
+      navigate('/');
     } catch (error) {
       console.error('登出失败:', error);
     }
@@ -175,7 +175,7 @@ const Header: React.FC<HeaderProps> = () => {
               className="p-1 rounded-lg"
               variant="ghost"
             >
-              {isLoggedIn && currentUser ? (
+              {currentUser ? (
                 <div className="flex items-center space-x-2">
                   <UserAvatar user={currentUser} size="sm" />
                   <span className="hidden sm:block text-sm font-medium text-gray-800">

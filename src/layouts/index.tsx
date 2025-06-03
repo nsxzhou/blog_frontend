@@ -1,5 +1,5 @@
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { useAuthSync } from '@/hooks/useAuthSync';
+import useUserModel from '@/models/user';
 import { getRouteAccess } from '@/utils/routeAccess';
 import { Outlet, useLocation } from '@umijs/max';
 import { motion } from 'framer-motion';
@@ -11,8 +11,8 @@ const GlobalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
-  // 使用优化的认证状态同步hook
-  const { currentUser } = useAuthSync();
+  // 获取当前用户信息
+  const { currentUser } = useUserModel();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
