@@ -27,6 +27,7 @@ export function Register(data: RegisterReq) {
   return request<baseResponse<any>>('/api/users/register', {
     method: 'POST',
     data,
+    skipErrorHandler: true, // 跳过错误处理器，注册失败不应该尝试刷新token
   });
 }
 
@@ -35,6 +36,7 @@ export function Login(data: LoginReq) {
   return request<baseResponse<LoginRes>>('/api/users/login', {
     method: 'POST',
     data,
+    skipErrorHandler: true, // 跳过错误处理器，登录失败不应该尝试刷新token
   });
 }
 

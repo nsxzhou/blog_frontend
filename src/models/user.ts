@@ -57,12 +57,17 @@ export default function useUserModel(): UserModelReturn {
         message.success('登录成功！');
         return { success: true, data: response.data };
       } else {
+        console.log("login error",response);
         message.error(response.message || '登录失败');
         return { success: false, message: response.message };
       }
-    } catch (error) {
-      message.error('网络连接失败');
-      return { success: false, message: '网络错误' };
+    } catch (error: any) {
+      console.log("login error",error);
+      // 处理登录错误
+      const errorMessage =
+        error?.response?.data?.message || error?.message ;
+      message.error(errorMessage);
+      return { success: false, message: errorMessage };
     }
   };
 
@@ -78,9 +83,12 @@ export default function useUserModel(): UserModelReturn {
         message.error(response.message || '注册失败');
         return { success: false, message: response.message };
       }
-    } catch (error) {
-      message.error('网络连接失败');
-      return { success: false, message: '网络错误' };
+    } catch (error: any) {
+      // 处理注册错误
+      const errorMessage =
+        error?.response?.data?.message || error?.message || '注册失败';
+      message.error(errorMessage);
+      return { success: false, message: errorMessage };
     }
   };
 

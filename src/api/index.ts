@@ -15,7 +15,6 @@ export interface baseResponse<T> {
   data: T;
 }
 
-
 interface RefreshTokenRes {
   access_token: string;
   refresh_token: string;
@@ -114,6 +113,14 @@ export const request: RequestConfig = {
 
       if (isUnauthorized) {
         const originalRequest = error.config;
+
+        // 检查是否有refresh token，如果没有直接跳转登录页
+        const refreshTokenValue = getRefreshTokenFromStorage();
+        if (!refreshTokenValue) {
+          message.error('登录已过期，请重新登录');
+          redirectToLogin();
+          throw error;
+        }
 
         // 如果已经在刷新token，将请求加入队列
         if (isRefreshing) {

@@ -183,7 +183,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             whileTap={{ scale: 0.9 }}
           />
-          <span className="ml-2 text-sm text-gray-600">记住我</span>
+          <span className="ml-2 text-sm text-gray-600">延长登录时间</span>
         </label>
         <motion.button
           type="button"

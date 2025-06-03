@@ -1,6 +1,7 @@
 import type { RegisterReq } from '@/api/user';
 import { Button } from '@/components/ui';
 import useUserModel from '@/models/user';
+import { validation } from '@/utils/validation';
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -41,41 +42,36 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     const newErrors: Partial<RegisterReq & { confirmPassword: string }> = {};
 
     // 用户名验证
-    if (!formData.username.trim()) {
-      newErrors.username = '请输入用户名';
-    } else if (formData.username.length < 3) {
-      newErrors.username = '用户名至少3位字符';
-    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username = '用户名只能包含字母、数字和下划线';
+    const usernameResult = validation.username.validate(formData.username);
+    if (!usernameResult.isValid) {
+      newErrors.username = usernameResult.error;
     }
 
     // 昵称验证
-    if (!formData.nickname.trim()) {
-      newErrors.nickname = '请输入昵称';
-    } else if (formData.nickname.length < 2) {
-      newErrors.nickname = '昵称至少2位字符';
+    const nicknameResult = validation.nickname.validate(formData.nickname);
+    if (!nicknameResult.isValid) {
+      newErrors.nickname = nicknameResult.error;
     }
 
-    // 邮箱验证
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim()) {
-      newErrors.email = '请输入邮箱';
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = '请输入有效的邮箱地址';
+    // 邮箱验证（使用更严格的验证）
+    const emailResult = validation.email.validate(formData.email);
+    if (!emailResult.isValid) {
+      newErrors.email = emailResult.error;
     }
 
     // 密码验证
-    if (!formData.password) {
-      newErrors.password = '请输入密码';
-    } else if (formData.password.length < 6) {
-      newErrors.password = '密码至少6位字符';
+    const passwordResult = validation.password.basic(formData.password);
+    if (!passwordResult.isValid) {
+      newErrors.password = passwordResult.error;
     }
 
     // 确认密码验证
-    if (!confirmPassword) {
-      newErrors.confirmPassword = '请确认密码';
-    } else if (confirmPassword !== formData.password) {
-      newErrors.confirmPassword = '两次输入的密码不一致';
+    const confirmPasswordResult = validation.confirmPassword(
+      formData.password,
+      confirmPassword,
+    );
+    if (!confirmPasswordResult.isValid) {
+      newErrors.confirmPassword = confirmPasswordResult.error;
     }
 
     setErrors(newErrors);
