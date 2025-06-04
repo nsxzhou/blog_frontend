@@ -35,7 +35,7 @@ interface DataTableProps {
  * 统一的数据表格组件
  * 根据type属性显示不同的表格内容
  */
-export const DataTable: React.FC<DataTableProps> = ({
+const DataTable: React.FC<DataTableProps> = ({
   type,
   data,
   loading,
@@ -313,3 +313,5 @@ export const DataTable: React.FC<DataTableProps> = ({
     </div>
   );
 };
+
+export default DataTable;

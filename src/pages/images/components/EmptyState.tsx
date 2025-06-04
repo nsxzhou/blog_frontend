@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import React from 'react';
 import type { EmptyStateProps } from './types';
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+const EmptyState: React.FC<EmptyStateProps> = ({
   searchTerm,
   onClearSearch,
   onUpload,
@@ -118,3 +118,5 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     </motion.div>
   );
 };
+
+export default EmptyState;

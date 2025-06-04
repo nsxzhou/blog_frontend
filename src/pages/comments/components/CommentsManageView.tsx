@@ -14,10 +14,10 @@ import type {
   SortType,
   ViewMode,
 } from '../types';
-import { DataTable } from './DataTable';
+import DataTable from './DataTable';
 import PageHeader from './PageHeader';
-import { SearchAndFilters } from './SearchAndFilters';
-import {StatsOverview} from './StatsOverview';
+import SearchAndFilters from './SearchAndFilters';
+import StatsOverview from './StatsOverview';
 
 interface CommentsManageViewProps {
   // 基础状态
@@ -78,7 +78,7 @@ interface CommentsManageViewProps {
  * 评论管理主视图组件
  * 整合了页面头部、统计信息、搜索过滤和数据表格
  */
-export const CommentsManageView: React.FC<CommentsManageViewProps> = ({
+const CommentsManageView: React.FC<CommentsManageViewProps> = ({
   viewMode,
   selectedArticle,
   searchTerm,
@@ -184,3 +184,5 @@ export const CommentsManageView: React.FC<CommentsManageViewProps> = ({
     </>
   );
 };
+
+export default CommentsManageView;

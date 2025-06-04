@@ -38,7 +38,7 @@ interface StatsOverviewProps {
  * 统计信息概览组件
  * 根据不同的视图模式显示相应的统计信息
  */
-export const StatsOverview: React.FC<StatsOverviewProps> = ({
+const StatsOverview: React.FC<StatsOverviewProps> = ({
   viewMode,
   selectedArticle,
   articleStats,
@@ -165,3 +165,5 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
     </motion.div>
   );
 };
+
+export default StatsOverview;

@@ -22,7 +22,7 @@ interface SearchAndFiltersProps {
  * 简化的搜索和过滤组件
  * 统一处理搜索、过滤和批量操作功能
  */
-export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
+const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   viewMode,
   searchTerm,
   filterType,
@@ -124,3 +124,5 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
     </Card>
   );
 };
+
+export default SearchAndFilters;

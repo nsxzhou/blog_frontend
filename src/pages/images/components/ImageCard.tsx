@@ -30,7 +30,7 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-export const ImageCard: React.FC<ImageCardProps> = ({
+const ImageCard: React.FC<ImageCardProps> = ({
   image,
   selected,
   onSelect,
@@ -212,3 +212,5 @@ export const ImageCard: React.FC<ImageCardProps> = ({
     </motion.div>
   );
 };
+
+export default ImageCard;

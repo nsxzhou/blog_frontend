@@ -1,8 +1,6 @@
 import type { ArticleListItem } from '@/api/article';
 import { fadeIn, itemVariants } from '@/constants/animations';
 import {
-  ArrowLeftOutlined,
-  CommentOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';
 import { Button, Typography } from 'antd';
