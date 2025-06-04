@@ -1,6 +1,7 @@
 import {
   DeleteTag,
   GetTagList,
+  SyncArticleCount,
   type GetTagListReq,
   type TagInfo,
 } from '@/api/tag';
@@ -15,9 +16,10 @@ import {
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
+  SyncOutlined,
   TagsOutlined,
 } from '@ant-design/icons';
-import { Empty, message, Modal, Spin } from 'antd';
+import { Button, Empty, message, Modal, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useMemo, useState } from 'react';
 import SearchAndFilter from './components/SearchAndFilter';
@@ -180,6 +182,15 @@ const TagManagementPage: React.FC = () => {
     fetchTags({ page, page_size: newPageSize });
   };
 
+  const handleSyncArticleCount = async () => {
+    const response = await SyncArticleCount();
+    if (response.code === 0) {
+      message.success('同步文章数量成功');
+      fetchTags();
+    } else {
+      message.error(response.message || '同步文章数量失败');
+    }
+  };
   return (
     <motion.div
       variants={containerVariants}
@@ -198,14 +209,20 @@ const TagManagementPage: React.FC = () => {
               </h1>
               <p className="text-gray-600 mt-2">管理博客标签，优化内容分类</p>
             </div>
-            <motion.button
-              {...hoverScale}
-              onClick={handleCreateTag}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors shadow-lg"
-            >
-              <PlusOutlined />
-              创建标签
-            </motion.button>
+            <div className="flex items-center gap-3">
+              <Button onClick={handleSyncArticleCount} type="default">
+                <SyncOutlined />
+                同步文章标签
+              </Button>
+              <motion.button
+                {...hoverScale}
+                onClick={handleCreateTag}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                <PlusOutlined />
+                创建标签
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 

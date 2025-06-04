@@ -48,5 +48,11 @@ export function GetTagList(params?: GetTagListReq) {
   });
 }
 
+export function SyncArticleCount() {
+  return request<baseResponse<string>>(`/api/tags/sync-count`, {
+    method: 'POST',
+  });
+}
+
 // 统一导出标签相关的API和类型
 export * from './type';
