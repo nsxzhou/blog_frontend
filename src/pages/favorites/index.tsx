@@ -93,7 +93,10 @@ const FavoritesPage: React.FC = () => {
           <motion.div variants={itemVariants}>
             {favoritesLoading ? (
               <div className="flex justify-center items-center py-20">
-                <Spin size="large" tip="加载中..." />
+                <div className="text-center">
+                  <Spin size="large" />
+                  <p className="text-gray-600 mt-4">加载中...</p>
+                </div>
               </div>
             ) : displayBlogPosts.length === 0 ? (
               <EmptyState />

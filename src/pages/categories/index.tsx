@@ -416,7 +416,7 @@ const CategoryManagementPage: React.FC = () => {
         onCancel={() => setIsFormModalOpen(false)}
         footer={null}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         <CategoryForm
           category={editingCategory}

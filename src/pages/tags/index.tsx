@@ -46,7 +46,6 @@ const TagManagementPage: React.FC = () => {
         keyword: searchTerm || undefined,
         ...params,
       });
-      console.log(response);
 
       if (response.code === 0 && response.data) {
         // 确保 tags 数组存在
@@ -228,6 +227,7 @@ const TagManagementPage: React.FC = () => {
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <Spin size="large" />
+              <p className="text-gray-600 mt-4">加载中...</p>
             </div>
           ) : tags.length === 0 ? (
             <motion.div
@@ -343,7 +343,6 @@ const TagManagementPage: React.FC = () => {
         onCancel={() => setIsFormModalOpen(false)}
         footer={null}
         width={500}
-        destroyOnClose
       >
         <TagForm
           tag={editingTag}

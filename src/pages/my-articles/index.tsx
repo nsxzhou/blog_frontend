@@ -10,11 +10,11 @@ import { motion } from 'framer-motion';
 import React, { useMemo, useState } from 'react';
 import {
   ArticleControls,
+  EmptyState,
   StatsCards,
   type ArticleStats,
   type FilterType,
   type SortType,
-  EmptyState,
 } from './components';
 import MyArticleCard from './components/MyArticleCard';
 
@@ -203,7 +203,10 @@ const MyArticlesPage: React.FC = () => {
           <motion.div variants={itemVariants}>
             {loading ? (
               <div className="flex justify-center items-center py-20">
-                <Spin size="large" tip="加载中..." />
+                <div className="text-center">
+                  <Spin size="large" />
+                  <p className="text-gray-600 mt-4">加载中...</p>
+                </div>
               </div>
             ) : articles.length === 0 ? (
               searchTerm || filterType !== '' ? (

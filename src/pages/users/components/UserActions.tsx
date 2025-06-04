@@ -8,7 +8,7 @@ import {
   StopOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
-import { Badge, Button, Divider, Space, Tooltip } from 'antd';
+import { Badge, Button, Divider, message, Space, Tooltip } from 'antd';
 import { motion } from 'framer-motion';
 import React from 'react';
 
@@ -134,6 +134,9 @@ const UserActions: React.FC<UserActionsProps> = ({
                 icon={<SettingOutlined />}
                 type="text"
                 className="text-gray-600 hover:text-blue-600"
+                onClick={() => {
+                  message.info('敬请期待');
+                }}
               />
             </motion.div>
           </Tooltip>
@@ -144,6 +147,9 @@ const UserActions: React.FC<UserActionsProps> = ({
                 type="primary"
                 icon={<UserAddOutlined />}
                 className="bg-blue-600 hover:bg-blue-700 border-blue-600"
+                onClick={() => {
+                  message.info('敬请期待');
+                }}
               >
                 邀请用户
               </Button>

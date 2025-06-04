@@ -7,20 +7,13 @@ import {
   type UserInfo,
 } from '@/api/user';
 import { containerVariants, itemVariants } from '@/constants';
-import {
-  BarChartOutlined,
-  HistoryOutlined,
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useModel } from '@umijs/max';
 import { message, Spin, Tabs } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityTimeline,
   PasswordChangeForm,
-  ProfileStats,
   UserEditForm,
   UserInfoCard,
 } from './components/index';
@@ -208,7 +201,10 @@ const ProfilePage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Spin size="large" tip="加载中..." />
+        <div className="text-center">
+          <Spin size="large" />
+          <p className="text-gray-600 mt-4">加载中...</p>
+        </div>
       </div>
     );
   }

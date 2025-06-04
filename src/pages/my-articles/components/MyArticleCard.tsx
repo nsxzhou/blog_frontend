@@ -504,7 +504,7 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
           setPassword('');
         }}
         confirmLoading={accessLoading}
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="py-4">
           <Input.Password

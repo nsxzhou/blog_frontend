@@ -65,7 +65,6 @@ const WritePage: React.FC = () => {
         page_size: 50,
         is_visible: 1,
       });
-      console.log(response);
       if (response.code === 0) {
         setCategories(response.data.list);
       }
