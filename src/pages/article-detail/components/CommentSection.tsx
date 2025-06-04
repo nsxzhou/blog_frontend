@@ -46,6 +46,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const [commentText, setCommentText] = useState('');
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [replyingToUser, setReplyingToUser] = useState<string | null>(null);
+  const [parentCommentId, setParentCommentId] = useState<number | null>(null);
 
   // 创建评论
   const { run: createComment, loading: createCommentLoading } = useRequest(
@@ -81,6 +83,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         message.success('回复发表成功');
         setReplyText('');
         setReplyingTo(null);
+        setReplyingToUser(null);
+        setParentCommentId(null);
         onCommentUpdate?.(); // 刷新评论列表
       },
       onError: (error) => {
@@ -136,7 +140,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       return;
     }
 
-    replyComment(commentId, replyText.trim());
+    // 构建回复内容，如果是对子评论的回复，则添加@用户名
+    let finalContent = replyText.trim();
+    if (replyingToUser) {
+      finalContent = `@${replyingToUser} ${finalContent}`;
+    }
+
+    // 如果是对子评论的回复，使用父评论ID；否则使用当前评论ID
+    const targetCommentId = parentCommentId || commentId;
+
+    replyComment(targetCommentId, finalContent);
   };
 
   // 点赞评论
@@ -151,8 +164,32 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     likeComment(commentId);
   };
 
+  // 开始回复评论
+  const handleStartReply = (
+    comment: Comment,
+    isReply: boolean,
+    parentId?: number,
+  ) => {
+    setReplyingTo(comment.id);
+    if (isReply) {
+      // 对子评论的回复
+      setReplyingToUser(comment.author.name);
+      setParentCommentId(parentId || comment.id);
+      setReplyText('');
+    } else {
+      // 对父评论的回复
+      setReplyingToUser(null);
+      setParentCommentId(null);
+      setReplyText('');
+    }
+  };
+
   // 渲染单条评论
-  const renderComment = (comment: Comment, isReply = false) => (
+  const renderComment = (
+    comment: Comment,
+    isReply = false,
+    parentCommentId?: number,
+  ) => (
     <motion.div
       key={comment.id}
       variants={itemVariants}
@@ -202,15 +239,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                 <span>{comment.likes}</span>
               </motion.button>
 
-              {!isReply && (
-                <motion.button
-                  {...hoverScale}
-                  onClick={() => setReplyingTo(comment.id)}
-                  className="text-xs text-gray-500 hover:text-blue-600 transition-colors"
-                >
-                  回复
-                </motion.button>
-              )}
+              <motion.button
+                {...hoverScale}
+                onClick={() =>
+                  handleStartReply(comment, isReply, parentCommentId)
+                }
+                className="text-xs text-gray-500 hover:text-blue-600 transition-colors"
+              >
+                回复
+              </motion.button>
             </div>
 
             {/* 回复表单 */}
@@ -221,10 +258,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                 animate="animate"
                 className="mt-4"
               >
+                {replyingToUser && (
+                  <div className="mb-2 text-xs text-blue-600">
+                    回复 @{replyingToUser}
+                  </div>
+                )}
                 <TextArea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="写下你的回复..."
+                  placeholder={
+                    replyingToUser
+                      ? `回复 @${replyingToUser}...`
+                      : '写下你的回复...'
+                  }
                   rows={3}
                   className="mb-3 text-sm"
                   style={{ resize: 'none' }}
@@ -244,6 +290,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                     onClick={() => {
                       setReplyingTo(null);
                       setReplyText('');
+                      setReplyingToUser(null);
+                      setParentCommentId(null);
                     }}
                     className="text-xs"
                   >
@@ -256,7 +304,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             {/* 回复列表 */}
             {comment.replies && comment.replies.length > 0 && (
               <div className="mt-4">
-                {comment.replies.map((reply) => renderComment(reply, true))}
+                {comment.replies.map((reply) =>
+                  renderComment(reply, true, comment.id),
+                )}
               </div>
             )}
           </div>

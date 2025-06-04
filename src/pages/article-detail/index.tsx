@@ -149,6 +149,7 @@ const ArticleDetailPage: React.FC = () => {
 
   // 转换评论数据
   useEffect(() => {
+    console.log('commentsResponse', commentsResponse);
     if (commentsResponse?.list) {
       const convertedComments: Comment[] = commentsResponse.list.map(
         (item: ApiComment) => ({
