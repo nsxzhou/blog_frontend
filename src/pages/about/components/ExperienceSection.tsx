@@ -10,7 +10,7 @@ import React from 'react';
 const ExperienceSection: React.FC = () => {
   const experiences = [
     {
-      title: '全栈开发工程师',
+      title: '全栈开发实习生',
       company: '深圳美藤科技',
       location: '深圳',
       period: '2025.03 - 2025.05',

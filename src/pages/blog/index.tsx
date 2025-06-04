@@ -6,6 +6,7 @@ import {
 import { GetCategoryList, type CategoryInfo } from '@/api/category';
 import { GetTagList, type TagInfo } from '@/api/tag';
 import { containerVariants, itemVariants } from '@/constants/animations';
+import { useSearchParams } from '@umijs/max';
 import { message, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -40,6 +41,8 @@ const transformArticleToPost = (article: ArticleListItem): BlogPost => {
 };
 
 const BlogPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+
   // 搜索和过滤状态
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
@@ -194,6 +197,16 @@ const BlogPage: React.FC = () => {
     },
     [currentPage, buildQueryParams],
   );
+
+  /**
+   * 处理 URL 参数
+   */
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setActiveCategory(decodeURIComponent(categoryParam));
+    }
+  }, [searchParams]);
 
   /**
    * 初始化数据

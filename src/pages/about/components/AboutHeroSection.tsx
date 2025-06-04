@@ -39,6 +39,18 @@ const AboutHeroSection: React.FC = () => {
         break;
     }
   };
+
+  const handleDownloadResume = () => {
+    const resumeUrl =
+      'https://typora-1324789722.cos.ap-guangzhou.myqcloud.com/images/%E6%BA%BA%E6%B0%B4%E5%AF%BB%E8%88%9F%E7%9A%84%E7%AE%80%E5%8E%86.pdf';
+    const link = document.createElement('a');
+    link.href = resumeUrl;
+    link.download = '溺水寻舟-简历.pdf';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   return (
     <motion.section
       style={{ y: heroY }}
@@ -123,6 +135,7 @@ const AboutHeroSection: React.FC = () => {
               size="large"
               icon={<DownloadOutlined />}
               className="h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 border-none"
+              onClick={handleDownloadResume}
             >
               下载简历
             </Button>

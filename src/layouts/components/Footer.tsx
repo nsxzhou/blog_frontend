@@ -1,24 +1,103 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Link } from '@umijs/max';
+import { GetCategoryList, type CategoryInfo } from '@/api/category';
 import {
-  GithubOutlined,
-  TwitterOutlined,
-  LinkedinOutlined,
-  WechatOutlined,
-  QqOutlined,
-  MailOutlined,
-  HomeOutlined,
-  FileTextOutlined,
-  UserOutlined,
   EditOutlined,
-  HeartFilled
+  FileTextOutlined,
+  GithubOutlined,
+  HeartFilled,
+  HomeOutlined,
+  LinkedinOutlined,
+  MailOutlined,
+  QqOutlined,
+  TwitterOutlined,
+  UserOutlined,
+  WechatOutlined,
 } from '@ant-design/icons';
+import { Link, history } from '@umijs/max';
+import { message } from 'antd';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+
+// 定义链接类型
+type FooterLink =
+  | { name: string; path: string; icon?: React.ReactElement; isAction?: false }
+  | { name: string; onClick: () => void; isAction: true };
+
+interface FooterSection {
+  title: string;
+  links: FooterLink[];
+}
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
 
-  const footerSections = [
+  // 获取分类列表
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await GetCategoryList({ is_visible: 1, page_size: 6 });
+        if (response.code === 0 && response.data) {
+          setCategories(response.data.list || []);
+        }
+      } catch (error) {
+        console.error('获取分类列表失败:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // 处理分类点击
+  const handleCategoryClick = (categoryName: string) => {
+    // 跳转到 blog 页面并设置分类筛选
+    history.push(`/blog?category=${encodeURIComponent(categoryName)}`);
+  };
+
+  // 处理敬请期待的功能点击
+  const handleComingSoon = () => {
+    message.info(`敬请期待！`);
+  };
+
+  const socialLinks = [
+    {
+      name: 'GitHub',
+      icon: <GithubOutlined />,
+      url: 'https://github.com',
+      color: 'hover:text-gray-700',
+    },
+    {
+      name: 'Twitter',
+      icon: <TwitterOutlined />,
+      url: 'https://twitter.com',
+      color: 'hover:text-blue-400',
+    },
+    {
+      name: 'LinkedIn',
+      icon: <LinkedinOutlined />,
+      url: 'https://linkedin.com',
+      color: 'hover:text-blue-600',
+    },
+    {
+      name: '微信',
+      icon: <WechatOutlined />,
+      url: '#',
+      color: 'hover:text-green-500',
+    },
+    {
+      name: 'QQ',
+      icon: <QqOutlined />,
+      url: '#',
+      color: 'hover:text-blue-500',
+    },
+    {
+      name: '邮箱',
+      icon: <MailOutlined />,
+      url: 'mailto:contact@example.com',
+      color: 'hover:text-red-500',
+    },
+  ];
+
+  const footerSections: FooterSection[] = [
     {
       title: '导航',
       links: [
@@ -26,65 +105,31 @@ const Footer: React.FC = () => {
         { name: '文章', path: '/blog', icon: <FileTextOutlined /> },
         { name: '关于', path: '/about', icon: <UserOutlined /> },
         { name: '写作', path: '/write', icon: <EditOutlined /> },
-      ]
+      ],
     },
     {
       title: '分类',
-      links: [
-        { name: 'React', path: '/blog/react' },
-        { name: 'TypeScript', path: '/blog/typescript' },
-        { name: 'CSS', path: '/blog/css' },
-        { name: '前端工程化', path: '/blog/engineering' },
-      ]
+      links: categories.map((category) => ({
+        name: category.name,
+        onClick: () => handleCategoryClick(category.name),
+        isAction: true as const,
+      })),
     },
     {
       title: '资源',
       links: [
-        { name: '归档', path: '/archive' },
-        { name: '标签', path: '/tags' },
-        { name: 'RSS订阅', path: '/rss' },
-        { name: '站点地图', path: '/sitemap' },
-      ]
-    }
-  ];
-
-  const socialLinks = [
-    {
-      name: 'GitHub',
-      icon: <GithubOutlined />,
-      url: 'https://github.com',
-      color: 'hover:text-gray-700'
+        {
+          name: '归档',
+          onClick: () => handleComingSoon(),
+          isAction: true as const,
+        },
+        {
+          name: 'RSS订阅',
+          onClick: () => handleComingSoon(),
+          isAction: true as const,
+        },
+      ],
     },
-    {
-      name: 'Twitter',
-      icon: <TwitterOutlined />,
-      url: 'https://twitter.com',
-      color: 'hover:text-blue-400'
-    },
-    {
-      name: 'LinkedIn',
-      icon: <LinkedinOutlined />,
-      url: 'https://linkedin.com',
-      color: 'hover:text-blue-600'
-    },
-    {
-      name: '微信',
-      icon: <WechatOutlined />,
-      url: '#',
-      color: 'hover:text-green-500'
-    },
-    {
-      name: 'QQ',
-      icon: <QqOutlined />,
-      url: '#',
-      color: 'hover:text-blue-500'
-    },
-    {
-      name: '邮箱',
-      icon: <MailOutlined />,
-      url: 'mailto:contact@example.com',
-      color: 'hover:text-red-500'
-    }
   ];
 
   return (
@@ -100,7 +145,7 @@ const Footer: React.FC = () => {
           transition={{
             duration: 12,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
       </div>
@@ -121,7 +166,7 @@ const Footer: React.FC = () => {
                   思维笔记
                 </span>
               </Link>
-              
+
               <p className="text-gray-600 mb-6 leading-relaxed max-w-md">
                 记录技术探索的点滴思考，分享编程智慧与成长感悟。
                 每一行代码都值得深度思考。
@@ -168,25 +213,36 @@ const Footer: React.FC = () => {
                       key={link.name}
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ 
-                        duration: 0.3, 
-                        delay: sectionIndex * 0.1 + linkIndex * 0.05 
+                      transition={{
+                        duration: 0.3,
+                        delay: sectionIndex * 0.1 + linkIndex * 0.05,
                       }}
                       viewport={{ once: true }}
                     >
-                      <Link
-                        to={link.path}
-                        className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 group"
-                      >
-                        {'icon' in link && link.icon && (
-                          <span className="text-gray-400 group-hover:text-blue-500 transition-colors">
-                            {link.icon}
+                      {link.isAction ? (
+                        <button
+                          onClick={link.onClick}
+                          className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 group cursor-pointer text-left"
+                        >
+                          <span className="group-hover:translate-x-1 transition-transform duration-200">
+                            {link.name}
                           </span>
-                        )}
-                        <span className="group-hover:translate-x-1 transition-transform duration-200">
-                          {link.name}
-                        </span>
-                      </Link>
+                        </button>
+                      ) : (
+                        <Link
+                          to={link.path}
+                          className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 group"
+                        >
+                          {link.icon && (
+                            <span className="text-gray-400 group-hover:text-blue-500 transition-colors">
+                              {link.icon}
+                            </span>
+                          )}
+                          <span className="group-hover:translate-x-1 transition-transform duration-200">
+                            {link.name}
+                          </span>
+                        </Link>
+                      )}
                     </motion.li>
                   ))}
                 </ul>
@@ -233,20 +289,20 @@ const Footer: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.5 }}
               viewport={{ once: true }}
             >
-              <Link 
-                to="/privacy" 
+              <Link
+                to="/privacy"
                 className="hover:text-gray-700 transition-colors duration-200"
               >
                 隐私政策
               </Link>
-              <Link 
-                to="/terms" 
+              <Link
+                to="/terms"
                 className="hover:text-gray-700 transition-colors duration-200"
               >
                 使用条款
               </Link>
-              <Link 
-                to="/sitemap" 
+              <Link
+                to="/sitemap"
                 className="hover:text-gray-700 transition-colors duration-200"
               >
                 网站地图
@@ -259,4 +315,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export default Footer;
