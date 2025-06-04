@@ -28,10 +28,6 @@ export function UploadImage(data: UploadImageReq) {
   return request<baseResponse<UploadImageRes>>('/api/images/upload', {
     method: 'POST',
     data: formData,
-    // 不要手动设置 Content-Type，让浏览器自动设置
-    // headers: {
-    //   'Content-Type': 'multipart/form-data',
-    // },
   });
 }
 

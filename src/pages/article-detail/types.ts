@@ -11,7 +11,6 @@ export interface Article {
     bio?: string;
   };
   publishDate: string;
-  readTime: number;
   views: number;
   likes: number;
   comments: number;

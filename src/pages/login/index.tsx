@@ -1,5 +1,5 @@
 import { delayedEntry, hoverScaleSmall } from '@/constants/animations';
-import { useNavigate } from '@umijs/max';
+import { useNavigate, useSearchParams } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { LoginForm, RegisterForm } from './components';
@@ -7,8 +7,16 @@ import { LoginForm, RegisterForm } from './components';
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
+
   const handleAuthSuccess = () => {
-    navigate('/');
+    // 如果有重定向路径，跳转到该路径，否则跳转到首页
+    if (redirectPath) {
+      navigate(decodeURIComponent(redirectPath));
+    } else {
+      navigate('/');
+    }
   };
 
   const handleSwitchMode = () => {

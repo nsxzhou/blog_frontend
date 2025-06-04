@@ -26,7 +26,6 @@ interface ArticleHeaderProps {
         bio?: string;
     };
     publishDate: string;
-    readTime: number;
     views: number;
     likes: number;
     comments: number;
@@ -39,7 +38,6 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({
     title,
     author,
     publishDate,
-    readTime,
     views,
     likes,
     comments,
@@ -109,7 +107,6 @@ const ArticleHeader: React.FC<ArticleHeaderProps> = ({
                                     <CalendarOutlined />
                                     {publishDate}
                                 </span>
-                                <span>{readTime} 分钟阅读</span>
                             </div>
                         </div>
                     </div>

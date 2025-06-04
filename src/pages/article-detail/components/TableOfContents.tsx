@@ -1,18 +1,21 @@
+import { ArticleAction } from '@/api/article';
 import {
   fadeInUp,
   hoverScale,
   sidebarItemVariants,
 } from '@/constants/animations';
 import {
+  BookFilled,
   BookOutlined,
   CloseOutlined,
+  HeartFilled,
   HeartOutlined,
   MessageOutlined,
-  PrinterOutlined,
   ShareAltOutlined,
   UnorderedListOutlined,
   UpOutlined,
 } from '@ant-design/icons';
+import { history, useModel } from '@umijs/max';
 import { Button, Tooltip, message } from 'antd';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
@@ -26,18 +29,41 @@ interface TocItem {
 interface TableOfContentsProps {
   isVisible: boolean;
   onToggle: () => void;
+  articleId: number;
+  initialLiked?: boolean;
+  initialFavorited?: boolean;
+  onLikeUpdate?: (liked: boolean, likeCount: number) => void;
+  onFavoriteUpdate?: (favorited: boolean, favoriteCount: number) => void;
 }
 
 const TableOfContents: React.FC<TableOfContentsProps> = ({
   isVisible,
   onToggle,
+  articleId,
+  initialLiked = false,
+  initialFavorited = false,
+  onLikeUpdate,
+  onFavoriteUpdate,
 }) => {
+  const { initialState } = useModel('@@initialState');
+  const { isLoggedIn } = initialState || {};
+
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>('');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [tocCollapsed, setTocCollapsed] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLiked, setIsLiked] = useState(initialLiked);
+  const [isBookmarked, setIsBookmarked] = useState(initialFavorited);
+  const [actionLoading, setActionLoading] = useState<{
+    like: boolean;
+    bookmark: boolean;
+  }>({ like: false, bookmark: false });
+
+  // 更新初始状态
+  useEffect(() => {
+    setIsLiked(initialLiked);
+    setIsBookmarked(initialFavorited);
+  }, [initialLiked, initialFavorited]);
 
   // 生成目录
   useEffect(() => {
@@ -116,25 +142,72 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
 
   // 交互功能处理函数
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: document.title,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      message.success('链接已复制到剪贴板');
+    navigator.clipboard.writeText(
+      `${window.location.origin}/article-detail/${articleId}`,
+    );
+    message.success('链接已复制到剪贴板');
+  };
+
+  // 检查登录状态的辅助函数
+  const checkLoginStatus = () => {
+    if (!isLoggedIn) {
+      message.warning('请先登录后再进行操作');
+      // 跳转到登录页面，并在登录成功后返回当前页面
+      history.push(
+        `/login?redirect=${encodeURIComponent(window.location.pathname)}`,
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const handleLike = async () => {
+    // 检查登录状态
+    if (!checkLoginStatus()) {
+      return;
+    }
+
+    if (actionLoading.like) return;
+
+    const newLikedState = !isLiked;
+    const action = newLikedState ? 'like' : 'unlike';
+
+    setActionLoading((prev) => ({ ...prev, like: true }));
+    try {
+      await ArticleAction(articleId, { action });
+      setIsLiked(newLikedState);
+      message.success(newLikedState ? '点赞成功' : '已取消点赞');
+    } catch (error) {
+      console.error('点赞操作失败:', error);
+      message.error('操作失败，请稍后重试');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, like: false }));
     }
   };
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    message.success(isLiked ? '已取消点赞' : '点赞成功');
-  };
+  const handleBookmark = async () => {
+    // 检查登录状态
+    if (!checkLoginStatus()) {
+      return;
+    }
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    message.success(isBookmarked ? '已取消收藏' : '收藏成功');
+    if (actionLoading.bookmark) return;
+
+    const newBookmarkedState = !isBookmarked;
+    const action = newBookmarkedState ? 'favorite' : 'unfavorite';
+
+    setActionLoading((prev) => ({ ...prev, bookmark: true }));
+
+    try {
+      await ArticleAction(articleId, { action });
+      setIsBookmarked(newBookmarkedState);
+      message.success(newBookmarkedState ? '收藏成功' : '已取消收藏');
+    } catch (error) {
+      console.error('收藏操作失败:', error);
+      message.error('操作失败，请稍后重试');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, bookmark: false }));
+    }
   };
 
   const handleComment = () => {
@@ -142,10 +215,6 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
     if (commentSection) {
       commentSection.scrollIntoView({ behavior: 'smooth' });
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   if (tocItems.length === 0) {
@@ -215,13 +284,14 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
               <Button
                 type="text"
                 shape="circle"
-                icon={<HeartOutlined />}
+                icon={isLiked ? <HeartFilled /> : <HeartOutlined />}
                 onClick={handleLike}
+                loading={actionLoading.like}
                 className={`${
                   isLiked
-                    ? 'text-red-500 hover:text-red-600'
-                    : 'text-red-400 hover:text-red-500'
-                }`}
+                    ? 'text-red-500 hover:text-red-600 bg-red-50'
+                    : 'text-red-400 hover:text-red-500 hover:bg-red-50'
+                } transition-all duration-200`}
               />
             </motion.div>
           </Tooltip>
@@ -231,13 +301,14 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
               <Button
                 type="text"
                 shape="circle"
-                icon={<BookOutlined />}
+                icon={isBookmarked ? <BookFilled /> : <BookOutlined />}
                 onClick={handleBookmark}
+                loading={actionLoading.bookmark}
                 className={`${
                   isBookmarked
-                    ? 'text-yellow-500 hover:text-yellow-600'
-                    : 'text-yellow-400 hover:text-yellow-500'
-                }`}
+                    ? 'text-yellow-500 hover:text-yellow-600 bg-yellow-50'
+                    : 'text-yellow-400 hover:text-yellow-500 hover:bg-yellow-50'
+                } transition-all duration-200`}
               />
             </motion.div>
           </Tooltip>
@@ -250,18 +321,6 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
                 icon={<MessageOutlined />}
                 onClick={handleComment}
                 className="text-green-500 hover:text-green-600"
-              />
-            </motion.div>
-          </Tooltip>
-
-          <Tooltip title="打印文章" placement="left">
-            <motion.div {...hoverScale}>
-              <Button
-                type="text"
-                shape="circle"
-                icon={<PrinterOutlined />}
-                onClick={handlePrint}
-                className="text-purple-500 hover:text-purple-600"
               />
             </motion.div>
           </Tooltip>

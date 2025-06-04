@@ -19,7 +19,7 @@ const convertToBlogPost = (apiArticle: ArticleListItem): BlogPost => {
     title: apiArticle.title,
     excerpt: apiArticle.summary,
     image: apiArticle.cover_image || '/default-cover.jpg',
-    date: new Date(apiArticle.published_at).toLocaleDateString(),
+    date: apiArticle.published_at || apiArticle.created_at, 
     views: apiArticle.view_count,
     likes: apiArticle.like_count,
     comments: apiArticle.comment_count,

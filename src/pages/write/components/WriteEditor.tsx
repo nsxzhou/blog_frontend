@@ -1,9 +1,11 @@
+import { UploadImage } from '@/api/image';
 import { cardVariants, itemVariants } from '@/constants/animations';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { Editor } from '@toast-ui/react-editor';
-import { Input } from 'antd';
+import { useModel } from '@umijs/max';
+import { Input, message } from 'antd';
 import { motion } from 'framer-motion';
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 const { TextArea } = Input;
 
@@ -27,6 +29,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   onContentChange,
 }) => {
   const editorRef = useRef<Editor>(null);
+  const { initialState } = useModel('@@initialState');
 
   const handleEditorChange = () => {
     const editorInstance = editorRef.current?.getInstance();
@@ -35,6 +38,60 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
       onContentChange(markdown);
     }
   };
+
+  // 自定义图片上传处理函数
+  const handleImageUpload = useCallback(
+    async (blob: Blob, callback: (url: string, altText?: string) => void) => {
+      try {
+        // 检查用户是否登录
+        if (!initialState?.currentUser?.id) {
+          message.error('请先登录后再上传图片');
+          return;
+        }
+
+        // 检查文件类型
+        if (!blob.type.startsWith('image/')) {
+          message.error('只能上传图片文件');
+          return;
+        }
+
+        // 显示上传中提示
+        const hide = message.loading('图片上传中...', 0);
+
+        // 创建File对象
+        const file = new File(
+          [blob],
+          `image_${Date.now()}.${blob.type.split('/')[1]}`,
+          {
+            type: blob.type,
+          },
+        );
+
+        // 调用上传API
+        const response = await UploadImage({
+          image: file,
+          usage_type: 'content', // 文章内容图片
+          storage_type: 'cos', // 或者 'local'，根据你的需求
+          // article_id: articleId, // 如果有文章ID可以传入
+        });
+
+        hide();
+
+        if (response.code === 0 && response.data?.image?.url) {
+          // 上传成功，使用返回的URL
+          const imageUrl = response.data.image.url;
+          callback(imageUrl, file.name);
+          message.success('图片上传成功');
+        } else {
+          message.error('图片上传失败，请重试');
+        }
+      } catch (error) {
+        console.error('图片上传失败:', error);
+        message.error('图片上传失败，请重试');
+      }
+    },
+    [initialState?.currentUser?.id],
+  );
 
   return (
     <motion.div variants={itemVariants} className="lg:col-span-3 space-y-4">
@@ -83,6 +140,9 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
             language="zh-CN"
             onChange={handleEditorChange}
             placeholder="开始写作..."
+            hooks={{
+              addImageBlobHook: handleImageUpload,
+            }}
           />
         </div>
       </motion.div>
