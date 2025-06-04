@@ -1,16 +1,9 @@
-import {
-  DeleteArticle,
-  GetArticleStats,
-  GetMyArticles,
-  type ArticleListItem,
-} from '@/api/article';
+import { DeleteArticle, GetArticleStats, GetMyArticles } from '@/api/article';
 import {
   containerVariants,
   itemVariants,
   pageVariants,
 } from '@/constants/animations';
-import BlogCard from '@/pages/blog/components/BlogCard';
-import type { BlogPost } from '@/pages/blog/components/types';
 import { history, useRequest } from '@umijs/max';
 import { Empty, Pagination, Spin, message } from 'antd';
 import { motion } from 'framer-motion';
@@ -21,30 +14,9 @@ import {
   type ArticleStats,
   type FilterType,
   type SortType,
+  EmptyState,
 } from './components';
-import { EmptyState } from './components/EmptyState';
-
-// 将 API 返回的文章数据转换为 BlogCard 需要的格式
-const convertToBlogPost = (apiArticle: ArticleListItem): BlogPost => {
-  return {
-    id: apiArticle.id,
-    title: apiArticle.title,
-    excerpt: apiArticle.summary,
-    image: apiArticle.cover_image || '/default-cover.jpg',
-    date: new Date(
-      apiArticle.published_at || apiArticle.created_at,
-    ).toLocaleDateString(),
-    views: apiArticle.view_count,
-    likes: apiArticle.like_count,
-    comments: apiArticle.comment_count,
-    tags: apiArticle.tags.map((tag) => tag.name),
-    category: apiArticle.category_name,
-    author: {
-      name: apiArticle.author_name || '匿名用户',
-    },
-    featured: apiArticle.is_top === 1,
-  };
-};
+import MyArticleCard from './components/MyArticleCard';
 
 const MyArticlesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,7 +35,7 @@ const MyArticlesPage: React.FC = () => {
       return GetMyArticles({
         page: currentPage,
         page_size: pageSize,
-        keyword: searchTerm || undefined,
+        keyword: searchTerm,
         status: filterType === '' ? '' : (filterType as any),
         order_by:
           sortType === 'date'
@@ -96,10 +68,9 @@ const MyArticlesPage: React.FC = () => {
     },
   );
 
-  // 转换文章数据为 BlogPost 格式
-  const blogPosts = useMemo(() => {
-    if (!articlesData?.list) return [];
-    return articlesData.list.map(convertToBlogPost);
+  // 文章数据
+  const articles = useMemo(() => {
+    return articlesData?.list || [];
   }, [articlesData]);
 
   // 计算统计数据
@@ -116,16 +87,27 @@ const MyArticlesPage: React.FC = () => {
     }
 
     // 如果统计接口失败，从文章列表计算（注意：这里只是当前页的数据）
-    const published = blogPosts.filter((post) => post.featured !== undefined);
+    const published = articles.filter(
+      (article) => article.status === 'published',
+    );
     return {
-      totalArticles: blogPosts.length,
-      totalViews: blogPosts.reduce((sum, post) => sum + post.views, 0),
-      totalLikes: blogPosts.reduce((sum, post) => sum + post.likes, 0),
-      totalComments: blogPosts.reduce((sum, post) => sum + post.comments, 0),
+      totalArticles: articles.length,
+      totalViews: articles.reduce(
+        (sum, article) => sum + article.view_count,
+        0,
+      ),
+      totalLikes: articles.reduce(
+        (sum, article) => sum + article.like_count,
+        0,
+      ),
+      totalComments: articles.reduce(
+        (sum, article) => sum + article.comment_count,
+        0,
+      ),
       publishedCount: published.length,
-      draftCount: blogPosts.length - published.length,
+      draftCount: articles.length - published.length,
     };
-  }, [statsData, blogPosts]);
+  }, [statsData, articles]);
 
   // 处理搜索和过滤变化
   const handleSearchChange = (value: string) => {
@@ -223,7 +205,7 @@ const MyArticlesPage: React.FC = () => {
               <div className="flex justify-center items-center py-20">
                 <Spin size="large" tip="加载中..." />
               </div>
-            ) : blogPosts.length === 0 ? (
+            ) : articles.length === 0 ? (
               searchTerm || filterType !== '' ? (
                 <motion.div
                   variants={itemVariants}
@@ -246,8 +228,16 @@ const MyArticlesPage: React.FC = () => {
                   animate="visible"
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
                 >
-                  {blogPosts.map((post, index) => (
-                    <BlogCard key={post.id} post={post} index={index} />
+                  {articles.map((article, index) => (
+                    <MyArticleCard
+                      key={article.id}
+                      article={article}
+                      index={index}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onShare={handleShare}
+                      onRefresh={refreshArticles}
+                    />
                   ))}
                 </motion.div>
 

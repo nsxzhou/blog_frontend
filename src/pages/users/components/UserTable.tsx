@@ -22,6 +22,7 @@ import {
   Dropdown,
   Empty,
   Input,
+  message,
   Modal,
   Popconfirm,
   Space,
@@ -338,6 +339,9 @@ const UserTable: React.FC<UserTableProps> = ({
                   size="small"
                   type="text"
                   className="text-blue-600 hover:bg-blue-50"
+                  onClick={() => {
+                    message.info('敬请期待');
+                  }}
                 />
               </motion.div>
             </Tooltip>
@@ -375,6 +379,9 @@ const UserTable: React.FC<UserTableProps> = ({
                   size="small"
                   type="text"
                   className="text-gray-600 hover:bg-gray-50"
+                  onClick={() => {
+                    message.info('敬请期待');
+                  }}
                 />
               </motion.div>
             </Dropdown>

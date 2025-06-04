@@ -325,7 +325,6 @@ const WritePage: React.FC = () => {
     ) {
       Modal.confirm({
         title: '确认离开？',
-        content: '您有未保存的更改，确定要离开吗？',
         onOk: () => history.back(),
       });
     } else {

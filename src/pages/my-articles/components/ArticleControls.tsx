@@ -24,7 +24,6 @@ const filterOptions = [
   { key: '', label: '全部文章', color: 'text-gray-600' },
   { key: 'published', label: '已发布', color: 'text-green-600' },
   { key: 'draft', label: '草稿', color: 'text-yellow-600' },
-  { key: 'private', label: '私密', color: 'text-red-600' },
 ];
 
 const sortOptions = [

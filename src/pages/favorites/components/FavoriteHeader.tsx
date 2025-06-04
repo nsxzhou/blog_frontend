@@ -38,15 +38,6 @@ const FavoriteHeader: React.FC<FavoriteHeaderProps> = ({ totalCount }) => {
           <p className="text-lg text-gray-600">管理您收藏的精彩文章</p>
         </motion.div>
       </div>
-
-      {/* 收藏提示 */}
-      {totalCount === 0 && (
-        <motion.div variants={itemVariants} className="text-center py-8">
-          <div className="text-gray-500 text-sm">
-            还没有收藏任何文章，快去发现感兴趣的内容吧！
-          </div>
-        </motion.div>
-      )}
     </motion.div>
   );
 };

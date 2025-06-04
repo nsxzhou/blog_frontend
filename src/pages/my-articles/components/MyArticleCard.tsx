@@ -1,236 +1,526 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from '@umijs/max';
+import type { ArticleListItem } from '@/api/article';
+import { UpdateArticleAccess, UpdateArticleStatus } from '@/api/article';
+import { UserAvatar } from '@/components/ui';
 import {
-    EyeOutlined,
-    HeartOutlined,
-    MessageOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    ShareAltOutlined,
-    MoreOutlined,
-    CalendarOutlined,
-    TagOutlined,
+  cardHover,
+  hoverScaleSmall,
+  imageVariants,
+  itemVariants,
+  modalVariants,
+  overlayVariants,
+  titleVariants,
+} from '@/constants/animations';
+import {
+  CalendarOutlined,
+  CheckOutlined,
+  CommentOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  FireOutlined,
+  GlobalOutlined,
+  HeartOutlined,
+  KeyOutlined,
+  LoadingOutlined,
+  MoreOutlined,
+  ShareAltOutlined,
 } from '@ant-design/icons';
-import type { MyArticle } from '../types';
-import {
-    articleCardVariants,
-    cardHover,
-    hoverScaleSmall,
-    modalVariants
-} from '@/constants';
+import { history, useRequest } from '@umijs/max';
+import { Dropdown, Input, message, Modal } from 'antd';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 
 interface MyArticleCardProps {
-    article: MyArticle;
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
-    onShare: (id: number) => void;
-    onClick: (id: number) => void;
+  article: ArticleListItem;
+  index: number;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
+  onShare: (id: number) => void;
+  onRefresh?: () => void;
 }
 
+// 状态配置
 const statusConfig = {
-    published: { label: '已发布', color: 'bg-green-100 text-green-700' },
-    draft: { label: '草稿', color: 'bg-yellow-100 text-yellow-700' },
-    private: { label: '私密', color: 'bg-red-100 text-red-700' },
+  draft: {
+    label: '草稿',
+    color: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    icon: <EditOutlined />,
+  },
+  published: {
+    label: '已发布',
+    color: 'bg-green-100 text-green-700 border-green-200',
+    icon: <CheckOutlined />,
+  },
 };
 
-export const MyArticleCard: React.FC<MyArticleCardProps> = ({
-    article,
-    onEdit,
-    onDelete,
-    onClick,
+// 访问权限配置
+const accessConfig = {
+  public: {
+    label: '公开',
+    color: 'bg-blue-100 text-blue-700',
+    icon: <GlobalOutlined />,
+  },
+  private: {
+    label: '私密',
+    color: 'bg-red-100 text-red-700',
+    icon: <EyeInvisibleOutlined />,
+  },
+  password: {
+    label: '密码',
+    color: 'bg-purple-100 text-purple-700',
+    icon: <KeyOutlined />,
+  },
+};
+
+const MyArticleCard: React.FC<MyArticleCardProps> = ({
+  article,
+  index,
+  onEdit,
+  onDelete,
+  onShare,
+  onRefresh,
 }) => {
-    const [showActions, setShowActions] = useState(false);
-    const status = statusConfig[article.status];
+  const [showActions, setShowActions] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState('');
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'published':
-                return 'text-green-600 bg-green-50';
-            case 'draft':
-                return 'text-yellow-600 bg-yellow-50';
-            default:
-                return 'text-gray-600 bg-gray-50';
-        }
-    };
+  // 状态更新请求
+  const { run: updateStatus, loading: statusLoading } = useRequest(
+    (status: 'draft' | 'published') =>
+      UpdateArticleStatus(article.id, { status }),
+    {
+      manual: true,
+      onSuccess: () => {
+        message.success('状态更新成功');
+        onRefresh?.();
+      },
+      onError: (error) => {
+        console.error('状态更新失败:', error);
+        message.error('状态更新失败');
+      },
+    },
+  );
 
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'published':
-                return '已发布';
-            case 'draft':
-                return '草稿';
-            default:
-                return '未知';
-        }
-    };
+  // 访问权限更新请求
+  const { run: updateAccess, loading: accessLoading } = useRequest(
+    (accessType: 'public' | 'private' | 'password', pwd?: string) =>
+      UpdateArticleAccess(article.id, {
+        access_type: accessType,
+        password: pwd,
+      }),
+    {
+      manual: true,
+      onSuccess: () => {
+        message.success('访问权限更新成功');
+        setShowPasswordModal(false);
+        setPassword('');
+        onRefresh?.();
+      },
+      onError: (error) => {
+        console.error('访问权限更新失败:', error);
+        message.error('访问权限更新失败');
+      },
+    },
+  );
 
-    const handleMenuClick = (e: React.MouseEvent, action: () => void) => {
-        e.stopPropagation();
-        action();
+  const handleCardClick = () => {
+    if (showActions) {
+      setShowActions(false);
+      return;
+    }
+    history.push(`/article-detail/${article.id}`);
+  };
+
+  const handleStatusChange = (status: 'draft' | 'published') => {
+    Modal.confirm({
+      title: `确认${status === 'published' ? '发布' : '转为草稿'}？`,
+      content: `您确定要将文章${
+        status === 'published' ? '发布' : '转为草稿'
+      }吗？`,
+      onOk: () => updateStatus(status),
+    });
+    setShowActions(false);
+  };
+
+  const handleAccessChange = (
+    accessType: 'public' | 'private' | 'password',
+  ) => {
+    if (accessType === 'password') {
+      setShowPasswordModal(true);
+    } else {
+      updateAccess(accessType);
+    }
+    setShowActions(false);
+  };
+
+  const handlePasswordSubmit = () => {
+    if (!password.trim()) {
+      message.error('请输入密码');
+      return;
+    }
+    updateAccess('password', password);
+  };
+
+  const handleMenuClick = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    action();
+  };
+
+  // ESC键关闭菜单
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         setShowActions(false);
+      }
     };
 
-    // ESC键关闭菜单
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                setShowActions(false);
-            }
-        };
+    if (showActions) {
+      document.addEventListener('keydown', handleEscape);
+    }
 
-        if (showActions) {
-            document.addEventListener('keydown', handleEscape);
-        }
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showActions]);
 
-        return () => {
-            document.removeEventListener('keydown', handleEscape);
-        };
-    }, [showActions]);
+  const currentStatus =
+    statusConfig[article.status as keyof typeof statusConfig];
+  const currentAccess =
+    accessConfig[article.access_type as keyof typeof accessConfig];
 
-    return (
+  // 状态切换菜单项
+  const statusMenuItems = [
+    {
+      key: 'published',
+      label: (
+        <div className="flex items-center gap-2">
+          <CheckOutlined />
+          <span>发布文章</span>
+        </div>
+      ),
+      disabled: article.status === 'published' || statusLoading,
+      onClick: () => handleStatusChange('published'),
+    },
+    {
+      key: 'draft',
+      label: (
+        <div className="flex items-center gap-2">
+          <EditOutlined />
+          <span>转为草稿</span>
+        </div>
+      ),
+      disabled: article.status === 'draft' || statusLoading,
+      onClick: () => handleStatusChange('draft'),
+    },
+  ];
+
+  // 访问权限菜单项
+  const accessMenuItems = [
+    {
+      key: 'public',
+      label: (
+        <div className="flex items-center gap-2">
+          <GlobalOutlined />
+          <span>公开访问</span>
+        </div>
+      ),
+      disabled: article.access_type === 'public' || accessLoading,
+      onClick: () => handleAccessChange('public'),
+    },
+    {
+      key: 'private',
+      label: (
+        <div className="flex items-center gap-2">
+          <EyeInvisibleOutlined />
+          <span>私密访问</span>
+        </div>
+      ),
+      disabled: article.access_type === 'private' || accessLoading,
+      onClick: () => handleAccessChange('private'),
+    },
+    {
+      key: 'password',
+      label: (
+        <div className="flex items-center gap-2">
+          <KeyOutlined />
+          <span>密码访问</span>
+        </div>
+      ),
+      disabled: accessLoading,
+      onClick: () => handleAccessChange('password'),
+    },
+  ];
+
+  return (
+    <>
+      <motion.article
+        variants={itemVariants}
+        custom={index}
+        layout
+        onClick={handleCardClick}
+        className="group relative cursor-pointer"
+      >
         <motion.div
-            variants={articleCardVariants}
-            initial="hidden"
-            animate="visible"
-            {...cardHover}
-            className="bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer relative flex flex-col h-full"
-            onClick={() => {
-                if (showActions) {
-                    setShowActions(false);
-                } else {
-                    onClick(article.id);
-                }
-            }}
+          variants={cardHover}
+          initial="rest"
+          whileHover="hover"
+          className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${
+            article.is_top === 1 ? 'ring-2 ring-blue-200' : ''
+          }`}
         >
-            {/* 文章图片 */}
-            {article.image && (
-                <div className="relative h-48 overflow-hidden">
-                    <img
-                        src={article.image}
-                        alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-
-                    <div className="absolute top-3 left-3">
-                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${status.color}`}>
-                            {status.label}
-                        </span>
-                    </div>
-
-                    {article.featured && (
-                        <div className="absolute top-3 right-3">
-                            <span className="px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-medium rounded-lg">
-                                推荐
-                            </span>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* 文章内容 */}
-            <div className="p-6 flex-1 flex flex-col">
-                {!article.image && (
-                    <div className="flex items-center justify-between mb-3">
-                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${status.color}`}>
-                            {status.label}
-                        </span>
-                        {article.featured && (
-                            <span className="px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-medium rounded-lg">
-                                推荐
-                            </span>
-                        )}
-                    </div>
-                )}
-
-                <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
-                    {article.title}
-                </h3>
-
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
-                    {article.excerpt}
-                </p>
-
-                {article.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-4">
-                        {article.tags.slice(0, 3).map((tag) => (
-                            <span
-                                key={tag}
-                                className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md"
-                            >
-                                <TagOutlined className="mr-1 text-xs" />
-                                {tag}
-                            </span>
-                        ))}
-                        {article.tags.length > 3 && (
-                            <span className="text-xs text-gray-400">+{article.tags.length - 3}</span>
-                        )}
-                    </div>
-                )}
-
-                <div className="flex items-center justify-between text-sm text-gray-500 border-t border-gray-100 pt-4">
-                    <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-1">
-                            <EyeOutlined />
-                            <span>{article.views.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                            <HeartOutlined />
-                            <span>{article.likes}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                            <MessageOutlined />
-                            <span>{article.comments}</span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                        <div className="flex items-center space-x-1 text-xs">
-                            <CalendarOutlined />
-                            <span>{new Date(article.date).toLocaleDateString()}</span>
-                        </div>
-
-                        <div className="relative">
-                            <motion.button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowActions(!showActions);
-                                }}
-                                className="p-1 rounded-md hover:bg-gray-100 transition-colors"
-                                {...hoverScaleSmall}
-                            >
-                                <MoreOutlined />
-                            </motion.button>
-
-                            <AnimatePresence>
-                                {showActions && (
-                                    <motion.div
-                                        {...modalVariants}
-                                        className="absolute bottom-12 right-4 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <button
-                                            onClick={(e) => handleMenuClick(e, () => onEdit(article.id))}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                                        >
-                                            <EditOutlined />
-                                            <span>编辑</span>
-                                        </button>
-                                        <button
-                                            onClick={(e) => handleMenuClick(e, () => onDelete(article.id))}
-                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                                        >
-                                            <DeleteOutlined />
-                                            <span>删除</span>
-                                        </button>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </div>
-                </div>
+          {/* 置顶标签 */}
+          {article.is_top === 1 && (
+            <div className="absolute top-4 left-4 z-10">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
+              >
+                <FireOutlined />
+                置顶
+              </motion.div>
             </div>
+          )}
+
+          {/* 操作按钮 */}
+          <div className="absolute top-4 right-4 z-10">
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowActions(!showActions);
+              }}
+              className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm"
+              {...hoverScaleSmall}
+            >
+              <MoreOutlined />
+            </motion.button>
+
+            <AnimatePresence>
+              {showActions && (
+                <motion.div
+                  {...modalVariants}
+                  className="absolute top-12 right-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[160px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={(e) =>
+                      handleMenuClick(e, () => onEdit(article.id))
+                    }
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <EditOutlined />
+                    <span>编辑文章</span>
+                  </button>
+
+                  {/* 状态切换子菜单 */}
+                  <Dropdown
+                    menu={{ items: statusMenuItems }}
+                    trigger={['hover']}
+                    placement="topLeft"
+                  >
+                    <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {statusLoading ? (
+                          <LoadingOutlined />
+                        ) : (
+                          currentStatus?.icon
+                        )}
+                        <span>状态管理</span>
+                      </div>
+                      <span>›</span>
+                    </button>
+                  </Dropdown>
+
+                  {/* 访问权限子菜单 */}
+                  <Dropdown
+                    menu={{ items: accessMenuItems }}
+                    trigger={['hover']}
+                    placement="topLeft"
+                  >
+                    <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {accessLoading ? (
+                          <LoadingOutlined />
+                        ) : (
+                          currentAccess?.icon
+                        )}
+                        <span>访问权限</span>
+                      </div>
+                      <span>›</span>
+                    </button>
+                  </Dropdown>
+
+                  <div className="border-t border-gray-100 my-1" />
+
+                  <button
+                    onClick={(e) =>
+                      handleMenuClick(e, () => onShare(article.id))
+                    }
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <ShareAltOutlined />
+                    <span>分享文章</span>
+                  </button>
+
+                  <button
+                    onClick={(e) =>
+                      handleMenuClick(e, () => onDelete(article.id))
+                    }
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <DeleteOutlined />
+                    <span>删除文章</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* 文章图片 */}
+          <div className="relative h-48 overflow-hidden">
+            <motion.img
+              src={article.cover_image}
+              alt={article.title}
+              className="w-full h-full object-cover"
+              variants={imageVariants}
+            />
+            <motion.div
+              variants={overlayVariants}
+              className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+            />
+          </div>
+
+          <div className="p-6">
+            {/* 状态和权限标签 */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-xs font-medium px-2 py-1 rounded-md border ${currentStatus?.color}`}
+                >
+                  <span className="flex items-center gap-1">
+                    {currentStatus?.icon}
+                    {currentStatus?.label}
+                  </span>
+                </span>
+                <span
+                  className={`text-xs font-medium px-2 py-1 rounded-md ${currentAccess?.color}`}
+                >
+                  <span className="flex items-center gap-1">
+                    {currentAccess?.icon}
+                    {currentAccess?.label}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                <span className="flex items-center gap-1">
+                  <CalendarOutlined />
+                  {new Date(
+                    article.published_at || article.created_at,
+                  ).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+
+            {/* 分类标签 */}
+            <div className="mb-3">
+              <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
+                {article.category_name}
+              </span>
+            </div>
+
+            {/* 文章标题 */}
+            <motion.h3
+              variants={titleVariants}
+              className="text-lg font-semibold mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors"
+            >
+              {article.title}
+            </motion.h3>
+
+            {/* 文章摘要 */}
+            <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3 text-sm">
+              {article.summary}
+            </p>
+
+            {/* 标签 */}
+            <div className="flex flex-wrap gap-1 mb-4">
+              {article.tags.slice(0, 3).map((tag, tagIndex) => (
+                <motion.span
+                  key={tagIndex}
+                  className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 cursor-pointer"
+                  whileHover={{
+                    backgroundColor: '#e5e7eb',
+                    transition: { duration: 0.1 },
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {tag.name}
+                </motion.span>
+              ))}
+              {article.tags.length > 3 && (
+                <span className="px-2 py-1 text-xs text-gray-400">
+                  +{article.tags.length - 3}
+                </span>
+              )}
+            </div>
+
+            {/* 作者和统计信息 */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-2">
+                <UserAvatar
+                  user={{ name: article.author_name }}
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+                <span className="text-sm text-gray-600">
+                  {article.author_name}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  <EyeOutlined />
+                  {article.view_count}
+                </span>
+                <span className="flex items-center gap-1">
+                  <HeartOutlined />
+                  {article.like_count}
+                </span>
+                <span className="flex items-center gap-1">
+                  <CommentOutlined />
+                  {article.comment_count}
+                </span>
+              </div>
+            </div>
+          </div>
         </motion.div>
-    );
+      </motion.article>
+
+      {/* 密码设置模态框 */}
+      <Modal
+        title="设置访问密码"
+        open={showPasswordModal}
+        onOk={handlePasswordSubmit}
+        onCancel={() => {
+          setShowPasswordModal(false);
+          setPassword('');
+        }}
+        confirmLoading={accessLoading}
+        destroyOnClose
+      >
+        <div className="py-4">
+          <Input.Password
+            placeholder="请输入访问密码"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onPressEnter={handlePasswordSubmit}
+            autoFocus
+          />
+          <p className="text-gray-500 text-sm mt-2">
+            设置密码后，访问者需要输入正确密码才能查看文章内容
+          </p>
+        </div>
+      </Modal>
+    </>
+  );
 };
+
+export default MyArticleCard;

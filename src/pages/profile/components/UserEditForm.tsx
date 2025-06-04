@@ -6,9 +6,20 @@ import {
   PictureOutlined,
   SaveOutlined,
 } from '@ant-design/icons';
-import { Button, Empty, Form, Image, Input, Modal, Spin, message } from 'antd';
+import {
+  Button,
+  Empty,
+  Form,
+  Image,
+  Input,
+  Modal,
+  Pagination,
+  Spin,
+  message,
+} from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
+import styles from './UserEditForm.module.css';
 
 interface UserEditFormProps {
   user: UserInfo;
@@ -28,6 +39,9 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
   const [avatarImages, setAvatarImages] = useState<ImageInfo[]>([]);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(user.avatar);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalImages, setTotalImages] = useState(0);
+  const pageSize = 12;
 
   const handleFinish = async (values: any) => {
     try {
@@ -42,15 +56,18 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
   };
 
   // 获取头像图片列表
-  const fetchAvatarImages = async () => {
+  const fetchAvatarImages = async (page: number = 1) => {
     setAvatarLoading(true);
     try {
       const response = await GetImagesByType('avatar', {
-        page: 1,
-        page_size: 50,
+        page,
+        page_size: pageSize,
+        is_external: 1,
       });
-      if (response.code === 200) {
+      if (response.code === 0) {
         setAvatarImages(response.data.list);
+        setTotalImages(response.data.total);
+        setCurrentPage(page);
       }
     } catch (error) {
       message.error('获取图片列表失败');
@@ -61,7 +78,12 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
 
   const handleOpenAvatarModal = () => {
     setIsAvatarModalOpen(true);
-    fetchAvatarImages();
+    setCurrentPage(1);
+    fetchAvatarImages(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchAvatarImages(page);
   };
 
   const handleSelectAvatar = (imageUrl: string) => {
@@ -204,52 +226,157 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
 
       {/* 头像选择模态框 */}
       <Modal
-        title="选择头像"
+        title={
+          <div className="flex items-center space-x-2">
+            <PictureOutlined className="text-blue-500" />
+            <span>选择头像</span>
+            {totalImages > 0 && (
+              <span className="text-sm text-gray-500">
+                (共 {totalImages} 张)
+              </span>
+            )}
+          </div>
+        }
         open={isAvatarModalOpen}
         onCancel={() => setIsAvatarModalOpen(false)}
         footer={null}
-        width={800}
-        className="avatar-select-modal"
+        width="90%"
+        style={{ maxWidth: 900 }}
+        className={`avatar-select-modal ${styles.avatarSelectModal}`}
+        styles={{
+          body: { padding: '20px 24px' },
+        }}
       >
-        <div className="py-4">
-          {avatarLoading ? (
-            <div className="flex justify-center py-8">
-              <Spin size="large" />
-            </div>
-          ) : avatarImages.length > 0 ? (
-            <div className="grid grid-cols-4 gap-4">
-              {avatarImages.map((image) => (
-                <motion.div
-                  key={image.id}
-                  className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedAvatar === image.url
-                      ? 'border-blue-500 ring-2 ring-blue-200'
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleSelectAvatar(image.url)}
-                >
-                  <Image
-                    src={image.url}
-                    alt={image.filename}
-                    width="100%"
-                    height={120}
-                    style={{ width: '100%', height: 120, objectFit: 'cover' }}
-                    preview={false}
-                  />
-                  {selectedAvatar === image.url && (
-                    <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
-                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs">✓</span>
+        <div className="space-y-6">
+          {/* 当前选择的头像预览 */}
+          {selectedAvatar && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-600">当前选择:</div>
+                <Image
+                  src={selectedAvatar}
+                  alt="当前选择的头像"
+                  width={60}
+                  height={60}
+                  className="rounded-full border-2 border-white shadow-md"
+                  style={{ width: 60, height: 60, objectFit: 'cover' }}
+                  preview={false}
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* 头像网格 */}
+          <div className="min-h-[400px]">
+            {avatarLoading ? (
+              <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                <Spin size="large" />
+                <div className="text-gray-500">加载头像中...</div>
+              </div>
+            ) : avatarImages.length > 0 ? (
+              <motion.div
+                className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 ${styles.avatarGrid}`}
+              >
+                {avatarImages.map((image, index) => (
+                  <motion.div
+                    key={image.id}
+                    className={`avatar-item relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 group ${
+                      selectedAvatar === image.url
+                        ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg'
+                        : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+                    }`}
+                    onClick={() => handleSelectAvatar(image.url)}
+                  >
+                    <div
+                      className="aspect-square relative overflow-hidden"
+                      style={{ lineHeight: 0 }}
+                    >
+                      <img
+                        src={image.url}
+                        alt={image.filename}
+                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        style={{
+                          display: 'block',
+                          verticalAlign: 'top',
+                        }}
+                      />
+                    </div>
+
+                    {/* 选中状态覆盖层 */}
+                    {selectedAvatar === image.url && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center"
+                      >
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                          className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
+                        >
+                          <span className="text-white text-sm font-medium">
+                            ✓
+                          </span>
+                        </motion.div>
+                      </motion.div>
+                    )}
+
+                    {/* 悬停时的信息提示 */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="text-white text-xs truncate">
+                        {image.filename}
                       </div>
                     </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <Empty description="暂无可选择的头像图片" className="py-8" />
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-16"
+              >
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description={
+                    <div className="space-y-2">
+                      <div className="text-gray-500">暂无可选择的头像图片</div>
+                      <div className="text-sm text-gray-400">
+                        请联系管理员添加头像图片
+                      </div>
+                    </div>
+                  }
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* 分页器 */}
+          {totalImages > pageSize && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex justify-center pt-4 border-t border-gray-100"
+            >
+              <Pagination
+                current={currentPage}
+                total={totalImages}
+                pageSize={pageSize}
+                onChange={handlePageChange}
+                showSizeChanger={false}
+                showQuickJumper={false}
+                showTotal={(total: number, range: [number, number]) =>
+                  `第 ${range[0]}-${range[1]} 项，共 ${total} 项`
+                }
+                className={`custom-pagination ${styles.customPagination}`}
+              />
+            </motion.div>
           )}
         </div>
       </Modal>

@@ -31,6 +31,7 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
       const response = await GetImageList({
         page,
         page_size: pageSize,
+        is_external: 1,
       });
 
       if (response.code === 0) {
