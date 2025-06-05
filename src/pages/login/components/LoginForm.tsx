@@ -81,16 +81,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   const handleQQLogin = async () => {
-    console.log('handleQQLogin');
     setQqLoading(true);
     try {
-      const result = await qqLogin();
-      console.log(result);
-      if (result.success) {
-        window.location.href = result.data;
-      } else {
-        message.error(result.message);
-      } 
+      await qqLogin();
     } catch (error) {
       console.error('QQ登录异常:', error);
     } finally {

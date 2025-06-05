@@ -170,7 +170,10 @@ export default function useUserModel(): UserModelReturn {
   const qqLogin = async () => {
     try {
       const response = await GetQQLoginURL();
+
       if (response.code === 0) {
+        // 跳转到QQ登录页面
+        window.location.href = response.data.url;
         return { success: true, data: response.data.url };
       } else {
         message.error(response.message || '获取QQ登录链接失败');
