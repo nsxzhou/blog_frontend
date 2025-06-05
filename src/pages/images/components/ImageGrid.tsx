@@ -2,8 +2,8 @@ import { containerVariants, itemVariants } from '@/constants/animations';
 import { Pagination } from 'antd';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
-import { ImageCard } from './ImageCard';
 import type { ImageGridProps } from './types';
+import ImageCard from './ImageCard';
 
 const ImageGrid: React.FC<ImageGridProps> = ({
   images,

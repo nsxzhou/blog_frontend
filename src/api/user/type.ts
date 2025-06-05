@@ -170,3 +170,10 @@ export interface BatchActionUsersReq {
   action: 'enable' | 'disable' | 'delete';
   user_ids: number[];
 }
+
+export interface QQLoginRes {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  user: UserInfo;
+}

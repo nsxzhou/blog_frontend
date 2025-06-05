@@ -6,6 +6,7 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
   LockOutlined,
+  QqOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { motion } from 'framer-motion';
@@ -20,7 +21,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSuccess,
   onSwitchToRegister,
 }) => {
-  const { login } = useUserModel();
+  const { login, qqLogin } = useUserModel();
 
   const [formData, setFormData] = useState<LoginReq>({
     username: '',
@@ -31,6 +32,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginReq>>({});
   const [loading, setLoading] = useState(false);
+  const [qqLoading, setQqLoading] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<LoginReq> = {};
@@ -74,6 +76,17 @@ const LoginForm: React.FC<LoginFormProps> = ({
       console.error('登录异常:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleQQLogin = async () => {
+    setQqLoading(true);
+    try {
+      await qqLogin();
+    } catch (error) {
+      console.error('QQ登录异常:', error);
+    } finally {
+      setQqLoading(false);
     }
   };
 
@@ -214,6 +227,20 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <div className="relative flex justify-center text-sm">
           <span className="px-4 bg-white text-gray-500">或</span>
         </div>
+      </motion.div>
+
+      {/* QQ登录按钮 */}
+      <motion.div>
+        <motion.button
+          type="button"
+          onClick={handleQQLogin}
+          disabled={qqLoading}
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 border-2 border-blue-500 rounded-lg text-blue-600 font-medium bg-white hover:bg-blue-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          {...hoverScale}
+        >
+          <QqOutlined className="text-xl" />
+          {qqLoading ? '跳转中...' : 'QQ 登录'}
+        </motion.button>
       </motion.div>
 
       {/* 注册链接 */}

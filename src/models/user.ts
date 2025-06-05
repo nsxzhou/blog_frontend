@@ -6,8 +6,10 @@ import type {
 } from '@/api/user';
 import {
   ChangePassword,
+  GetQQLoginURL,
   Login,
   Logout,
+  QQLoginCallback,
   Register,
   UpdateUserInfo,
 } from '@/api/user';
@@ -31,6 +33,12 @@ interface UserModelReturn {
   changePassword: (
     payload: ChangePasswordReq,
   ) => Promise<{ success: boolean; message?: string }>;
+  qqLogin: () => Promise<{ success: boolean; data?: any; message?: string }>;
+  handleQQCallback: () => Promise<{
+    success: boolean;
+    data?: any;
+    message?: string;
+  }>;
 }
 
 export default function useUserModel(): UserModelReturn {
@@ -57,15 +65,14 @@ export default function useUserModel(): UserModelReturn {
         message.success('登录成功！');
         return { success: true, data: response.data };
       } else {
-        console.log("login error",response);
+        console.log('login error', response);
         message.error(response.message || '登录失败');
         return { success: false, message: response.message };
       }
     } catch (error: any) {
-      console.log("login error",error);
+      console.log('login error', error);
       // 处理登录错误
-      const errorMessage =
-        error?.response?.data?.message || error?.message ;
+      const errorMessage = error?.response?.data?.message || error?.message;
       message.error(errorMessage);
       return { success: false, message: errorMessage };
     }
@@ -159,6 +166,61 @@ export default function useUserModel(): UserModelReturn {
     }
   };
 
+  // QQ登录
+  const qqLogin = async () => {
+    try {
+      const response = await GetQQLoginURL();
+
+      if (response.code === 0) {
+        // 跳转到QQ登录页面
+        window.location.href = response.data;
+        return { success: true, data: response.data };
+      } else {
+        message.error(response.message || '获取QQ登录链接失败');
+        return { success: false, message: response.message };
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        '获取QQ登录链接失败';
+      message.error(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  // 处理QQ登录回调
+  const handleQQCallback = async () => {
+    try {
+      const response = await QQLoginCallback();
+
+      if (response.code === 0) {
+        const { access_token, refresh_token, user, expires_in } = response.data;
+
+        // 保存token到localStorage
+        setAuthTokens(access_token, refresh_token, expires_in);
+
+        // 更新全局状态
+        setInitialState((prev: any) => ({
+          ...prev,
+          currentUser: user,
+          isLoggedIn: true,
+        }));
+
+        message.success('QQ登录成功！');
+        return { success: true, data: response.data };
+      } else {
+        message.error(response.message || 'QQ登录失败');
+        return { success: false, message: response.message };
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || 'QQ登录失败';
+      message.error(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
   return {
     // 状态
     currentUser: initialState?.currentUser,
@@ -170,5 +232,7 @@ export default function useUserModel(): UserModelReturn {
     logout,
     updateUserInfo,
     changePassword,
+    qqLogin,
+    handleQQCallback,
   };
 }

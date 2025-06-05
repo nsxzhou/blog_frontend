@@ -20,6 +20,7 @@ import type {
   RegisterReq,
   UpdateUserInfoReq,
   UpdateUserInfoRes,
+  QQLoginRes,
 } from './type';
 
 // 用户注册
@@ -157,6 +158,20 @@ export function BatchActionUsers(data: BatchActionUsersReq) {
   return request<baseResponse<any>>('/api/users/batch-action', {
     method: 'POST',
     data,
+  });
+}
+
+// 获取QQ登录URL
+export function GetQQLoginURL() {
+  return request<baseResponse<string>>('/api/users/qq/login-url', {
+    method: 'GET',
+  });
+}
+
+// 获取QQ登录回调
+export function QQLoginCallback() {
+  return request<baseResponse<QQLoginRes>>('/api/users/qq/callback', {
+    method: 'GET',
   });
 }
 
