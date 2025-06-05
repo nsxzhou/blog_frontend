@@ -35,13 +35,10 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user, onEdit }) => {
           <EditOutlined />
           <span>编辑</span>
         </motion.button>
-      </div>  
+      </div>
 
       <div className="flex items-center space-x-6 mb-6">
-        <UserAvatar
-          size="lg"
-          user={user}
-        />
+        <UserAvatar size="lg" user={user} />
         <div className="flex-1">
           <h3 className="text-2xl font-bold text-gray-900 mb-2">
             {user.nickname || user.username}
@@ -53,7 +50,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user, onEdit }) => {
             </div>
             <div className="flex items-center space-x-2">
               <MailOutlined className="text-sm" />
-              <span>{user.email}</span>
+              <span>{user.email || ''}</span>
             </div>
             {user.phone && (
               <div className="flex items-center space-x-2">
@@ -82,9 +79,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user, onEdit }) => {
           </div>
           <div>
             <span className="font-medium">注册时间：</span>
-            <span className="ml-1">
-              {user.created_at}
-            </span>
+            <span className="ml-1">{user.created_at}</span>
           </div>
         </div>
       </div>

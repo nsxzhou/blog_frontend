@@ -17,7 +17,7 @@ export interface LoginReq {
 export interface LoginRes {
   access_token: string;
   refresh_token: string;
-  expires_at: number;
+  expires_in: number;
   user: UserInfo;
 }
 
@@ -30,7 +30,7 @@ export interface RefreshTokenReq {
 export interface RefreshTokenRes {
   access_token: string;
   refresh_token: string;
-  expires_at: number;
+  expires_in: number;
 }
 
 // 登出请求参数

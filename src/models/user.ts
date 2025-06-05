@@ -16,6 +16,7 @@ import {
 import { clearAuthTokens, setAuthTokens } from '@/utils/auth';
 import { useModel } from '@umijs/max';
 import { message } from 'antd';
+import { useCallback } from 'react';
 
 interface UserModelReturn {
   currentUser: any;
@@ -50,10 +51,10 @@ export default function useUserModel(): UserModelReturn {
       const response = await Login(payload);
 
       if (response.code === 0) {
-        const { access_token, refresh_token, user, expires_at } = response.data;
+        const { access_token, refresh_token, user, expires_in } = response.data;
 
         // 保存token到localStorage
-        setAuthTokens(access_token, refresh_token, expires_at);
+        setAuthTokens(access_token, refresh_token, expires_in);
 
         // 更新全局状态
         setInitialState((prev: any) => ({
@@ -190,7 +191,7 @@ export default function useUserModel(): UserModelReturn {
   };
 
   // 处理QQ登录回调
-  const handleQQCallback = async () => {
+  const handleQQCallback = useCallback(async () => {
     try {
       // 从URL中获取code参数
       const urlParams = new URLSearchParams(window.location.search);
@@ -201,8 +202,7 @@ export default function useUserModel(): UserModelReturn {
         return { success: false, message: 'QQ登录授权码缺失' };
       }
 
-      const response = await QQLoginCallback(code);
-
+      const response = await QQLoginCallback({ code });
       if (response.code === 0) {
         const { access_token, refresh_token, user, expires_in } = response.data;
 
@@ -228,7 +228,7 @@ export default function useUserModel(): UserModelReturn {
       message.error(errorMessage);
       return { success: false, message: errorMessage };
     }
-  };
+  }, [setInitialState]);
 
   return {
     // 状态

@@ -2,7 +2,7 @@ import { fadeInUp } from '@/constants/animations';
 import useUserModel from '@/models/user';
 import { history } from '@umijs/max';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const QQCallback: React.FC = () => {
   const { handleQQCallback } = useUserModel();
@@ -10,10 +10,18 @@ const QQCallback: React.FC = () => {
     'loading',
   );
   const [message, setMessage] = useState('正在处理QQ登录...');
+  const hasProcessed = useRef(false); // 防止重复处理
 
   useEffect(() => {
+    // 如果已经处理过，直接返回
+    if (hasProcessed.current) {
+      return;
+    }
+
     const processCallback = async () => {
       try {
+        // 标记为已处理
+        hasProcessed.current = true;
 
         const result = await handleQQCallback();
 
@@ -21,10 +29,9 @@ const QQCallback: React.FC = () => {
           setStatus('success');
           setMessage('QQ登录成功！正在跳转...');
 
-          // 1秒后跳转到首页
           setTimeout(() => {
             history.push('/');
-          }, 1000);
+          }, 500);
         } else {
           setStatus('error');
           setMessage(result.message || 'QQ登录失败');
@@ -32,7 +39,7 @@ const QQCallback: React.FC = () => {
           // 3秒后跳转到登录页
           setTimeout(() => {
             history.push('/login');
-          }, 2000);
+          }, 1000);
         }
       } catch (error) {
         console.error('QQ登录回调处理异常:', error);
@@ -42,12 +49,12 @@ const QQCallback: React.FC = () => {
         // 3秒后跳转到登录页
         setTimeout(() => {
           history.push('/login');
-        }, 2000);
+        }, 1000);
       }
     };
 
     processCallback();
-  }, [handleQQCallback]);
+  }, []); // 移除依赖数组，只在组件挂载时执行一次
 
   const getStatusIcon = () => {
     switch (status) {

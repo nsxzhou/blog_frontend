@@ -141,8 +141,10 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                   <h3 className="text-lg font-medium text-gray-800 mb-1">
                     {user.nickname || user.username}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-4">{user.email}</p>
-                  <div className="flex justify-center space-x-4 text-sm">
+                  <p className="text-sm text-gray-500 mb-4">
+                    {user.email || ''}
+                  </p>
+                  {/* <div className="flex justify-center space-x-4 text-sm">
                     <div className="text-center">
                       <div className="font-semibold text-gray-800">23</div>
                       <div className="text-gray-500">文章</div>
@@ -155,7 +157,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                       <div className="font-semibold text-gray-800">89</div>
                       <div className="text-gray-500">关注</div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               ) : (
                 <div className="text-center">

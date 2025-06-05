@@ -169,8 +169,7 @@ export function GetQQLoginURL() {
 }
 
 // 获取QQ登录回调
-export function QQLoginCallback(code?: string) {
-  const params = code ? { code } : {};
+export function QQLoginCallback(params: { code: string }) {
   return request<baseResponse<QQLoginRes>>('/api/users/qq/callback', {
     method: 'GET',
     params,
