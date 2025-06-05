@@ -32,7 +32,7 @@ export default defineConfig({
       component: '@/pages/login',
     },
     {
-      path: '/login/qq-callback',
+      path: '/qq/callback',
       component: '@/pages/login/qq-callback',
     },
     {
