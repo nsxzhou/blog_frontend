@@ -9,6 +9,7 @@ import {
   QqOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import { message } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
@@ -80,9 +81,16 @@ const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   const handleQQLogin = async () => {
+    console.log('handleQQLogin');
     setQqLoading(true);
     try {
-      await qqLogin();
+      const result = await qqLogin();
+      console.log(result);
+      if (result.success) {
+        window.location.href = result.data;
+      } else {
+        message.error(result.message);
+      } 
     } catch (error) {
       console.error('QQ登录异常:', error);
     } finally {

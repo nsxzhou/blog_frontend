@@ -170,11 +170,8 @@ export default function useUserModel(): UserModelReturn {
   const qqLogin = async () => {
     try {
       const response = await GetQQLoginURL();
-
       if (response.code === 0) {
-        // 跳转到QQ登录页面
-        window.location.href = response.data;
-        return { success: true, data: response.data };
+        return { success: true, data: response.data.url };
       } else {
         message.error(response.message || '获取QQ登录链接失败');
         return { success: false, message: response.message };
@@ -192,7 +189,16 @@ export default function useUserModel(): UserModelReturn {
   // 处理QQ登录回调
   const handleQQCallback = async () => {
     try {
-      const response = await QQLoginCallback();
+      // 从URL中获取code参数
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+
+      if (!code) {
+        message.error('QQ登录授权码缺失');
+        return { success: false, message: 'QQ登录授权码缺失' };
+      }
+
+      const response = await QQLoginCallback(code);
 
       if (response.code === 0) {
         const { access_token, refresh_token, user, expires_in } = response.data;

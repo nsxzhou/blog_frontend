@@ -15,12 +15,12 @@ import type {
   LoginReq,
   LoginRes,
   LogoutReq,
+  QQLoginRes,
   RefreshTokenReq,
   RefreshTokenRes,
   RegisterReq,
   UpdateUserInfoReq,
   UpdateUserInfoRes,
-  QQLoginRes,
 } from './type';
 
 // 用户注册
@@ -163,15 +163,17 @@ export function BatchActionUsers(data: BatchActionUsersReq) {
 
 // 获取QQ登录URL
 export function GetQQLoginURL() {
-  return request<baseResponse<string>>('/api/users/qq/login-url', {
+  return request<baseResponse<{ url: string }>>('/api/users/qq/login-url', {
     method: 'GET',
   });
 }
 
 // 获取QQ登录回调
-export function QQLoginCallback() {
+export function QQLoginCallback(code?: string) {
+  const params = code ? { code } : {};
   return request<baseResponse<QQLoginRes>>('/api/users/qq/callback', {
     method: 'GET',
+    params,
   });
 }
 

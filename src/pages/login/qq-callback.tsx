@@ -14,16 +14,17 @@ const QQCallback: React.FC = () => {
   useEffect(() => {
     const processCallback = async () => {
       try {
+
         const result = await handleQQCallback();
 
         if (result.success) {
           setStatus('success');
           setMessage('QQ登录成功！正在跳转...');
 
-          // 2秒后跳转到首页
+          // 1秒后跳转到首页
           setTimeout(() => {
             history.push('/');
-          }, 2000);
+          }, 1000);
         } else {
           setStatus('error');
           setMessage(result.message || 'QQ登录失败');
@@ -31,16 +32,17 @@ const QQCallback: React.FC = () => {
           // 3秒后跳转到登录页
           setTimeout(() => {
             history.push('/login');
-          }, 3000);
+          }, 2000);
         }
       } catch (error) {
+        console.error('QQ登录回调处理异常:', error);
         setStatus('error');
         setMessage('QQ登录处理异常');
 
         // 3秒后跳转到登录页
         setTimeout(() => {
           history.push('/login');
-        }, 3000);
+        }, 2000);
       }
     };
 
