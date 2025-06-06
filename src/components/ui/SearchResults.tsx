@@ -61,7 +61,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             onClick={onResultClick}
             className="block"
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
+            <h3
+              dangerouslySetInnerHTML={{ __html: item.title }}
+              className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors"
+            >
               {item.title}
             </h3>
 
