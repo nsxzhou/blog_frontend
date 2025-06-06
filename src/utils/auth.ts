@@ -25,12 +25,13 @@ export const getTokenExpiresAt = (): number | null => {
 export const setAuthTokens = (
   accessToken: string,
   refreshToken: string,
-  expiresAt?: number,
+  expiresIn?: number,
 ): void => {
   if (typeof window === 'undefined') return;
   localStorage.setItem('token', accessToken);
   localStorage.setItem('refresh_token', refreshToken);
-  if (expiresAt) {
+  if (expiresIn) {
+    const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
     localStorage.setItem('token_expires_at', expiresAt.toString());
   }
 };

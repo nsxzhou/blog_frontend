@@ -59,7 +59,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
   const fetchAvatarImages = async (page: number = 1) => {
     setAvatarLoading(true);
     try {
-      const response = await GetImagesByType('avatar', {
+      const response = await GetImagesByType('avatar,cover', {
         page,
         page_size: pageSize,
         is_external: 1,

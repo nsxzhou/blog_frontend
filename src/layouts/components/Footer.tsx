@@ -1,19 +1,17 @@
 import { GetCategoryList, type CategoryInfo } from '@/api/category';
+import QRCodeModal from '@/components/ui/QRCodeModal';
 import {
   EditOutlined,
   FileTextOutlined,
   GithubOutlined,
   HeartFilled,
   HomeOutlined,
-  LinkedinOutlined,
-  MailOutlined,
   QqOutlined,
-  TwitterOutlined,
   UserOutlined,
   WechatOutlined,
 } from '@ant-design/icons';
 import { Link, history } from '@umijs/max';
-import { message } from 'antd';
+import { Button, message } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 
@@ -30,6 +28,8 @@ interface FooterSection {
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
+  const [qrType, setQrType] = useState<'wechat' | 'qq' | null>(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
 
   // 获取分类列表
   useEffect(() => {
@@ -47,6 +47,23 @@ const Footer: React.FC = () => {
     fetchCategories();
   }, []);
 
+  // 处理社交媒体点击
+  const handleSocialClick = (type: 'github' | 'wechat' | 'qq') => {
+    switch (type) {
+      case 'github':
+        window.open('https://github.com/nsxzhou', '_blank');
+        break;
+      case 'wechat':
+        setQrType('wechat');
+        setQrModalOpen(true);
+        break;
+      case 'qq':
+        setQrType('qq');
+        setQrModalOpen(true);
+        break;
+    }
+  };
+
   // 处理分类点击
   const handleCategoryClick = (categoryName: string) => {
     // 跳转到 blog 页面并设置分类筛选
@@ -62,38 +79,23 @@ const Footer: React.FC = () => {
     {
       name: 'GitHub',
       icon: <GithubOutlined />,
-      url: 'https://github.com',
+      url: 'https://github.com/nsxzhou',
+      onClick: () => handleSocialClick('github'),
       color: 'hover:text-gray-700',
-    },
-    {
-      name: 'Twitter',
-      icon: <TwitterOutlined />,
-      url: 'https://twitter.com',
-      color: 'hover:text-blue-400',
-    },
-    {
-      name: 'LinkedIn',
-      icon: <LinkedinOutlined />,
-      url: 'https://linkedin.com',
-      color: 'hover:text-blue-600',
     },
     {
       name: '微信',
       icon: <WechatOutlined />,
       url: '#',
+      onClick: () => handleSocialClick('wechat'),
       color: 'hover:text-green-500',
     },
     {
       name: 'QQ',
       icon: <QqOutlined />,
       url: '#',
+      onClick: () => handleSocialClick('qq'),
       color: 'hover:text-blue-500',
-    },
-    {
-      name: '邮箱',
-      icon: <MailOutlined />,
-      url: 'mailto:contact@example.com',
-      color: 'hover:text-red-500',
     },
   ];
 
@@ -175,12 +177,10 @@ const Footer: React.FC = () => {
               {/* 社交媒体链接 */}
               <div className="flex items-center space-x-3">
                 {socialLinks.map((social, index) => (
-                  <motion.a
+                  <motion.button
                     key={social.name}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`p-2 rounded-lg text-gray-400 transition-colors duration-200 ${social.color} hover:bg-white`}
+                    onClick={social.onClick}
+                    className={`p-2 rounded-lg text-gray-400 transition-colors duration-200 ${social.color} hover:bg-white cursor-pointer`}
                     whileHover={{ scale: 1.1, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                     initial={{ opacity: 0, y: 20 }}
@@ -189,7 +189,7 @@ const Footer: React.FC = () => {
                     viewport={{ once: true }}
                   >
                     {social.icon}
-                  </motion.a>
+                  </motion.button>
                 ))}
               </div>
             </motion.div>
@@ -289,28 +289,33 @@ const Footer: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.5 }}
               viewport={{ once: true }}
             >
-              <Link
-                to="/privacy"
+              <Button
+                type="text"
                 className="hover:text-gray-700 transition-colors duration-200"
+                onClick={() => handleComingSoon()}
               >
                 隐私政策
-              </Link>
-              <Link
-                to="/terms"
+              </Button>
+              <Button
+                type="text"
                 className="hover:text-gray-700 transition-colors duration-200"
               >
                 使用条款
-              </Link>
-              <Link
-                to="/sitemap"
-                className="hover:text-gray-700 transition-colors duration-200"
-              >
-                网站地图
-              </Link>
+              </Button>
             </motion.div>
           </div>
         </motion.div>
       </div>
+
+      {/* 二维码模态框 */}
+      <QRCodeModal
+        isOpen={qrModalOpen}
+        onClose={() => {
+          setQrModalOpen(false);
+          setQrType(null);
+        }}
+        type={qrType}
+      />
     </footer>
   );
 };
