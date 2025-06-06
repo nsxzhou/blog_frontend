@@ -1,4 +1,4 @@
-import { GetImageList, type ImageInfo } from '@/api/image';
+import { GetImagesByType, type ImageInfo } from '@/api/image';
 import { fadeInUp, scaleIn } from '@/constants/animations';
 import { CheckOutlined, PictureOutlined } from '@ant-design/icons';
 import { Empty, Modal, Pagination, Spin } from 'antd';
@@ -28,14 +28,13 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
   const loadImages = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await GetImageList({
+      const response = await GetImagesByType('cover,avatar', {
         page,
         page_size: pageSize,
         is_external: 1,
       });
 
       if (response.code === 0) {
-        console.log(response.data);
         let imageList = response.data.list;
 
         setImages(imageList);

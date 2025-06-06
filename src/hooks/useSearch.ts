@@ -10,8 +10,8 @@ export const useSearch = () => {
   const { loading, run: searchArticles } = useRequest(FullTextSearchArticles, {
     manual: true,
     onSuccess: (response: any) => {
-      if (response.code === 0 && response.data) {
-        setResults(response.data.list);
+      if (response.list && response.list.length > 0) {
+        setResults(response.list);
       } else {
         setResults([]);
       }
