@@ -12,17 +12,6 @@ alwaysApply: true
 1. 在开发 API 接口时全部的接口应该放到 api 文件夹下
 2. 在开发某一类接口时应该进行归类，在 api 文件夹下创建相应的文件目录并在这个目录下定义相对应的接口数据类型及其接口
 
-### 代码提交规范
-
-1. 提交前必须通过 ESLint 和 Prettier 检查
-2. 使用语义化的 commit 信息：
-   - `feat:` 新功能
-   - `fix:` 修复 bug
-   - `docs:` 文档更新
-   - `style:` 代码格式调整
-   - `refactor:` 代码重构
-   - `test:` 测试相关
-
 ### 错误处理规范
 
 ```typescript
