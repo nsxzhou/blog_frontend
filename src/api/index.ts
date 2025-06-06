@@ -68,7 +68,7 @@ const refreshToken = async (): Promise<string | null> => {
       },
     );
 
-    if (response.code === 200 && response.data) {
+    if (response.code === 0 && response.data) {
       const { access_token, refresh_token, expires_at } = response.data;
       setAuthTokens(access_token, refresh_token, expires_at);
       return access_token;
