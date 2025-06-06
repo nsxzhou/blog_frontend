@@ -116,7 +116,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         initial="initial"
         whileInView="animate"
         viewport={{ once: true }}
-        className="list-disc list-inside text-gray-700 mb-4 space-y-1 ml-4"
+        className="list-disc list-outside text-gray-700 mb-4 space-y-1 ml-6 pl-2"
       >
         {children}
       </motion.ul>
@@ -127,7 +127,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         initial="initial"
         whileInView="animate"
         viewport={{ once: true }}
-        className="list-decimal list-inside text-gray-700 mb-4 space-y-1 ml-4"
+        className="list-decimal list-outside text-gray-700 mb-4 space-y-1 ml-6 pl-2"
       >
         {children}
       </motion.ol>
