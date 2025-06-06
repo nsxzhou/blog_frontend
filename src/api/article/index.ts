@@ -11,6 +11,8 @@ import type {
   ArticleStatsRes,
   CreateArticleReq,
   CreateArticleRes,
+  FullTextSearchQuery,
+  FullTextSearchRes,
   SearchArticleQuery,
   UnifiedArticleQuery,
   UpdateArticleAccessReq,
@@ -170,6 +172,14 @@ export function GetArticleLikeUsers(id: number) {
       method: 'GET',
     },
   );
+}
+
+// 全文搜索文章
+export function FullTextSearchArticles(params: FullTextSearchQuery) {
+  return request<baseResponse<FullTextSearchRes>>('/api/articles/search', {
+    method: 'GET',
+    params,
+  });
 }
 
 // 统一导出文章相关的API和类型

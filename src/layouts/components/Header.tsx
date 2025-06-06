@@ -1,9 +1,15 @@
-import { Button, QRCodeModal, UserAvatar } from '@/components/ui';
+import {
+  Button,
+  QRCodeModal,
+  SearchResults,
+  UserAvatar,
+} from '@/components/ui';
 import {
   fadeInUp,
   headerVariants,
   navItemVariants,
 } from '@/constants/animations';
+import { useSearch } from '@/hooks/useSearch';
 import useUserModel from '@/models/user';
 import {
   CloseOutlined,
@@ -23,7 +29,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import UserSidebar from '../../components/ui/UserSidebar';
 
 interface HeaderProps {
@@ -42,6 +48,8 @@ const Header: React.FC<HeaderProps> = () => {
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [qrType, setQrType] = useState<'wechat' | 'qq' | null>(null);
+  const [searchValue, setSearchValue] = useState('');
+  const searchRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const { scrollY } = useScroll();
   const navigate = useNavigate();
@@ -49,7 +57,53 @@ const Header: React.FC<HeaderProps> = () => {
   // 获取当前用户信息和logout方法
   const { currentUser, logout } = useUserModel();
 
+  // 搜索相关
+  const { keyword, results, loading, handleSearch, clearSearch } = useSearch();
+
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
+
+  // 处理搜索输入变化
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch(searchValue);
+    }, 300); // 防抖
+
+    return () => clearTimeout(timer);
+  }, [searchValue, handleSearch]);
+
+  // 点击外部关闭搜索
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        handleCloseSearch();
+      }
+    };
+
+    if (searchOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [searchOpen]);
+
+  // ESC键关闭搜索
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && searchOpen) {
+        handleCloseSearch();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [searchOpen]);
 
   // 处理登录
   const handleLogin = () => {
@@ -82,6 +136,18 @@ const Header: React.FC<HeaderProps> = () => {
         setQrModalOpen(true);
         break;
     }
+  };
+
+  // 关闭搜索
+  const handleCloseSearch = () => {
+    setSearchOpen(false);
+    setSearchValue('');
+    clearSearch();
+  };
+
+  // 搜索结果点击
+  const handleSearchResultClick = () => {
+    handleCloseSearch();
   };
 
   return (
@@ -197,21 +263,37 @@ const Header: React.FC<HeaderProps> = () => {
             className="border-t border-gray-200/50 bg-white/90 backdrop-blur-sm"
           >
             <div className="px-6 py-4">
-              <div className="relative max-w-md mx-auto">
+              <div ref={searchRef} className="relative max-w-4xl mx-auto">
                 <Input
                   placeholder="搜索文章、标签、作者..."
                   prefix={<SearchOutlined className="text-gray-400" />}
                   suffix={
                     <Button
-                      onClick={() => setSearchOpen(false)}
+                      onClick={handleCloseSearch}
                       variant="ghost"
                       size="sm"
                     >
                       <CloseOutlined />
                     </Button>
                   }
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
                   autoFocus
                 />
+
+                {/* 搜索结果 */}
+                {searchOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+                    <div className="p-4">
+                      <SearchResults
+                        results={results}
+                        loading={loading}
+                        keyword={keyword}
+                        onResultClick={handleSearchResultClick}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

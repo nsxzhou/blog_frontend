@@ -26,8 +26,8 @@ export interface Article {
   word_count: number;
   status: string; // draft, published
   access_type: string; // public, private, password
-  is_top: 0 | 1 ; // 0, 1
-  is_original: 0 | 1 ; // 0, 1
+  is_top: 0 | 1; // 0, 1
+  is_original: 0 | 1; // 0, 1
   source_url: string;
   source_name: string;
   tags: {
@@ -238,4 +238,35 @@ export interface ArticlesByCategoryRes {
 export interface ArticleLikeUsersRes {
   list: UserInfo[];
   total: number;
+}
+
+// 全文搜索查询参数
+export interface FullTextSearchQuery {
+  page: number;
+  page_size: number;
+  keyword?: string;
+}
+
+// 全文搜索结果片段
+export interface SearchFragment {
+  content: string;
+  position: number;
+  match_score: number;
+}
+
+// 全文搜索结果项
+export interface FullTextSearchItem {
+  article_id: number;
+  title: string;
+  author_name: string;
+  category_name: string;
+  published_at: string;
+  fragments: SearchFragment[];
+  score: number;
+}
+
+// 全文搜索响应数据
+export interface FullTextSearchRes {
+  total: number;
+  list: FullTextSearchItem[];
 }
