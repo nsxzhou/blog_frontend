@@ -3,6 +3,7 @@ import {
   fadeInUp,
   itemVariants,
 } from '@/constants/animations';
+import { MermaidChart } from '@/components/ui';
 import { motion } from 'framer-motion';
 import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -32,6 +33,15 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     // 代码块
     code: ({ node, inline, className, children, ...props }: any) => {
       const match = /language-(\w+)/.exec(className || '');
+      const language = match ? match[1] : '';
+      const codeContent = String(children).replace(/\n$/, '');
+
+      // 处理 Mermaid 图表
+      if (!inline && language === 'mermaid') {
+        return <MermaidChart chart={codeContent} />;
+      }
+
+      // 处理其他代码块
       return !inline && match ? (
         <motion.span
           variants={fadeInUp}
@@ -42,13 +52,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         >
           <SyntaxHighlighter
             style={vscDarkPlus}
-            language={match[1]}
+            language={language}
             PreTag="div"
             className="rounded-lg shadow-lg"
             showLineNumbers
             {...props}
           >
-            {String(children).replace(/\n$/, '')}
+            {codeContent}
           </SyntaxHighlighter>
         </motion.span>
       ) : (
