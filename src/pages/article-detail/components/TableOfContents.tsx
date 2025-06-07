@@ -67,7 +67,15 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
 
   // 生成目录
   useEffect(() => {
-    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    // 只在文章内容区域查找标题，避免抓取页面其他区域的标题
+    const articleContent = document.querySelector('article') || document.querySelector('.prose');
+
+    if (!articleContent) {
+      setTocItems([]);
+      return;
+    }
+
+    const headings = articleContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const items: TocItem[] = Array.from(headings).map((heading, index) => {
       // 为标题添加id
       const id = heading.id || `heading-${index}`;
@@ -287,11 +295,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
                 icon={isLiked ? <HeartFilled /> : <HeartOutlined />}
                 onClick={handleLike}
                 loading={actionLoading.like}
-                className={`${
-                  isLiked
-                    ? 'text-red-500 hover:text-red-600 bg-red-50'
-                    : 'text-red-400 hover:text-red-500 hover:bg-red-50'
-                } transition-all duration-200`}
+                className={`${isLiked
+                  ? 'text-red-500 hover:text-red-600 bg-red-50'
+                  : 'text-red-400 hover:text-red-500 hover:bg-red-50'
+                  } transition-all duration-200`}
               />
             </motion.div>
           </Tooltip>
@@ -304,11 +311,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
                 icon={isBookmarked ? <BookFilled /> : <BookOutlined />}
                 onClick={handleBookmark}
                 loading={actionLoading.bookmark}
-                className={`${
-                  isBookmarked
-                    ? 'text-yellow-500 hover:text-yellow-600 bg-yellow-50'
-                    : 'text-yellow-400 hover:text-yellow-500 hover:bg-yellow-50'
-                } transition-all duration-200`}
+                className={`${isBookmarked
+                  ? 'text-yellow-500 hover:text-yellow-600 bg-yellow-50'
+                  : 'text-yellow-400 hover:text-yellow-500 hover:bg-yellow-50'
+                  } transition-all duration-200`}
               />
             </motion.div>
           </Tooltip>
@@ -375,11 +381,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
                           onClick={() => scrollToHeading(item.id)}
                           className={`
                                                         w-full text-left px-3 py-2 rounded-md text-xs transition-all duration-200
-                                                        ${
-                                                          activeId === item.id
-                                                            ? 'bg-blue-50 text-blue-600 border-l-3 border-blue-500'
-                                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                                        }
+                                                        ${activeId === item.id
+                              ? 'bg-blue-50 text-blue-600 border-l-3 border-blue-500'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            }
                                                     `}
                           style={{
                             paddingLeft: `${0.75 + (item.level - 1) * 0.5}rem`,
