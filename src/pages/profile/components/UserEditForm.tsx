@@ -18,7 +18,7 @@ import {
   message,
 } from 'antd';
 import { motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './UserEditForm.module.css';
 
 interface UserEditFormProps {
@@ -27,6 +27,94 @@ interface UserEditFormProps {
   onCancel: () => void;
   loading?: boolean;
 }
+
+// 优化的头像项组件
+const AvatarItem = React.memo<{
+  image: ImageInfo;
+  isSelected: boolean;
+  onSelect: (imageUrl: string) => void;
+}>(({ image, isSelected, onSelect }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleSelect = useCallback(() => {
+    onSelect(image.url);
+  }, [image.url, onSelect]);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+  }, []);
+
+  const itemClassName = useMemo(
+    () => `avatar-item relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 group ${isSelected
+      ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg'
+      : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+      }`,
+    [isSelected]
+  );
+
+  return (
+    <motion.div
+      className={itemClassName}
+      onClick={handleSelect}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div
+        className="aspect-square relative overflow-hidden"
+        style={{ lineHeight: 0 }}
+      >
+        {/* 图片加载占位符 */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+            <PictureOutlined className="text-xl text-gray-400" />
+          </div>
+        )}
+
+        <img
+          src={image.url}
+          alt={image.filename}
+          className={`w-full h-full object-cover transition-all duration-200 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          style={{
+            display: 'block',
+            verticalAlign: 'top',
+          }}
+          loading="lazy"
+          decoding="async"
+          onLoad={handleImageLoad}
+        />
+      </div>
+
+      {/* 选中状态覆盖层 */}
+      {isSelected && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
+          >
+            <span className="text-white text-sm font-medium">✓</span>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* 悬停时的信息提示 */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="text-white text-xs truncate">
+          {image.filename}
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
+AvatarItem.displayName = 'AvatarItem';
 
 const UserEditForm: React.FC<UserEditFormProps> = ({
   user,
@@ -43,7 +131,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
   const [totalImages, setTotalImages] = useState(0);
   const pageSize = 12;
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = useCallback(async (values: any) => {
     try {
       await onSave({
         ...values,
@@ -53,10 +141,10 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
     } catch (error) {
       message.error('更新失败，请重试');
     }
-  };
+  }, [onSave, selectedAvatar]);
 
   // 获取头像图片列表
-  const fetchAvatarImages = async (page: number = 1) => {
+  const fetchAvatarImages = useCallback(async (page: number = 1) => {
     setAvatarLoading(true);
     try {
       const response = await GetImagesByType('avatar,cover', {
@@ -74,28 +162,40 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
     } finally {
       setAvatarLoading(false);
     }
-  };
+  }, [pageSize]);
 
-  const handleOpenAvatarModal = () => {
+  const handleOpenAvatarModal = useCallback(() => {
     setIsAvatarModalOpen(true);
     setCurrentPage(1);
     fetchAvatarImages(1);
-  };
+  }, [fetchAvatarImages]);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     fetchAvatarImages(page);
-  };
+  }, [fetchAvatarImages]);
 
-  const handleSelectAvatar = (imageUrl: string) => {
+  const handleSelectAvatar = useCallback((imageUrl: string) => {
     setSelectedAvatar(imageUrl);
     form.setFieldsValue({ avatar: imageUrl });
     setIsAvatarModalOpen(false);
     message.success('头像选择成功');
-  };
+  }, [form]);
 
   useEffect(() => {
     setSelectedAvatar(user.avatar);
   }, [user.avatar]);
+
+  // 使用 useMemo 优化渲染的头像列表
+  const renderedAvatars = useMemo(() => {
+    return avatarImages.map((image) => (
+      <AvatarItem
+        key={image.id}
+        image={image}
+        isSelected={selectedAvatar === image.url}
+        onSelect={handleSelectAvatar}
+      />
+    ));
+  }, [avatarImages, selectedAvatar, handleSelectAvatar]);
 
   return (
     <motion.div
@@ -246,6 +346,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
         styles={{
           body: { padding: '20px 24px' },
         }}
+        destroyOnClose
       >
         <div className="space-y-6">
           {/* 当前选择的头像预览 */}
@@ -280,60 +381,11 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
             ) : avatarImages.length > 0 ? (
               <motion.div
                 className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 ${styles.avatarGrid}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
-                {avatarImages.map((image, index) => (
-                  <motion.div
-                    key={image.id}
-                    className={`avatar-item relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 group ${
-                      selectedAvatar === image.url
-                        ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg'
-                        : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
-                    }`}
-                    onClick={() => handleSelectAvatar(image.url)}
-                  >
-                    <div
-                      className="aspect-square relative overflow-hidden"
-                      style={{ lineHeight: 0 }}
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.filename}
-                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                        style={{
-                          display: 'block',
-                          verticalAlign: 'top',
-                        }}
-                      />
-                    </div>
-
-                    {/* 选中状态覆盖层 */}
-                    {selectedAvatar === image.url && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center"
-                      >
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.1 }}
-                          className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
-                        >
-                          <span className="text-white text-sm font-medium">
-                            ✓
-                          </span>
-                        </motion.div>
-                      </motion.div>
-                    )}
-
-                    {/* 悬停时的信息提示 */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <div className="text-white text-xs truncate">
-                        {image.filename}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+                {renderedAvatars}
               </motion.div>
             ) : (
               <motion.div

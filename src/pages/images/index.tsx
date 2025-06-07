@@ -19,6 +19,7 @@ import {
   EyeOutlined,
   FileImageOutlined,
   PlusOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
 import {
   Button,
@@ -29,25 +30,191 @@ import {
   Spin,
   Tag,
   Tooltip,
+  Select,
+  DatePicker,
 } from 'antd';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ImageDetailModal,
-  ImageFilters,
   ImageStats,
   ImageUploadModal,
 } from './components';
 
+// 优化的图片卡片组件
+const ImageCard = React.memo<{
+  image: ImageInfo;
+  isSelected: boolean;
+  isBatchMode: boolean;
+  onSelect: (imageId: number, checked: boolean) => void;
+  onViewDetail: (image: ImageInfo) => void;
+  onDownload: (image: ImageInfo) => void;
+  onDelete: (image: ImageInfo) => void;
+}>(({ image, isSelected, isBatchMode, onSelect, onViewDetail, onDownload, onDelete }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // 使用 useCallback 优化事件处理
+  const handleSelect = useCallback((e: any) => {
+    onSelect(image.id, e.target.checked);
+  }, [image.id, onSelect]);
+
+  const handleViewDetail = useCallback(() => {
+    onViewDetail(image);
+  }, [image, onViewDetail]);
+
+  const handleDownload = useCallback(() => {
+    onDownload(image);
+  }, [image, onDownload]);
+
+  const handleDelete = useCallback(() => {
+    onDelete(image);
+  }, [image, onDelete]);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+  }, []);
+
+  // 格式化文件大小
+  const formatFileSize = useCallback((bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }, []);
+
+  // 格式化日期
+  const formatDate = useCallback((dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN');
+  }, []);
+
+  // 获取使用类型标签颜色
+  const getUsageTypeColor = useCallback((type: string) => {
+    const colorMap: Record<string, string> = {
+      avatar: 'blue',
+      cover: 'green',
+      content: 'orange',
+      other: 'gray',
+    };
+    return colorMap[type] || 'gray';
+  }, []);
+
+  // 获取存储类型标签颜色
+  const getStorageTypeColor = useCallback((type: string) => {
+    const colorMap: Record<string, string> = {
+      local: 'purple',
+      cos: 'cyan',
+    };
+    return colorMap[type] || 'gray';
+  }, []);
+
+  return (
+    <motion.div
+      // 简化动画配置
+      whileHover={{ y: -2, scale: 1.01 }}
+      transition={{ duration: 0.2 }}
+      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group"
+    >
+      {/* 批量选择复选框 */}
+      {isBatchMode && (
+        <div className="absolute top-2 left-2 z-10">
+          <Checkbox
+            checked={isSelected}
+            onChange={handleSelect}
+            className="bg-white/80 backdrop-blur-sm rounded"
+          />
+        </div>
+      )}
+
+      {/* 操作按钮 */}
+      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex gap-1">
+          <Tooltip title="查看详情">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleViewDetail}
+              className="p-1.5 bg-white/80 backdrop-blur-sm rounded-md hover:bg-white/90 transition-colors"
+            >
+              <EyeOutlined className="text-gray-600" />
+            </motion.button>
+          </Tooltip>
+          <Tooltip title="下载图片">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleDownload}
+              className="p-1.5 bg-white/80 backdrop-blur-sm rounded-md hover:bg-white/90 transition-colors"
+            >
+              <DownloadOutlined className="text-gray-600" />
+            </motion.button>
+          </Tooltip>
+          <Tooltip title="删除图片">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleDelete}
+              className="p-1.5 bg-white/80 backdrop-blur-sm rounded-md hover:bg-red-50 transition-colors"
+            >
+              <DeleteOutlined className="text-red-500" />
+            </motion.button>
+          </Tooltip>
+        </div>
+      </div>
+
+      {/* 图片展示 */}
+      <div className="aspect-square bg-gray-100 overflow-hidden relative">
+        {/* 图片加载占位符 */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+            <FileImageOutlined className="text-2xl text-gray-400" />
+          </div>
+        )}
+
+        <img
+          src={image.url}
+          alt={image.filename}
+          className={`w-full h-full object-cover transition-all duration-200 hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          loading="lazy"
+          decoding="async"
+          onLoad={handleImageLoad}
+        />
+      </div>
+
+      {/* 图片信息 */}
+      <div className="p-4">
+        <h3 className="text-sm font-medium text-gray-900 truncate mb-2">
+          {image.filename}
+        </h3>
+
+        <div className="flex justify-between text-xs text-gray-500 mb-3">
+          <span>{formatFileSize(image.size)}</span>
+          <span>{formatDate(image.created_at)}</span>
+        </div>
+
+        <div className="flex flex-wrap gap-1">
+          <Tag color={getUsageTypeColor(image.usage_type)}>
+            {image.usage_type}
+          </Tag>
+          <Tag color={getStorageTypeColor(image.storage_type)}>
+            {image.storage_type}
+          </Tag>
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
+ImageCard.displayName = 'ImageCard';
+
 const ImagesManagementPage: React.FC = () => {
   const [images, setImages] = useState<ImageInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isExternalFilter, setIsExternalFilter] = useState<0 | 1 | 2>(2);
   const [usageTypeFilter, setUsageTypeFilter] = useState<string>('');
-  const [storageTypeFilter, setStorageTypeFilter] = useState<string>('');
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
-  const [sortBy, setSortBy] = useState<'date' | 'size' | 'name'>('date');
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImageInfo | null>(null);
@@ -60,54 +227,22 @@ const ImagesManagementPage: React.FC = () => {
   });
 
   // 获取图片列表
-  const fetchImages = async (params?: GetImageListReq) => {
+  const fetchImages = useCallback(async (params?: GetImageListReq) => {
     setLoading(true);
     try {
       const response = await GetImageList({
         page: pagination.current,
         page_size: pagination.pageSize,
         is_external: isExternalFilter,
-        usage_type: usageTypeFilter === '' ? '' : usageTypeFilter,
+        usage_type: usageTypeFilter === '' ? undefined : usageTypeFilter,
         start_date: dateRange?.[0],
         end_date: dateRange?.[1],
         ...params,
       });
 
       if (response.code === 0 && response.data) {
-        let imageList = response.data.list || [];
-
-        // 客户端搜索过滤
-        if (searchTerm) {
-          imageList = imageList.filter((image) =>
-            image.filename.toLowerCase().includes(searchTerm.toLowerCase()),
-          );
-        }
-
-        // 客户端存储类型过滤
-        if (storageTypeFilter !== '') {
-          imageList = imageList.filter(
-            (image) => image.storage_type === storageTypeFilter,
-          );
-        }
-
-        // 客户端排序
-        imageList.sort((a, b) => {
-          switch (sortBy) {
-            case 'date':
-              return (
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime()
-              );
-            case 'size':
-              return b.size - a.size;
-            case 'name':
-              return a.filename.localeCompare(b.filename);
-            default:
-              return 0;
-          }
-        });
-
-        setImages(imageList);
+        // 直接使用服务端返回的数据，不进行客户端过滤和排序
+        setImages(response.data.list || []);
         setPagination((prev) => ({
           ...prev,
           total: response.data.total || 0,
@@ -134,13 +269,13 @@ const ImagesManagementPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.current, pagination.pageSize, isExternalFilter, usageTypeFilter, dateRange]);
 
   // 获取统计数据
   const [statistics, setStatistics] = useState<any>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
-  const fetchStatistics = async () => {
+  const fetchStatistics = useCallback(async () => {
     setStatsLoading(true);
     try {
       const response = await GetImageStatistics();
@@ -152,7 +287,7 @@ const ImagesManagementPage: React.FC = () => {
     } finally {
       setStatsLoading(false);
     }
-  };
+  }, []);
 
   // 初始化加载
   useEffect(() => {
@@ -160,7 +295,7 @@ const ImagesManagementPage: React.FC = () => {
     fetchStatistics();
   }, []);
 
-  // 搜索和筛选变化时重新加载（防抖处理）
+  // 筛选变化时重新加载（移除搜索和排序的依赖）
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setPagination((prev) => ({ ...prev, current: 1 }));
@@ -168,7 +303,7 @@ const ImagesManagementPage: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, usageTypeFilter, storageTypeFilter, dateRange, sortBy]);
+  }, [usageTypeFilter, dateRange, isExternalFilter]);
 
   // 计算统计数据
   const stats = useMemo(() => {
@@ -194,12 +329,12 @@ const ImagesManagementPage: React.FC = () => {
   }, [statistics, images]);
 
   // 处理上传
-  const handleUpload = () => {
+  const handleUpload = useCallback(() => {
     setIsUploadModalOpen(true);
-  };
+  }, []);
 
   // 处理删除单个图片
-  const handleDeleteImage = (image: ImageInfo) => {
+  const handleDeleteImage = useCallback((image: ImageInfo) => {
     Modal.confirm({
       title: '确认删除',
       content: `确定要删除图片"${image.filename}"吗？此操作不可恢复。`,
@@ -222,10 +357,10 @@ const ImagesManagementPage: React.FC = () => {
         }
       },
     });
-  };
+  }, [fetchImages, fetchStatistics]);
 
   // 处理批量删除
-  const handleBatchDelete = () => {
+  const handleBatchDelete = useCallback(() => {
     if (selectedImages.length === 0) {
       message.warning('请先选择要删除的图片');
       return;
@@ -257,16 +392,16 @@ const ImagesManagementPage: React.FC = () => {
         }
       },
     });
-  };
+  }, [selectedImages, fetchImages, fetchStatistics]);
 
   // 处理查看详情
-  const handleViewDetail = (image: ImageInfo) => {
+  const handleViewDetail = useCallback((image: ImageInfo) => {
     setSelectedImage(image);
     setIsDetailModalOpen(true);
-  };
+  }, []);
 
   // 处理下载图片
-  const handleDownloadImage = (image: ImageInfo) => {
+  const handleDownloadImage = useCallback((image: ImageInfo) => {
     const link = document.createElement('a');
     link.href = image.url;
     link.download = image.filename;
@@ -274,35 +409,35 @@ const ImagesManagementPage: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+  }, []);
 
   // 处理批量选择
-  const handleBatchSelect = (imageId: number, checked: boolean) => {
+  const handleBatchSelect = useCallback((imageId: number, checked: boolean) => {
     if (checked) {
       setSelectedImages((prev) => [...prev, imageId]);
     } else {
       setSelectedImages((prev) => prev.filter((id) => id !== imageId));
     }
-  };
+  }, []);
 
   // 处理全选
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
       setSelectedImages(images.map((image) => image.id));
     } else {
       setSelectedImages([]);
     }
-  };
+  }, [images]);
 
   // 处理表单提交成功
-  const handleUploadSuccess = () => {
+  const handleUploadSuccess = useCallback(() => {
     setIsUploadModalOpen(false);
     fetchImages();
     fetchStatistics();
-  };
+  }, [fetchImages, fetchStatistics]);
 
   // 处理分页变化
-  const handlePageChange = (page: number, pageSize?: number) => {
+  const handlePageChange = useCallback((page: number, pageSize?: number) => {
     const newPageSize = pageSize || pagination.pageSize;
     setPagination((prev) => ({
       ...prev,
@@ -310,42 +445,23 @@ const ImagesManagementPage: React.FC = () => {
       pageSize: newPageSize,
     }));
     fetchImages({ page, page_size: newPageSize });
-  };
+  }, [pagination.pageSize, fetchImages]);
 
-  // 格式化文件大小
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  // 格式化日期
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN');
-  };
-
-  // 获取使用类型标签颜色
-  const getUsageTypeColor = (type: string) => {
-    const colorMap: Record<string, string> = {
-      avatar: 'blue',
-      cover: 'green',
-      content: 'orange',
-      other: 'gray',
-    };
-    return colorMap[type] || 'gray';
-  };
-
-  // 获取存储类型标签颜色
-  const getStorageTypeColor = (type: string) => {
-    const colorMap: Record<string, string> = {
-      local: 'purple',
-      cos: 'cyan',
-    };
-    return colorMap[type] || 'gray';
-  };
+  // 使用 useMemo 优化渲染的图片列表
+  const renderedImages = useMemo(() => {
+    return images.map((image) => (
+      <ImageCard
+        key={image.id}
+        image={image}
+        isSelected={selectedImages.includes(image.id)}
+        isBatchMode={batchMode}
+        onSelect={handleBatchSelect}
+        onViewDetail={handleViewDetail}
+        onDownload={handleDownloadImage}
+        onDelete={handleDeleteImage}
+      />
+    ));
+  }, [images, selectedImages, batchMode, handleBatchSelect, handleViewDetail, handleDownloadImage, handleDeleteImage]);
 
   return (
     <motion.div
@@ -420,26 +536,117 @@ const ImagesManagementPage: React.FC = () => {
 
         {/* 搜索和过滤 */}
         <motion.div variants={itemVariants} className="mb-8">
-          <ImageFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filters={{
-              usageType: usageTypeFilter,
-              storageType: storageTypeFilter,
-              dateRange: dateRange,
-            }}
-            onFilterChange={(filters) => {
-              setUsageTypeFilter(filters.usageType);
-              setStorageTypeFilter(filters.storageType);
-              setDateRange(filters.dateRange);
-            }}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            selectedCount={selectedImages.length}
-            totalCount={images.length}
-            onSelectAll={handleSelectAll}
-            onBatchDelete={handleBatchDelete}
-          />
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+          >
+            {/* 功能提示 */}
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-700">
+                💡 提示：当前版本暂不支持搜索和排序功能，请使用筛选条件来查找图片
+              </p>
+            </div>
+
+            {/* 过滤器和操作栏 */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* 过滤器 */}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <FilterOutlined className="text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">过滤:</span>
+                </div>
+
+                <Select
+                  value={usageTypeFilter || 'all'}
+                  onChange={(value) => setUsageTypeFilter(value === 'all' ? '' : value)}
+                  className="min-w-[120px]"
+                  placeholder="使用类型"
+                >
+                  <Select.Option value="all">全部类型</Select.Option>
+                  <Select.Option value="avatar">头像</Select.Option>
+                  <Select.Option value="cover">封面</Select.Option>
+                  <Select.Option value="content">内容</Select.Option>
+                  <Select.Option value="other">其他</Select.Option>
+                </Select>
+
+                <Select
+                  value={isExternalFilter}
+                  onChange={setIsExternalFilter}
+                  className="min-w-[120px]"
+                  placeholder="存储位置"
+                >
+                  <Select.Option value={2}>全部位置</Select.Option>
+                  <Select.Option value={1}>外部存储</Select.Option>
+                  <Select.Option value={0}>本地存储</Select.Option>
+                </Select>
+
+                <DatePicker.RangePicker
+                  onChange={(dates) => {
+                    const dateRange =
+                      dates && dates[0] && dates[1]
+                        ? ([
+                          dates[0].format('YYYY-MM-DD'),
+                          dates[1].format('YYYY-MM-DD'),
+                        ] as [string, string])
+                        : null;
+                    setDateRange(dateRange);
+                  }}
+                  placeholder={['开始日期', '结束日期']}
+                  className="min-w-[200px]"
+                />
+              </div>
+
+              {/* 操作栏 */}
+              <div className="flex items-center gap-4">
+                {/* 全选操作 */}
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={
+                      selectedImages.length === images.length &&
+                      images.length > 0
+                    }
+                    indeterminate={
+                      selectedImages.length > 0 &&
+                      selectedImages.length < images.length
+                    }
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                  >
+                    <span className="text-sm text-gray-600">
+                      {selectedImages.length > 0
+                        ? `已选择 ${selectedImages.length} 项`
+                        : `全选 (${images.length})`}
+                    </span>
+                  </Checkbox>
+                </div>
+
+                {/* 批量操作 */}
+                {selectedImages.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-2"
+                  >
+                    <motion.div {...hoverScale}>
+                      <Button
+                        type="primary"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={handleBatchDelete}
+                        size="small"
+                      >
+                        批量删除
+                      </Button>
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {/* 统计信息 */}
+                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-lg">
+                  共 {images.length} 张图片
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* 图片列表 */}
@@ -469,99 +676,7 @@ const ImagesManagementPage: React.FC = () => {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                <AnimatePresence>
-                  {images.map((image, index) => (
-                    <motion.div
-                      key={image.id}
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                      transition={{ delay: index * 0.05 }}
-                      {...cardHover}
-                      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group"
-                    >
-                      {/* 批量选择复选框 */}
-                      {batchMode && (
-                        <div className="absolute top-2 left-2 z-10">
-                          <Checkbox
-                            checked={selectedImages.includes(image.id)}
-                            onChange={(e) =>
-                              handleBatchSelect(image.id, e.target.checked)
-                            }
-                            className="bg-white/80 backdrop-blur-sm rounded"
-                          />
-                        </div>
-                      )}
-
-                      {/* 操作按钮 */}
-                      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="flex gap-1">
-                          <Tooltip title="查看详情">
-                            <motion.button
-                              {...hoverScale}
-                              onClick={() => handleViewDetail(image)}
-                              className="p-1.5 bg-white/80 backdrop-blur-sm rounded-md hover:bg-white/90 transition-colors"
-                            >
-                              <EyeOutlined className="text-gray-600" />
-                            </motion.button>
-                          </Tooltip>
-                          <Tooltip title="下载图片">
-                            <motion.button
-                              {...hoverScale}
-                              onClick={() => handleDownloadImage(image)}
-                              className="p-1.5 bg-white/80 backdrop-blur-sm rounded-md hover:bg-white/90 transition-colors"
-                            >
-                              <DownloadOutlined className="text-gray-600" />
-                            </motion.button>
-                          </Tooltip>
-                          <Tooltip title="删除图片">
-                            <motion.button
-                              {...hoverScale}
-                              onClick={() => handleDeleteImage(image)}
-                              className="p-1.5 bg-white/80 backdrop-blur-sm rounded-md hover:bg-red-50 transition-colors"
-                            >
-                              <DeleteOutlined className="text-red-500" />
-                            </motion.button>
-                          </Tooltip>
-                        </div>
-                      </div>
-
-                      {/* 图片展示 */}
-                      <div className="aspect-square bg-gray-100 overflow-hidden">
-                        <motion.img
-                          src={image.url}
-                          alt={image.filename}
-                          className="w-full h-full object-cover"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.3 }}
-                          loading="lazy"
-                        />
-                      </div>
-
-                      {/* 图片信息 */}
-                      <div className="p-4">
-                        <h3 className="text-sm font-medium text-gray-900 truncate mb-2">
-                          {image.filename}
-                        </h3>
-
-                        <div className="flex justify-between text-xs text-gray-500 mb-3">
-                          <span>{formatFileSize(image.size)}</span>
-                          <span>{formatDate(image.created_at)}</span>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1">
-                          <Tag color={getUsageTypeColor(image.usage_type)}>
-                            {image.usage_type}
-                          </Tag>
-                          <Tag color={getStorageTypeColor(image.storage_type)}>
-                            {image.storage_type}
-                          </Tag>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                {renderedImages}
               </div>
 
               {/* 分页 */}

@@ -13,7 +13,7 @@ export interface ImageInfo {
   user_avatar: string;
   usage_type: string; // avatar, cover, content
   article_id: number;
-  is_external: 0 | 1 ;
+  is_external: 0 | 1;
   storage_type: string; // local, cos
   created_at: string;
   updated_at: string;
