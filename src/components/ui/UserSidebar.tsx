@@ -51,10 +51,10 @@ const menuItems = [
     hasRoute: true,
   },
   {
-    key: '/reading-list',
+    key: '/reading-history',
     label: '阅读列表',
     icon: <BookOutlined />,
-    hasRoute: false,
+    hasRoute: true,
   },
   {
     key: '/notifications',

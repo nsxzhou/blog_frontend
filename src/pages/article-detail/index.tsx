@@ -1,10 +1,8 @@
-﻿import { GetArticleDetail, GetArticles } from '@/api/article';
-import type {
-  Article as ApiArticle,
-  ArticleListItem,
-} from '@/api/article/type';
+﻿import { GetArticleDetail } from '@/api/article';
+import type { Article as ApiArticle } from '@/api/article/type';
 import { GetCommentList } from '@/api/comment';
 import type { CommentItem as ApiComment } from '@/api/comment/type';
+import { CreateReadingHistory } from '@/api/reading-history';
 import { containerVariants, pageVariants } from '@/constants/animations';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { history, useParams, useRequest } from '@umijs/max';
@@ -117,6 +115,16 @@ const ArticleDetailPage: React.FC = () => {
       };
 
       setArticle(convertedArticle);
+
+      // 记录阅读历史
+      CreateReadingHistory({ article_id: apiArticle.id })
+        .then(() => {
+          console.log('阅读历史记录成功');
+        })
+        .catch((error: any) => {
+          console.error('记录阅读历史失败:', error);
+          // 不显示错误消息，因为这不是关键功能
+        });
     }
   }, [articleResponse]);
 

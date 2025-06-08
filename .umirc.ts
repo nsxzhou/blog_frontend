@@ -28,6 +28,10 @@ export default defineConfig({
       component: '@/pages/articles',
     },
     {
+      path: '/reading-history',
+      component: '@/pages/reading-history',
+    },
+    {
       path: '/login',
       component: '@/pages/login',
     },
