@@ -8,6 +8,7 @@ import { ArrowRightOutlined } from '@ant-design/icons';
 import { message, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from '@umijs/max';
 
 /**
  * 将API返回的文章数据转换为BlogPost格式
@@ -35,7 +36,7 @@ const BlogSection: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
   /**
    * 获取最新文章数据
    */
@@ -133,7 +134,7 @@ const BlogSection: React.FC = () => {
             </motion.div>
 
             <motion.div variants={itemVariants} className="text-center mt-12">
-              <Button variant="primary" size="lg">
+              <Button variant="primary" size="lg" onClick={() => navigate('/blog')}>
                 <span className="flex items-center gap-2">
                   查看全部文章
                   <ArrowRightOutlined />

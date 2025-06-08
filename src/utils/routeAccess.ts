@@ -1,8 +1,8 @@
 // 路由权限映射配置
 export const routeAccessMap: Record<string, string> = {
-  '/write': 'canAccess',
+  '/write': 'isAdmin',
   '/profile': 'canAccess',
-  '/my-articles': 'canAccess',
+  '/my-articles': 'isAdmin',
   '/categories': 'isAdmin',
   '/tags': 'isAdmin',
   '/images': 'isAdmin',

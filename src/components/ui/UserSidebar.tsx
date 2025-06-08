@@ -45,13 +45,6 @@ const menuItems = [
     hasRoute: true,
   },
   {
-    key: '/my-articles',
-    label: '我的文章',
-    icon: <FileTextOutlined />,
-    hasRoute: true,
-  },
-  { key: '/write', label: '写文章', icon: <EditOutlined />, hasRoute: true },
-  {
     key: '/favorites',
     label: '收藏夹',
     icon: <HeartOutlined />,
@@ -73,6 +66,8 @@ const menuItems = [
 
 // 管理员专用菜单
 const adminMenuItems = [
+  { key: '/my-articles', label: '我的文章', icon: <FileTextOutlined /> },
+  { key: '/write', label: '写文章', icon: <EditOutlined /> },
   { key: '/articles', label: '文章管理', icon: <FileTextOutlined /> },
   { key: '/users', label: '用户管理', icon: <TeamOutlined /> },
   { key: '/images', label: '图片管理', icon: <FileImageOutlined /> },
