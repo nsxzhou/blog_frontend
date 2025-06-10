@@ -57,7 +57,7 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
           page_size: pageSize,
           is_external: 1,
         });
-
+        console.log(response);
         if (response.code === 0 && response.data.list.length > 0) {
           allImages.push(...response.data.list);
 
@@ -83,15 +83,11 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
   const handleRandomCover = useCallback(async () => {
     setRandomizing(true);
 
-    // 显示加载提示
-    const loadingMessage = message.loading('正在获取图片列表...', 0);
 
     try {
       // 获取所有可用的封面图片
       const allImages = await getAllAvailableImages();
 
-      // 隐藏加载提示
-      loadingMessage();
 
       if (allImages.length > 0) {
         // 过滤掉当前已选择的图片，避免重复选择
@@ -112,12 +108,7 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
         onDataChange({ coverImage: selectedImage.url });
 
         // 显示成功消息，包含统计信息
-        const totalCount = allImages.length;
-        const availableCount = availableImages.length;
-        const messageText =
-          availableCount > 0
-            ? `已随机选择封面图片：${selectedImage.filename}（从 ${availableCount} 张可选图片中选择，共 ${totalCount} 张）`
-            : `已随机选择封面图片：${selectedImage.filename}（共 ${totalCount} 张图片）`;
+        const messageText = `已随机选择封面图片`;
 
         message.success(messageText);
       } else {
@@ -125,7 +116,6 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
       }
     } catch (error) {
       // 隐藏加载提示
-      loadingMessage();
       console.error('随机选择封面失败:', error);
       message.error('随机选择封面失败，请检查网络连接后重试');
     } finally {
