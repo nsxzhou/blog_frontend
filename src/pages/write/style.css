@@ -450,7 +450,11 @@
   box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
 }
 
-/* 图片卡片边框加粗样式 */
+/* 图片卡片边框样式 */
+.border-2 {
+  border-width: 2px !important;
+}
+
 .border-3 {
   border-width: 3px !important;
 }
@@ -472,4 +476,103 @@
 .image-selector-modal .ant-empty-description {
   color: #94a3b8 !important;
   font-size: 16px !important;
+}
+
+/* 图片懒加载优化样式 */
+.image-item-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 图片缓存状态提示样式 */
+.cache-info {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 1px solid #e1bee7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #6a1b9a;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* 优化的图片项动画 */
+.image-item-optimized {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* 随机选择封面按钮样式 */
+.select-cover-btn:disabled {
+  background: linear-gradient(45deg, #f5f5f5, #e8e8e8) !important;
+  border-color: #d9d9d9 !important;
+  color: #bfbfbf !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.select-cover-btn:disabled:hover {
+  background: linear-gradient(45deg, #f5f5f5, #e8e8e8) !important;
+  border-color: #d9d9d9 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 随机选择按钮加载动画 */
+@keyframes random-pulse {
+  0%,
+  100% {
+    background: linear-gradient(45deg, #e3f2fd, #f0f8ff);
+  }
+  50% {
+    background: linear-gradient(45deg, #bbdefb, #e1f5fe);
+  }
+}
+
+.select-cover-btn.randomizing {
+  animation: random-pulse 1.5s ease-in-out infinite;
+}
+
+/* 旋转图标动画优化 */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .image-selector-modal .ant-modal-content {
+    margin: 16px !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+
+  .image-selector-modal .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .image-selector-modal .grid-cols-4 {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
 }

@@ -253,9 +253,9 @@ const BlogPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, activeCategory, selectedTags]);
 
-  // 页码变化时搜索
+  // 页码变化时搜索 - 修复翻页逻辑
   useEffect(() => {
-    if (!loading && currentPage > 1) {
+    if (!loading) {
       fetchArticles();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -306,7 +306,7 @@ const BlogPage: React.FC = () => {
       className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50"
     >
       {/* 头部区域 */}
-      <BlogHeader blogPosts={blogPosts} />
+      <BlogHeader />
 
       {/* 搜索和过滤区域 */}
       <motion.section variants={itemVariants} className="px-4 pb-8">

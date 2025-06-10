@@ -1,10 +1,14 @@
 import type { ImageInfo } from '@/api/image';
+import { GetImagesByType } from '@/api/image';
 import { cardVariants, itemVariants } from '@/constants/animations';
-import { EditOutlined, PictureOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Input, Select, Switch, Tag } from 'antd';
+import {
+  PictureOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from '@ant-design/icons';
+import { Button, Input, Select, Switch, Tag, message } from 'antd';
 import { motion } from 'framer-motion';
-import React, { useState } from 'react';
-import ImageSelector from './ImageSelector';
+import React, { useCallback, useState } from 'react';
 
 const { Option } = Select;
 
@@ -36,13 +40,98 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
   onAddTag,
   onRemoveTag,
 }) => {
-  const [imageSelectorVisible, setImageSelectorVisible] = useState(false);
+  const [randomizing, setRandomizing] = useState(false);
 
-  // 处理图片选择
-  const handleImageSelect = (image: ImageInfo) => {
-    onDataChange({ coverImage: image.url });
-    setImageSelectorVisible(false);
+  // 获取所有可用图片的函数
+  const getAllAvailableImages = async (): Promise<ImageInfo[]> => {
+    const allImages: ImageInfo[] = [];
+    let currentPage = 1;
+    let hasMorePages = true;
+    const pageSize = 50; // API限制的最大页面大小
+    const maxPages = 20; // 最多获取20页，避免无限循环
+
+    while (hasMorePages && currentPage <= maxPages) {
+      try {
+        const response = await GetImagesByType('cover,avatar', {
+          page: currentPage,
+          page_size: pageSize,
+          is_external: 1,
+        });
+
+        if (response.code === 0 && response.data.list.length > 0) {
+          allImages.push(...response.data.list);
+
+          // 如果当前页面的图片数量小于页面大小，说明没有更多页面了
+          if (response.data.list.length < pageSize) {
+            hasMorePages = false;
+          } else {
+            currentPage++;
+          }
+        } else {
+          hasMorePages = false;
+        }
+      } catch (error) {
+        console.error(`获取第${currentPage}页图片失败:`, error);
+        hasMorePages = false;
+      }
+    }
+
+    return allImages;
   };
+
+  // 随机选择封面图片
+  const handleRandomCover = useCallback(async () => {
+    setRandomizing(true);
+
+    // 显示加载提示
+    const loadingMessage = message.loading('正在获取图片列表...', 0);
+
+    try {
+      // 获取所有可用的封面图片
+      const allImages = await getAllAvailableImages();
+
+      // 隐藏加载提示
+      loadingMessage();
+
+      if (allImages.length > 0) {
+        // 过滤掉当前已选择的图片，避免重复选择
+        const availableImages = allImages.filter(
+          (img) => img.url !== articleData.coverImage,
+        );
+
+        // 如果过滤后没有可用图片，使用全部图片
+        const imagesToChooseFrom =
+          availableImages.length > 0 ? availableImages : allImages;
+
+        // 从图片列表中随机选择一张
+        const randomIndex = Math.floor(
+          Math.random() * imagesToChooseFrom.length,
+        );
+        const selectedImage = imagesToChooseFrom[randomIndex];
+
+        onDataChange({ coverImage: selectedImage.url });
+
+        // 显示成功消息，包含统计信息
+        const totalCount = allImages.length;
+        const availableCount = availableImages.length;
+        const messageText =
+          availableCount > 0
+            ? `已随机选择封面图片：${selectedImage.filename}（从 ${availableCount} 张可选图片中选择，共 ${totalCount} 张）`
+            : `已随机选择封面图片：${selectedImage.filename}（共 ${totalCount} 张图片）`;
+
+        message.success(messageText);
+      } else {
+        message.warning('暂无可用的封面图片，请先上传一些图片到图库');
+      }
+    } catch (error) {
+      // 隐藏加载提示
+      loadingMessage();
+      console.error('随机选择封面失败:', error);
+      message.error('随机选择封面失败，请检查网络连接后重试');
+    } finally {
+      setRandomizing(false);
+    }
+  }, [onDataChange, articleData.coverImage]);
 
   // 移除封面图片
   const handleRemoveCover = () => {
@@ -194,8 +283,8 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
               {/* 覆盖层，显示提示 */}
               <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
                 <div className="text-white text-center">
-                  <EditOutlined className="text-2xl mb-1" />
-                  <p className="text-sm font-medium">点击更换</p>
+                  <ReloadOutlined className="text-2xl mb-1" />
+                  <p className="text-sm font-medium">点击换一张</p>
                 </div>
               </div>
             </motion.div>
@@ -203,11 +292,12 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
             <div className="flex gap-2">
               <Button
                 size="small"
-                icon={<EditOutlined />}
-                onClick={() => setImageSelectorVisible(true)}
+                icon={<ReloadOutlined />}
+                onClick={handleRandomCover}
+                loading={randomizing}
                 className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50"
               >
-                更换封面
+                {randomizing ? '随机选择中...' : '换一张'}
               </Button>
               <Button
                 size="small"
@@ -221,42 +311,44 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
 
             {/* 图片信息 */}
             <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-2">
-              <p>📌 这将作为文章的封面图片显示</p>
+              <p>🎲 点击"换一张"可随机选择新的封面图片</p>
+              <p className="mt-1 text-gray-400">
+                💡 系统会从所有可用图片中随机选择
+              </p>
             </div>
           </motion.div>
         ) : (
           // 未选择封面图片
           <motion.button
-            onClick={() => setImageSelectorVisible(true)}
+            onClick={handleRandomCover}
+            disabled={randomizing}
             className="w-full aspect-video border-2 border-dashed border-gray-300 rounded-xl 
                                  hover:border-blue-400 hover:bg-blue-50 transition-all duration-300
                                  flex flex-col items-center justify-center text-gray-500 hover:text-blue-600
-                                 select-cover-btn group"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+                                 select-cover-btn group disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: randomizing ? 1 : 1.02 }}
+            whileTap={{ scale: randomizing ? 1 : 0.98 }}
           >
             <motion.div
               className="flex flex-col items-center"
-              whileHover={{ y: -2 }}
+              whileHover={{ y: randomizing ? 0 : -2 }}
               transition={{ duration: 0.2 }}
             >
-              <PictureOutlined className="text-3xl mb-3 group-hover:text-blue-500 transition-colors" />
-              <span className="text-sm font-medium mb-1">选择封面图片</span>
+              <ReloadOutlined
+                className={`text-3xl mb-3 group-hover:text-blue-500 transition-colors ${
+                  randomizing ? 'animate-spin' : ''
+                }`}
+              />
+              <span className="text-sm font-medium mb-1">
+                {randomizing ? '随机选择中...' : '随机选择封面'}
+              </span>
               <span className="text-xs text-gray-400 group-hover:text-blue-400">
-                点击从图库中选择
+                {randomizing ? '请稍候' : '点击从图库中随机选择'}
               </span>
             </motion.div>
           </motion.button>
         )}
       </motion.div>
-
-      {/* 图片选择器 */}
-      <ImageSelector
-        open={imageSelectorVisible}
-        onCancel={() => setImageSelectorVisible(false)}
-        onSelect={handleImageSelect}
-        selectedImageUrl={articleData.coverImage}
-      />
     </motion.div>
   );
 };

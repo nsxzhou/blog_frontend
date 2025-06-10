@@ -87,6 +87,13 @@ export function GetArticleStats() {
   });
 }
 
+// 获取所有文章统计数据
+export function GetAllArticleStats() {
+  return request<baseResponse<ArticleStatsRes>>('/api/articles/stats/all', {
+    method: 'GET',
+  });
+}
+
 // 更新文章状态
 export function UpdateArticleStatus(id: number, data: UpdateArticleStatusReq) {
   return request<baseResponse<UpdateArticleStatusRes>>(

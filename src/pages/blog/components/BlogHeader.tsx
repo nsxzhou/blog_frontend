@@ -1,28 +1,46 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import { GetAllArticleStats, type ArticleStatsRes } from '@/api/article';
 import {
-  BookOutlined,
-  EyeOutlined,
-  HeartOutlined,
-} from '@ant-design/icons';
-import { itemVariants, scaleIn, floatingAnimation } from '@/constants/animations';
-import type { BlogPost } from './types';
+  floatingAnimation,
+  itemVariants,
+  scaleIn,
+} from '@/constants/animations';
+import { BookOutlined, EyeOutlined, HeartOutlined } from '@ant-design/icons';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 
 interface BlogHeaderProps {
-  blogPosts: BlogPost[];
+  // 移除不再需要的blogPosts参数
 }
 
-const BlogHeader: React.FC<BlogHeaderProps> = ({ blogPosts }) => {
-  const totalViews = blogPosts.reduce((sum, post) => sum + post.views, 0);
-  const totalLikes = blogPosts.reduce((sum, post) => sum + post.likes, 0);
+const BlogHeader: React.FC<BlogHeaderProps> = () => {
+  const [stats, setStats] = useState<ArticleStatsRes | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  /**
+   * 获取全站文章统计数据
+   */
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const response = await GetAllArticleStats();
+        if (response.code === 0 && response.data) {
+          setStats(response.data);
+        }
+      } catch (error) {
+        console.error('获取统计数据失败:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <motion.section variants={itemVariants} className="relative pt-20 px-4">
       <div className="max-w-6xl mx-auto text-center">
-        <motion.div
-          {...scaleIn}
-          className="mb-8"
-        >
+        <motion.div {...scaleIn} className="mb-8">
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-6">
             技术博客
           </h1>
@@ -36,18 +54,29 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ blogPosts }) => {
           variants={itemVariants}
           className="flex justify-center items-center gap-8 text-sm text-gray-500 mb-12"
         >
-          <div className="flex items-center gap-2">
-            <BookOutlined className="text-blue-500" />
-            <span>{blogPosts.length} 篇文章</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <EyeOutlined className="text-green-500" />
-            <span>{totalViews} 次阅读</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <HeartOutlined className="text-red-500" />
-            <span>{totalLikes} 个赞</span>
-          </div>
+          {loading ? (
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2">
+                <BookOutlined className="text-blue-500" />
+                <span>加载中...</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <BookOutlined className="text-blue-500" />
+                <span>{stats?.published_articles || 0} 篇文章</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <EyeOutlined className="text-green-500" />
+                <span>{stats?.total_views || 0} 次阅读</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <HeartOutlined className="text-red-500" />
+                <span>{stats?.total_likes || 0} 个赞</span>
+              </div>
+            </>
+          )}
         </motion.div>
       </div>
 
@@ -67,4 +96,4 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ blogPosts }) => {
   );
 };
 
-export default BlogHeader; 
+export default BlogHeader;
