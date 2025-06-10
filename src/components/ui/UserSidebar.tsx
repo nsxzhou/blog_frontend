@@ -60,7 +60,7 @@ const menuItems = [
     key: '/notifications',
     label: '通知',
     icon: <BellOutlined />,
-    hasRoute: false,
+    hasRoute: true,
   },
 ];
 
