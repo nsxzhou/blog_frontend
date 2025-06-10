@@ -41,12 +41,12 @@ const MyArticlesPage: React.FC = () => {
           sortType === 'date'
             ? 'published_at'
             : sortType === 'views'
-            ? 'view_count'
-            : sortType === 'likes'
-            ? 'like_count'
-            : 'title',
+              ? 'view_count'
+              : sortType === 'likes'
+                ? 'like_count'
+                : 'title',
         order: sortType === 'title' ? 'asc' : 'desc',
-        is_original: 1,
+        is_original: 2,
       });
     },
     {
