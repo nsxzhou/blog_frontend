@@ -29,6 +29,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion';
+import { Rss } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import UserSidebar from '../../components/ui/UserSidebar';
 
@@ -40,6 +41,7 @@ const navigationItems = [
   { key: '/', label: '首页', icon: <FileTextOutlined /> },
   { key: '/blog', label: '文章', icon: <FileTextOutlined /> },
   { key: '/about', label: '关于', icon: <UserOutlined /> },
+  // { key: '/rss', label: 'RSS', icon: <Rss size={16} /> },
   { key: '/write', label: '写作', icon: <EditOutlined /> },
 ];
 

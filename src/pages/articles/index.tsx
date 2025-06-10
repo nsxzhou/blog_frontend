@@ -69,21 +69,16 @@ const ArticleManagementPage: React.FC = () => {
         page_size: pagination.pageSize,
         keyword: filters.keyword || undefined,
         // 字符串状态字段：不传则获取所有
-        status: filters.status === '' ? '' : filters.status as any,
+        status: filters.status === '' ? '' : (filters.status as any),
         category_id: filters.category_id,
         tag_id: filters.tag_id,
         // 字符串状态字段：不传则获取所有
         access_type:
-          filters.access_type === ''
-            ? ''
-            : (filters.access_type as any),
+          filters.access_type === '' ? '' : (filters.access_type as any),
         // 数字状态字段：传2获取全部，传具体值获取对应状态
-        is_top:
-          filters.is_top === 2 ? 2 : (filters.is_top as any),
+        is_top: filters.is_top === 2 ? 2 : (filters.is_top as any),
         is_original:
-          filters.is_original === 2
-            ? 2
-            : (filters.is_original as any),
+          filters.is_original === 2 ? 2 : (filters.is_original as any),
         start_date: filters.start_date || undefined,
         end_date: filters.end_date || undefined,
         author_id: filters.author_id,
@@ -272,9 +267,7 @@ const ArticleManagementPage: React.FC = () => {
     });
   };
 
-  const handleBatchStatusChange = async (
-    status: 'draft' | 'published',
-  ) => {
+  const handleBatchStatusChange = async (status: 'draft' | 'published') => {
     if (selectedArticles.length === 0) {
       message.warning('请先选择要操作的文章');
       return;
@@ -316,10 +309,14 @@ const ArticleManagementPage: React.FC = () => {
         >
           {/* 页面标题 */}
           <motion.div variants={itemVariants} className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">文章管理</h1>
-            <p className="mt-2 text-gray-600">
-              管理系统中的所有文章，包括查看、编辑、删除、状态管理等操作
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">文章管理</h1>
+                <p className="mt-2 text-gray-600">
+                  管理系统中的所有文章，包括查看、编辑、删除、状态管理等操作
+                </p>
+              </div>
+            </div>
           </motion.div>
 
           {/* 统计卡片 */}

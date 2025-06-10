@@ -262,23 +262,36 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             {/* 版权信息 */}
             <motion.div
-              className="flex items-center space-x-2 text-gray-500"
+              className="flex flex-col items-center md:items-start space-y-2"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <span>© {currentYear} 思维笔记</span>
-              <span>•</span>
-              <span>Made with</span>
-              <motion.span
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                className="text-red-500"
-              >
-                <HeartFilled />
-              </motion.span>
-              <span>By NSXZHOU</span>
+              <div className="flex items-center space-x-2 text-gray-500">
+                <span>© {currentYear} 思维笔记</span>
+                <span>•</span>
+                <span>Made with</span>
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="text-red-500"
+                >
+                  <HeartFilled />
+                </motion.span>
+                <span>By NSXZHOU</span>
+              </div>
+              {/* 备案号信息 */}
+              <div className="text-sm text-gray-400">
+                <a
+                  href="https://beian.miit.gov.cn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gray-600 transition-colors duration-200"
+                >
+                  赣ICP备2025054533号-1
+                </a>
+              </div>
             </motion.div>
 
             {/* 法律链接 */}

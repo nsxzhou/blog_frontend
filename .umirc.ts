@@ -23,6 +23,10 @@ export default defineConfig({
       path: '/my-articles',
       component: '@/pages/my-articles',
     },
+    // {
+    //   path: '/rss',
+    //   component: '@/pages/rss',
+    // },
     {
       path: '/articles',
       component: '@/pages/articles',
