@@ -87,10 +87,6 @@ export default defineConfig({
       path: '/403',
       component: '@/pages/403',
     },
-    {
-      path: '/test',
-      component: '@/pages/test',
-    },
   ],
   npmClient: 'pnpm',
   dva: {},

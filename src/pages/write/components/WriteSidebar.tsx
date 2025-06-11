@@ -57,7 +57,6 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
           page_size: pageSize,
           is_external: 1,
         });
-        console.log(response);
         if (response.code === 0 && response.data.list.length > 0) {
           allImages.push(...response.data.list);
 

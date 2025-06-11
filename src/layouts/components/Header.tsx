@@ -215,7 +215,7 @@ const Header: React.FC<HeaderProps> = () => {
           </Button>
 
           {/* 通知铃铛 */}
-          {/* {currentUser && <NotificationBell />} */}
+          <NotificationBell />
 
           <div className="flex items-center space-x-2">
             <div className="hidden md:flex items-center space-x-1">

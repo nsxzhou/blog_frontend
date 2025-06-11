@@ -20,7 +20,6 @@ const NotificationsPage: FC = () => {
   const {
     state,
     isConnected,
-    connectionStatus,
     fetchNotifications,
     refreshNotifications,
   } = useNotificationModel();
@@ -41,7 +40,7 @@ const NotificationsPage: FC = () => {
       setFilters(newFilters);
 
       // 获取新的通知数据
-      fetchNotifications(newFilters.page, newFilters.page_size);
+      fetchNotifications(newFilters.page, newFilters.page_size, false, newFilters.type, newFilters.is_read);
     },
     [filters, fetchNotifications],
   );
@@ -55,6 +54,11 @@ const NotificationsPage: FC = () => {
     [handleFilterChange],
   );
 
+  // 刷新通知
+  const refreshNotificationsWithFilters = useCallback(() => {
+    refreshNotifications();
+  }, [refreshNotifications]);
+
   // 处理Tab切换
   const handleTabChange = useCallback(
     (activeKey: string) => {
@@ -62,8 +66,8 @@ const NotificationsPage: FC = () => {
         activeKey === 'read'
           ? true
           : activeKey === 'unread'
-          ? false
-          : undefined;
+            ? false
+            : undefined;
       handleFilterChange('is_read', is_read);
     },
     [handleFilterChange],
@@ -136,7 +140,7 @@ const NotificationsPage: FC = () => {
           transition={{ delay: 0.05 }}
           className="mb-6"
         >
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          {/* <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <div className="flex items-center gap-3">
               <WifiOutlined className="text-blue-500" />
               <div className="flex items-center gap-2">
@@ -148,7 +152,7 @@ const NotificationsPage: FC = () => {
                 <Text type="secondary">实时连接状态: {connectionStatus}</Text>
               </div>
             </div>
-          </div>
+          </div> */}
         </motion.div>
 
         {/* 筛选区域 */}
@@ -180,7 +184,9 @@ const NotificationsPage: FC = () => {
                 >
                   <Option value="article_like">点赞</Option>
                   <Option value="article_favorite">收藏</Option>
-                  <Option value="article_comment">评论</Option>
+                  <Option value="comment">评论</Option>
+                  <Option value="comment_reply">回复</Option>
+                  <Option value="comment_like">评论点赞</Option>
                   <Option value="follow">关注</Option>
                 </Select>
               </div>
@@ -197,7 +203,7 @@ const NotificationsPage: FC = () => {
           <NotificationList
             notifications={state.notifications}
             loading={state.loading}
-            onRefresh={refreshNotifications}
+            onRefresh={refreshNotificationsWithFilters}
           />
         </motion.div>
 

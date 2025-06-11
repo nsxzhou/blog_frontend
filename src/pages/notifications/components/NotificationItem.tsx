@@ -47,8 +47,12 @@ const NotificationItem: FC<NotificationItemProps> = ({
         return '点赞';
       case 'article_favorite':
         return '收藏';
-      case 'article_comment':
+      case 'comment':
         return '评论';
+      case 'comment_reply':
+        return '回复';
+      case 'comment_like':
+        return '评论点赞';
       case 'follow':
         return '关注';
       default:
@@ -62,8 +66,12 @@ const NotificationItem: FC<NotificationItemProps> = ({
         return 'bg-red-100 text-red-600';
       case 'article_favorite':
         return 'bg-yellow-100 text-yellow-600';
-      case 'article_comment':
+      case 'comment':
         return 'bg-blue-100 text-blue-600';
+      case 'comment_reply':
+        return 'bg-purple-100 text-purple-600';
+      case 'comment_like':
+        return 'bg-pink-100 text-pink-600';
       case 'follow':
         return 'bg-green-100 text-green-600';
       default:
@@ -76,9 +84,8 @@ const NotificationItem: FC<NotificationItemProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-        !notification.is_read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-      }`}
+      className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${!notification.is_read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+        }`}
     >
       <div className="flex items-start gap-3">
         {/* 选择框 */}

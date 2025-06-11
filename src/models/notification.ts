@@ -31,6 +31,14 @@ export interface UseNotificationModelReturn {
     page?: number,
     pageSize?: number,
     refresh?: boolean,
+    type?:
+      | 'article_like'
+      | 'article_favorite'
+      | 'comment'
+      | 'comment_reply'
+      | 'comment_like'
+      | 'follow',
+    is_read?: boolean,
   ) => Promise<void>;
   fetchUnreadCount: () => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
@@ -62,8 +70,6 @@ export default function useNotificationModel(): UseNotificationModelReturn {
 
   // 处理WebSocket消息
   const handleWebSocketMessage = useCallback((wsMessage: WebSocketMessage) => {
-    console.log('收到WebSocket消息:', wsMessage);
-
     switch (wsMessage.type) {
       case 'notification':
         // 新通知
@@ -125,13 +131,27 @@ export default function useNotificationModel(): UseNotificationModelReturn {
 
   // 获取通知列表
   const fetchNotifications = useCallback(
-    async (page = 1, pageSize = 10, refresh = false) => {
+    async (
+      page = 1,
+      pageSize = 10,
+      refresh = false,
+      type?:
+        | 'article_like'
+        | 'article_favorite'
+        | 'comment'
+        | 'comment_reply'
+        | 'comment_like'
+        | 'follow',
+      is_read?: boolean,
+    ) => {
       try {
         setState((prev) => ({ ...prev, loading: true }));
 
         const response = await GetNotifications({
           page,
           page_size: pageSize,
+          type,
+          is_read,
         });
 
         if (response.code === 0) {

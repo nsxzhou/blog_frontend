@@ -16,7 +16,13 @@ export interface NotificationArticle {
 // 通知项
 export interface NotificationItem {
   id: number;
-  type: string;
+  type:
+    | 'article_like'
+    | 'article_favorite'
+    | 'comment'
+    | 'comment_reply'
+    | 'comment_like'
+    | 'follow';
   content: string;
   is_read: boolean;
   created_at: string;
@@ -29,7 +35,13 @@ export interface NotificationItem {
 export interface GetNotificationsReq {
   page?: number;
   page_size?: number;
-  type?: string;
+  type?:
+    | 'article_like'
+    | 'article_favorite'
+    | 'comment'
+    | 'comment_reply'
+    | 'comment_like'
+    | 'follow';
   is_read?: boolean;
 }
 
