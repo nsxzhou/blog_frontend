@@ -217,7 +217,7 @@ export function useWebSocket(options: UseWebSocketOptions) {
         socketRef.current.close();
       }
     };
-  }, [autoConnect, connect, clearTimers]);
+  }, [connect, clearTimers]);
 
   return {
     status,

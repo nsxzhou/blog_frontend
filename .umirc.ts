@@ -55,10 +55,10 @@ export default defineConfig({
       path: '/profile',
       component: '@/pages/profile',
     },
-    // {
-    //   path: '/notifications',
-    //   component: '@/pages/notifications',
-    // },
+    {
+      path: '/notifications',
+      component: '@/pages/notifications',
+    },
     {
       path: '/categories',
       component: '@/pages/categories',

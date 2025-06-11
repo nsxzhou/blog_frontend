@@ -1,6 +1,6 @@
 import {
   Button,
-  // NotificationBell,
+  NotificationBell,
   QRCodeModal,
   SearchResults,
   UserAvatar,
@@ -191,11 +191,10 @@ const Header: React.FC<HeaderProps> = () => {
                 initial="idle"
                 whileHover="hover"
                 whileTap="tap"
-                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${
-                  location.pathname === item.key
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                }`}
+                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${location.pathname === item.key
+                  ? 'bg-gray-100 text-gray-900'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-500">{item.icon}</span>
