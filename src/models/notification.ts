@@ -124,7 +124,9 @@ export default function useNotificationModel(): UseNotificationModelReturn {
     reconnect,
     isConnected,
   } = useWebSocket({
-    url: 'ws://127.0.0.1:8080/api/ws/connect',
+    url: `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${
+      window.location.host
+    }/api/ws/connect`,
     onMessage: handleWebSocketMessage,
     autoConnect: !!currentUser, // 只有登录用户才自动连接
   });
