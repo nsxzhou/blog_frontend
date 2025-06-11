@@ -55,10 +55,10 @@ export default defineConfig({
       path: '/profile',
       component: '@/pages/profile',
     },
-    {
-      path: '/notifications',
-      component: '@/pages/notifications',
-    },
+    // {
+    //   path: '/notifications',
+    //   component: '@/pages/notifications',
+    // },
     {
       path: '/categories',
       component: '@/pages/categories',
@@ -86,7 +86,11 @@ export default defineConfig({
     {
       path: '/403',
       component: '@/pages/403',
-    }
+    },
+    {
+      path: '/test',
+      component: '@/pages/test',
+    },
   ],
   npmClient: 'pnpm',
   dva: {},

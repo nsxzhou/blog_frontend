@@ -1,5 +1,6 @@
 import {
   Button,
+  // NotificationBell,
   QRCodeModal,
   SearchResults,
   UserAvatar,
@@ -60,7 +61,6 @@ const Header: React.FC<HeaderProps> = () => {
 
   // 搜索相关
   const { keyword, results, loading, handleSearch, clearSearch } = useSearch();
-
 
   const headerBlur = useTransform(scrollY, [0, 80], [12, 20]);
 
@@ -215,6 +215,8 @@ const Header: React.FC<HeaderProps> = () => {
             <SearchOutlined className="text-lg" />
           </Button>
 
+          {/* 通知铃铛 */}
+          {/* {currentUser && <NotificationBell />} */}
 
           <div className="flex items-center space-x-2">
             <div className="hidden md:flex items-center space-x-1">

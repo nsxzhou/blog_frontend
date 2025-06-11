@@ -1,0 +1,138 @@
+/* 通知弹窗样式优化 */
+.notification-popover .ant-popover-content {
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.notification-popover .ant-popover-inner {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 通知项悬停效果 */
+.notification-item {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background-color: #f8fafc;
+  transform: translateX(4px);
+}
+
+/* 未读通知指示器 */
+.unread-indicator {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 连接状态指示器 */
+.connection-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.connection-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+  background-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.connection-status.disconnected {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.connection-status.connecting {
+  background-color: #3b82f6;
+  animation: connecting-pulse 1s infinite;
+}
+
+@keyframes connecting-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+/* 通知徽章动画 */
+.notification-badge {
+  animation: badge-bounce 0.3s ease;
+}
+
+@keyframes badge-bounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 通知列表滚动条美化 */
+.notification-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 空状态样式 */
+.empty-notification {
+  padding: 32px 16px;
+  text-align: center;
+  color: #64748b;
+}
+
+.empty-notification .ant-empty-image {
+  height: 60px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .notification-popover .ant-popover-content {
+    width: 90vw;
+    max-width: 320px;
+  }
+}
