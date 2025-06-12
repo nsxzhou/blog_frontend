@@ -1,6 +1,5 @@
 import { Button, UserAvatar } from '@/components/ui';
-import { fadeInUp, scaleIn, hoverScale } from '@/constants/animations';
-import useNotificationModel from '@/models/notification';
+import { fadeInUp, scaleIn } from '@/constants/animations';
 import {
   BellOutlined,
   CheckOutlined,
@@ -8,40 +7,42 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { useNavigate } from '@umijs/max';
+import { connect, useModel, useNavigate } from '@umijs/max';
 import { Badge, Empty, List, Popover, Spin, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
-import { useCallback, useState, useRef } from 'react';
-import { useModel } from '@umijs/max';
+import { useCallback, useRef, useState } from 'react';
 
 const { Text, Title } = Typography;
 
 interface NotificationBellProps {
   className?: string;
+  notification?: any;
+  dispatch?: any;
 }
 
-const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
+const NotificationBell: FC<NotificationBellProps> = ({
+  className = '',
+  notification,
+  dispatch,
+}) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const buttonContainerRef = useRef<HTMLDivElement>(null);
   const { initialState } = useModel('@@initialState');
   const currentUser = initialState?.currentUser;
-  const {
-    state,
-    isConnected,
-    connectionStatus,
-    markAsRead,
-    markAllAsRead,
-    refreshNotifications,
-  } = useNotificationModel();
+
+  // 从props中获取状态
+  const state = notification;
+  const isConnected = notification.isConnected;
+  const connectionStatus = notification.connectionStatus;
 
   // 处理通知点击
   const handleNotificationClick = useCallback(
     (notification: any) => {
       // 标记为已读
       if (!notification.is_read) {
-        markAsRead(notification.id);
+        dispatch({ type: 'notification/markAsRead', payload: notification.id });
       }
 
       // 跳转到相关页面
@@ -51,7 +52,7 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
 
       setVisible(false);
     },
-    [markAsRead, navigate],
+    [dispatch, navigate],
   );
 
   // 查看所有通知
@@ -65,6 +66,16 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
     navigate('/login');
     setVisible(false);
   }, [navigate]);
+
+  // 刷新通知
+  const refreshNotifications = useCallback(() => {
+    dispatch({ type: 'notification/refreshNotifications' });
+  }, [dispatch]);
+
+  // 标记所有已读
+  const markAllAsRead = useCallback(() => {
+    dispatch({ type: 'notification/markAllAsRead' });
+  }, [dispatch]);
 
   // 格式化通知时间
   const formatTime = useCallback((dateString: string) => {
@@ -93,8 +104,12 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
     >
       <div className="flex flex-col items-center justify-center py-6">
         <BellOutlined className="text-4xl text-gray-300 mb-4" />
-        <Title level={5} className="text-center mb-2">请先登录</Title>
-        <Text type="secondary" className="text-center mb-4">登录后查看您的通知</Text>
+        <Title level={5} className="text-center mb-2">
+          请先登录
+        </Title>
+        <Text type="secondary" className="text-center mb-4">
+          登录后查看您的通知
+        </Text>
         <Button
           size="sm"
           onClick={handleGoToLogin}
@@ -148,8 +163,9 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
       <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2 text-xs">
           <div
-            className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'
-              }`}
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? 'bg-green-500' : 'bg-red-500'
+            }`}
           />
           <Text type="secondary">{connectionStatus}</Text>
         </div>
@@ -172,15 +188,19 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
         ) : (
           <List
             dataSource={state.notifications.slice(0, 10)}
-            renderItem={(notification) => (
+            renderItem={(notification: any) => (
               <motion.div
                 key={notification.id}
                 variants={fadeInUp}
                 initial="initial"
                 animate="animate"
-                whileHover={{ backgroundColor: '#f0f9ff', transition: { duration: 0.1 } }}
-                className={`px-4 py-3 border-b border-gray-100 cursor-pointer transition-all ${!notification.is_read ? 'bg-blue-50' : ''
-                  }`}
+                whileHover={{
+                  backgroundColor: '#f0f9ff',
+                  transition: { duration: 0.1 },
+                }}
+                className={`px-4 py-3 border-b border-gray-100 cursor-pointer transition-all ${
+                  !notification.is_read ? 'bg-blue-50' : ''
+                }`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start gap-3">
@@ -188,7 +208,11 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
                   <UserAvatar
                     user={notification.sender}
                     size="sm"
-                    className={!notification.is_read ? 'ring-2 ring-blue-300 ring-offset-1' : ''}
+                    className={
+                      !notification.is_read
+                        ? 'ring-2 ring-blue-300 ring-offset-1'
+                        : ''
+                    }
                     fallback={notification.sender?.nickname?.[0] || 'N'}
                   />
 
@@ -199,8 +223,11 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
                         <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
                       )}
                       <Text
-                        className={`text-sm ${!notification.is_read ? 'font-medium text-black' : 'text-gray-700'
-                          }`}
+                        className={`text-sm ${
+                          !notification.is_read
+                            ? 'font-medium text-black'
+                            : 'text-gray-700'
+                        }`}
                       >
                         {notification.content}
                       </Text>
@@ -210,7 +237,10 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
                         {formatTime(notification.created_at)}
                       </Text>
                       {notification.article && (
-                        <Text type="secondary" className="text-xs truncate max-w-[180px]">
+                        <Text
+                          type="secondary"
+                          className="text-xs truncate max-w-[180px]"
+                        >
                           《{notification.article.title}》
                         </Text>
                       )}
@@ -266,7 +296,11 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
           className={`relative p-2 rounded-lg hover:bg-gray-100 ${className}`}
           onClick={() => setVisible(!visible)}
         >
-          <Badge count={currentUser ? state.unreadCount : 0} size="small" offset={[-2, 2]}>
+          <Badge
+            count={currentUser ? state.unreadCount : 0}
+            size="small"
+            offset={[-2, 2]}
+          >
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -281,4 +315,6 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
   );
 };
 
-export default NotificationBell;
+export default connect(({ notification }: { notification: any }) => ({
+  notification,
+}))(NotificationBell);

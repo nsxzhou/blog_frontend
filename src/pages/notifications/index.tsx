@@ -1,12 +1,11 @@
 import type { GetNotificationsReq } from '@/api/notification';
 import { fadeInUp } from '@/constants/animations';
-import useNotificationModel from '@/models/notification';
 import {
   BellOutlined,
   CheckCircleOutlined,
   WifiOutlined,
 } from '@ant-design/icons';
-import { Helmet } from '@umijs/max';
+import { connect, Helmet } from '@umijs/max';
 import { Badge, Pagination, Select, Tabs, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
@@ -16,14 +15,15 @@ import NotificationList from './components/NotificationList';
 const { Option } = Select;
 const { Text } = Typography;
 
-const NotificationsPage: FC = () => {
-  const {
-    state,
-    isConnected,
-    fetchNotifications,
-    refreshNotifications,
-  } = useNotificationModel();
+interface NotificationsPageProps {
+  notification: any;
+  dispatch: any;
+}
 
+const NotificationsPage: FC<NotificationsPageProps> = ({
+  notification,
+  dispatch,
+}) => {
   const [filters, setFilters] = useState<GetNotificationsReq>({
     page: 1,
     page_size: 10,
@@ -40,9 +40,18 @@ const NotificationsPage: FC = () => {
       setFilters(newFilters);
 
       // 获取新的通知数据
-      fetchNotifications(newFilters.page, newFilters.page_size, false, newFilters.type, newFilters.is_read);
+      dispatch({
+        type: 'notification/fetchNotifications',
+        payload: {
+          page: newFilters.page,
+          pageSize: newFilters.page_size,
+          refresh: false,
+          type: newFilters.type,
+          is_read: newFilters.is_read,
+        },
+      });
     },
-    [filters, fetchNotifications],
+    [filters, dispatch],
   );
 
   // 处理分页变化
@@ -56,8 +65,8 @@ const NotificationsPage: FC = () => {
 
   // 刷新通知
   const refreshNotificationsWithFilters = useCallback(() => {
-    refreshNotifications();
-  }, [refreshNotifications]);
+    dispatch({ type: 'notification/refreshNotifications' });
+  }, [dispatch]);
 
   // 处理Tab切换
   const handleTabChange = useCallback(
@@ -66,8 +75,8 @@ const NotificationsPage: FC = () => {
         activeKey === 'read'
           ? true
           : activeKey === 'unread'
-            ? false
-            : undefined;
+          ? false
+          : undefined;
       handleFilterChange('is_read', is_read);
     },
     [handleFilterChange],
@@ -90,8 +99,8 @@ const NotificationsPage: FC = () => {
       label: (
         <span className="flex items-center gap-1">
           未读
-          {state.unreadCount > 0 && (
-            <Badge count={state.unreadCount} size="small" />
+          {notification.unreadCount > 0 && (
+            <Badge count={notification.unreadCount} size="small" />
           )}
         </span>
       ),
@@ -126,7 +135,9 @@ const NotificationsPage: FC = () => {
           <div className="flex items-center gap-3 mb-2">
             <BellOutlined className="text-2xl text-blue-600" />
             <h1 className="text-3xl font-bold text-gray-900">我的通知</h1>
-            {state.unreadCount > 0 && <Badge count={state.unreadCount} />}
+            {notification.unreadCount > 0 && (
+              <Badge count={notification.unreadCount} />
+            )}
           </div>
           <p className="text-gray-600">
             管理您的系统通知，包括点赞、评论、关注等消息
@@ -146,10 +157,10 @@ const NotificationsPage: FC = () => {
               <div className="flex items-center gap-2">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    isConnected ? 'bg-green-500' : 'bg-red-500'
+                    notification.isConnected ? 'bg-green-500' : 'bg-red-500'
                   }`}
                 />
-                <Text type="secondary">实时连接状态: {connectionStatus}</Text>
+                <Text type="secondary">实时连接状态: {notification.connectionStatus}</Text>
               </div>
             </div>
           </div> */}
@@ -201,14 +212,14 @@ const NotificationsPage: FC = () => {
           transition={{ delay: 0.2 }}
         >
           <NotificationList
-            notifications={state.notifications}
-            loading={state.loading}
+            notifications={notification.notifications}
+            loading={notification.loading}
             onRefresh={refreshNotificationsWithFilters}
           />
         </motion.div>
 
         {/* 分页 */}
-        {state.total > 0 && (
+        {notification.total > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -216,9 +227,9 @@ const NotificationsPage: FC = () => {
             className="mt-8 flex justify-center"
           >
             <Pagination
-              current={state.currentPage}
-              pageSize={state.pageSize}
-              total={state.total}
+              current={notification.currentPage}
+              pageSize={notification.pageSize}
+              total={notification.total}
               onChange={handlePageChange}
               showSizeChanger
               showQuickJumper
@@ -240,15 +251,15 @@ const NotificationsPage: FC = () => {
           <div className="inline-flex items-center gap-4 px-4 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">
             <span className="flex items-center gap-1">
               <BellOutlined />
-              总通知: {state.total}
+              总通知: {notification.total}
             </span>
             <span className="flex items-center gap-1">
               <CheckCircleOutlined />
-              未读: {state.unreadCount}
+              未读: {notification.unreadCount}
             </span>
             <span className="flex items-center gap-1">
               <WifiOutlined />
-              连接: {isConnected ? '已连接' : '未连接'}
+              连接: {notification.isConnected ? '已连接' : '未连接'}
             </span>
           </div>
         </motion.div>
@@ -257,4 +268,6 @@ const NotificationsPage: FC = () => {
   );
 };
 
-export default NotificationsPage;
+export default connect(({ notification }: { notification: any }) => ({
+  notification,
+}))(NotificationsPage);
