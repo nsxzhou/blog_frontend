@@ -6,6 +6,7 @@ import {
   UserAvatar,
 } from '@/components/ui';
 import {
+  cardHover,
   fadeInUp,
   headerVariants,
   navItemVariants,

@@ -1,4 +1,6 @@
+import { QQLoginCallback } from '@/api/user';
 import { fadeInUp } from '@/constants/animations';
+import { setAuthTokens } from '@/utils/auth';
 import { connect, history, useDispatch } from '@umijs/max';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
@@ -40,12 +42,15 @@ const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
           return;
         }
 
-        const result: any = await dispatch({
-          type: 'user/handleQQCallback',
-          payload: { code },
-        });
+        const res = await QQLoginCallback({ code });
 
-        if (result.success) {
+        if (res.code === 0) {
+          setAuthTokens(
+            res.data.access_token,
+            res.data.refresh_token,
+            res.data.expires_in,
+          );
+          dispatch({ type: 'user/setUser', payload: res.data.user });
           setStatus('success');
           setMessage('QQ登录成功！正在跳转...');
 
@@ -54,7 +59,7 @@ const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
           }, 500);
         } else {
           setStatus('error');
-          setMessage(result?.message || 'QQ登录失败');
+          setMessage(res.message || 'QQ登录失败');
 
           // 3秒后跳转到登录页
           setTimeout(() => {

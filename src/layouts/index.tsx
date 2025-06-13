@@ -119,6 +119,12 @@ const GlobalLayout: React.FC<GlobalLayoutProps> = ({ user, websocket }) => {
   useEffect(() => {
     let reconnectTimer: NodeJS.Timeout;
 
+    const token = getTokenFromStorage();
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
     const connectWebSocket = () => {
       if (
         websocket.status === 'connected' ||
@@ -134,7 +140,6 @@ const GlobalLayout: React.FC<GlobalLayoutProps> = ({ user, websocket }) => {
           message: '正在连接...',
         },
       });
-
       const ws = new WebSocket(getWebSocketURL());
 
       ws.onopen = () => {
@@ -210,13 +215,7 @@ const GlobalLayout: React.FC<GlobalLayoutProps> = ({ user, websocket }) => {
         websocket.socket.close();
       }
     };
-  }, [
-    dispatch,
-    websocket.reconnectAttempts,
-    websocket.maxReconnectAttempts,
-    websocket.reconnectInterval,
-    websocket.status,
-  ]);
+  }, [dispatch, user.isLoggedIn]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative">

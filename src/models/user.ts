@@ -1,21 +1,6 @@
-import {
-  GetQQLoginURL,
-  GetUserInfo,
-  Login,
-  Logout,
-  QQLoginCallback,
-  Register,
-  type LoginReq,
-  type RegisterReq,
-  type UserInfo,
-} from '@/api/user';
-import {
-  clearAuthTokens,
-  getTokenFromStorage,
-  isTokenExpired,
-  setAuthTokens,
-} from '@/utils/auth';
-import type { Effect, Reducer } from '@umijs/max';
+import { type UserInfo } from '@/api/user';
+import { clearAuthTokens } from '@/utils/auth';
+import type { Reducer } from '@umijs/max';
 
 export interface UserModelState {
   currentUser: UserInfo | null;
@@ -46,6 +31,7 @@ const UserModel: UserModelType = {
       };
     },
     clearUser(state) {
+      clearAuthTokens();
       return {
         ...state,
         currentUser: null,
