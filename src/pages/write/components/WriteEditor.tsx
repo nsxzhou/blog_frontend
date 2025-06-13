@@ -74,12 +74,9 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
           const imageUrl = response.data.image.url;
           callback(imageUrl, file.name);
           message.success('图片上传成功');
-        } else {
-          message.error('图片上传失败，请重试');
-        }
+        } 
       } catch (error) {
         console.error('图片上传失败:', error);
-        message.error('图片上传失败，请重试');
       }
     },
     [],

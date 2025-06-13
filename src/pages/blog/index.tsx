@@ -7,7 +7,7 @@ import { GetCategoryList, type CategoryInfo } from '@/api/category';
 import { GetTagList, type TagInfo } from '@/api/tag';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useSearchParams } from '@umijs/max';
-import { message, Spin } from 'antd';
+import { Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -188,7 +188,6 @@ const BlogPage: React.FC = () => {
       } catch (err) {
         console.error('获取文章失败:', err);
         setError('获取文章列表失败，请稍后重试');
-        message.error('获取文章列表失败，请稍后重试');
         setBlogPosts([]);
         setTotal(0);
       } finally {

@@ -1,14 +1,20 @@
 import { GetUserInfo } from '@/api/user';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { UserModelState } from '@/models/user';
+import { WebSocketState } from '@/models/websocket';
+import { getTokenFromStorage } from '@/utils/auth';
 import { getRouteAccess } from '@/utils/routeAccess';
+import { getWebSocketURL } from '@/utils/websocket';
 import { connect, Outlet, useDispatch, useLocation } from '@umijs/max';
+import { Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
 import StagewiseWrapper from '../components/StagewiseWrapper';
 import { Footer, Header } from './components';
 
 interface GlobalLayoutProps {
-  user: any;
+  user: UserModelState;
+  websocket: WebSocketState;
 }
 
 // 抽离背景动画组件
@@ -59,8 +65,9 @@ const MainContent: React.FC<{ pathname: string }> = ({ pathname }) => (
   </main>
 );
 
-const GlobalLayout: React.FC<GlobalLayoutProps> = ({ user }) => {
+const GlobalLayout: React.FC<GlobalLayoutProps> = ({ user, websocket }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -81,26 +88,162 @@ const GlobalLayout: React.FC<GlobalLayoutProps> = ({ user }) => {
   // 用户信息初始化
   useEffect(() => {
     const fetchUserInfo = async () => {
-      const res = await GetUserInfo();
-      if (res.code === 0) {
-        dispatch({
-          type: 'user/setUser',
-          payload: res.data.user,
-        });
+      // 如果没有 token，直接结束加载流程
+      const token = getTokenFromStorage();
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const res = await GetUserInfo();
+        if (res.code === 0) {
+          dispatch({
+            type: 'user/setUser',
+            payload: res.data.user,
+          });
+        }
+      } catch (error) {
+        // 这里不需要额外处理，统一错误拦截器会处理
+        console.error('获取用户信息失败:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
+
     fetchUserInfo();
   }, [dispatch]);
+
+  // WebSocket连接初始化
+  useEffect(() => {
+    let reconnectTimer: NodeJS.Timeout;
+
+    const connectWebSocket = () => {
+      if (
+        websocket.status === 'connected' ||
+        websocket.status === 'connecting'
+      ) {
+        return;
+      }
+
+      dispatch({
+        type: 'websocket/setStatus',
+        payload: {
+          status: 'connecting',
+          message: '正在连接...',
+        },
+      });
+
+      const ws = new WebSocket(getWebSocketURL());
+
+      ws.onopen = () => {
+        dispatch({
+          type: 'websocket/setStatus',
+          payload: {
+            status: 'connected',
+            message: '已连接',
+          },
+        });
+        dispatch({
+          type: 'websocket/setSocket',
+          payload: ws,
+        });
+        dispatch({
+          type: 'websocket/resetReconnectAttempts',
+        });
+      };
+
+      ws.onclose = () => {
+        dispatch({
+          type: 'websocket/setStatus',
+          payload: {
+            status: 'disconnected',
+            message: '连接已断开',
+          },
+        });
+        dispatch({
+          type: 'websocket/setSocket',
+          payload: null,
+        });
+
+        // 重连逻辑
+        if (websocket.reconnectAttempts < websocket.maxReconnectAttempts) {
+          dispatch({
+            type: 'websocket/setStatus',
+            payload: {
+              status: 'reconnecting',
+              message: `正在重连... (${websocket.reconnectAttempts + 1}/${
+                websocket.maxReconnectAttempts
+              })`,
+            },
+          });
+          dispatch({
+            type: 'websocket/incrementReconnectAttempts',
+          });
+          reconnectTimer = setTimeout(
+            connectWebSocket,
+            websocket.reconnectInterval,
+          );
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket错误:', error);
+        dispatch({
+          type: 'websocket/setStatus',
+          payload: {
+            status: 'disconnected',
+            message: '连接错误',
+          },
+        });
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
+      if (websocket.socket) {
+        websocket.socket.close();
+      }
+    };
+  }, [
+    dispatch,
+    websocket.reconnectAttempts,
+    websocket.maxReconnectAttempts,
+    websocket.reconnectInterval,
+    websocket.status,
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative">
       <StagewiseWrapper />
       <BackgroundAnimation />
       <Header onMenuToggle={toggleSidebar} />
-      <MainContent pathname={location.pathname} />
+      {isLoading ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <MainContent pathname={location.pathname} />
+      )}
       <Footer />
     </div>
   );
 };
 
-export default connect(({ user }: any) => ({ user }))(GlobalLayout);
+export default connect(
+  ({
+    user,
+    websocket,
+  }: {
+    user: UserModelState;
+    websocket: WebSocketState;
+  }) => ({
+    user,
+    websocket,
+  }),
+)(GlobalLayout);

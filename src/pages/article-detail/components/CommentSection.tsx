@@ -65,7 +65,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       },
       onError: (error) => {
         console.error('发表评论失败:', error);
-        message.error('评论发表失败，请稍后重试');
       },
     },
   );
@@ -89,7 +88,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       },
       onError: (error) => {
         console.error('回复评论失败:', error);
-        message.error('回复发表失败，请稍后重试');
       },
     },
   );
@@ -104,7 +102,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       },
       onError: (error) => {
         console.error('点赞失败:', error);
-        message.error('操作失败，请稍后重试');
       },
     },
   );

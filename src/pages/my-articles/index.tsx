@@ -53,7 +53,6 @@ const MyArticlesPage: React.FC = () => {
       refreshDeps: [currentPage, pageSize, searchTerm, filterType, sortType],
       onError: (error) => {
         console.error('获取文章列表失败:', error);
-        message.error('获取文章列表失败，请稍后重试');
       },
     },
   );
@@ -145,8 +144,7 @@ const MyArticlesPage: React.FC = () => {
       message.success('文章删除成功');
       refreshArticles();
     } catch (error) {
-      console.error('删除文章失败:', error);
-      message.error('删除文章失败，请稍后重试');
+      console.error('删除文章失败:', error); 
     }
   };
 

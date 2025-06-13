@@ -41,7 +41,6 @@ const ReadingHistoryPage: React.FC = () => {
       manual: true,
       onError: (error) => {
         console.error('获取阅读历史失败:', error);
-        message.error('获取阅读历史失败');
       },
     },
   );
@@ -55,8 +54,8 @@ const ReadingHistoryPage: React.FC = () => {
         message.success('删除成功');
         loadHistory(currentPage, pageSize);
       },
-      onError: () => {
-        message.error('删除失败');
+      onError: (error) => {
+        console.error('删除失败:', error);
       },
     },
   );
@@ -72,8 +71,8 @@ const ReadingHistoryPage: React.FC = () => {
         setIsSelectionMode(false);
         loadHistory(currentPage, pageSize);
       },
-      onError: () => {
-        message.error('批量删除失败');
+      onError: (error) => {
+        console.error('批量删除失败:', error);
       },
     },
   );
@@ -87,8 +86,8 @@ const ReadingHistoryPage: React.FC = () => {
         message.success('清空成功');
         loadHistory(currentPage, pageSize);
       },
-      onError: () => {
-        message.error('清空失败');
+      onError: (error) => {
+        console.error('清空失败:', error);
       },
     },
   );

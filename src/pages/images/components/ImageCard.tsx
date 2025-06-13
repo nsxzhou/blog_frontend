@@ -46,7 +46,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
       await navigator.clipboard.writeText(image.url);
       message.success('图片链接已复制到剪贴板');
     } catch (error) {
-      message.error('复制失败');
+      message.error('复制失败'); 
     }
   };
 

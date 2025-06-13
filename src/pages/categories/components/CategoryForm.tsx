@@ -66,7 +66,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onSuccess, onCanc
                 }
             }
         } catch (error) {
-            message.error(category ? '更新分类失败' : '创建分类失败');
             console.error('表单提交失败:', error);
         } finally {
             setLoading(false);

@@ -20,9 +20,9 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
     try {
       await onSubmit(values);
       form.resetFields();
-      message.success('密码修改成功');
+      message.success('密码修改成功'); 
     } catch (error) {
-      message.error('密码修改失败，请检查原密码是否正确');
+      console.error('密码修改失败:', error);
     }
   };
 

@@ -37,7 +37,7 @@ const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
           setUserInfo(response.data.user);
         }
       } catch (error) {
-        message.error('获取用户信息失败');
+        console.error('获取用户信息失败:', error);
         // 使用初始状态中的用户信息作为后备
         if (user) {
           setUserInfo(user.currentUser);
@@ -61,7 +61,7 @@ const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
         message.success('信息更新成功');
       }
     } catch (error) {
-      message.error('更新失败，请重试');
+      console.error('更新用户信息失败:', error);
       throw error;
     } finally {
       setUpdateLoading(false);
@@ -77,7 +77,7 @@ const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
         message.success('密码修改成功');
       }
     } catch (error) {
-      message.error('密码修改失败，请检查原密码是否正确');
+      console.error('密码修改失败:', error);
       throw error;
     } finally {
       setPasswordLoading(false);

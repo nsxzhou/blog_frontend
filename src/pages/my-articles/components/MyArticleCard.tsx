@@ -96,8 +96,7 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
         onRefresh?.();
       },
       onError: (error) => {
-        console.error('状态更新失败:', error);
-        message.error('状态更新失败');
+        console.error('状态更新失败:', error); 
       },
     },
   );
@@ -119,7 +118,6 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
       },
       onError: (error) => {
         console.error('访问权限更新失败:', error);
-        message.error('访问权限更新失败');
       },
     },
   );
@@ -156,7 +154,7 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
 
   const handlePasswordSubmit = () => {
     if (!password.trim()) {
-      message.error('请输入密码');
+      message.error('请输入密码'); 
       return;
     }
     updateAccess('password', password);

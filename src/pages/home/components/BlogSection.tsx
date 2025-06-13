@@ -66,7 +66,6 @@ const BlogSection: React.FC = () => {
     } catch (err) {
       console.error('获取最新文章失败:', err);
       setError('获取文章列表失败，请稍后重试');
-      message.error('获取文章列表失败，请稍后重试');
       setBlogPosts([]);
     } finally {
       setLoading(false);

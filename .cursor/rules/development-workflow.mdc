@@ -15,18 +15,18 @@ alwaysApply: true
 ### 错误处理规范
 
 ```typescript
-// API 调用错误处理
-try {
-  const response = await api.getPosts();
-  setData(response.data);
-} catch (error) {
-  console.error("获取文章失败:", error);
-  message.error("获取文章失败，请稍后重试");
-}
-
-// 组件错误边界
-const ErrorBoundary: FC<{ children: ReactNode }> = ({ children }) => {
-  // 实现错误边界逻辑
+// 组件中的API调用示例
+const fetchData = async () => {
+  try {
+    // 直接使用返回的数据，错误已在拦截器中处理
+    const response = await ai.getPosts();
+    if(response.code===0) {
+        setData(response.data);
+    }
+  } catch (error) {
+    // 仅处理组件特定的错误逻辑
+    console.error('获取数据失败:', error);
+  }
 };
 ```
 

@@ -112,7 +112,7 @@ const ImageDetailModal: React.FC<ImageDetailModalProps> = ({
       setIsEditing(false);
       onUpdate();
     } catch (error) {
-      message.error('更新失败，请重试');
+      console.error('更新图片信息失败:', error);
     } finally {
       setLoading(false);
     }

@@ -83,10 +83,8 @@ const CategoryManagementPage: React.FC = () => {
           total: 0,
           current: 1,
         }));
-        message.error(response.message || '获取分类列表失败');
       }
     } catch (error) {
-      message.error('获取分类列表失败');
       console.error('获取分类列表失败:', error);
       // 重置状态
       setCategories([]);
@@ -160,11 +158,8 @@ const CategoryManagementPage: React.FC = () => {
           if (response.code === 0) {
             message.success('分类删除成功');
             fetchCategories();
-          } else {
-            message.error(response.message || '删除分类失败');
           }
         } catch (error) {
-          message.error('删除分类失败');
           console.error('删除分类失败:', error);
         }
       },
@@ -186,11 +181,8 @@ const CategoryManagementPage: React.FC = () => {
           `分类${category.is_visible === 1 ? '隐藏' : '显示'}成功`,
         );
         fetchCategories();
-      } else {
-        message.error(response.message || '操作失败');
       }
     } catch (error) {
-      message.error('操作失败');
       console.error('切换可见性失败:', error);
     }
   };

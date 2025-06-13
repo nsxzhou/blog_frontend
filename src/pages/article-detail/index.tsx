@@ -39,7 +39,6 @@ const ArticleDetailPage: React.FC<{ user: UserModelState }> = ({ user }) => {
       refreshDeps: [id],
       onError: (error) => {
         console.error('获取文章详情失败:', error);
-        message.error('获取文章详情失败');
       },
     },
   );
@@ -61,7 +60,6 @@ const ArticleDetailPage: React.FC<{ user: UserModelState }> = ({ user }) => {
       refreshDeps: [id],
       onError: (error) => {
         console.error('获取评论列表失败:', error);
-        message.error('获取评论列表失败');
       },
     },
   );

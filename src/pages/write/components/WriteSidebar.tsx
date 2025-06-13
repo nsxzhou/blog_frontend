@@ -116,7 +116,6 @@ const WriteSidebar: React.FC<WriteSidebarProps> = ({
     } catch (error) {
       // 隐藏加载提示
       console.error('随机选择封面失败:', error);
-      message.error('随机选择封面失败，请检查网络连接后重试');
     } finally {
       setRandomizing(false);
     }

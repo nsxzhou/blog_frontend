@@ -54,7 +54,6 @@ const TagForm: React.FC<TagFormProps> = ({ tag, onSuccess, onCancel }) => {
                 }
             }
         } catch (error) {
-            message.error(tag ? '更新标签失败' : '创建标签失败');
             console.error('表单提交失败:', error);
         } finally {
             setLoading(false);

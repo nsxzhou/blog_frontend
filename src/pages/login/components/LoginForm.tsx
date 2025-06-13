@@ -12,6 +12,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { connect, useDispatch } from '@umijs/max';
+import { message } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
@@ -75,7 +76,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         setTimeout(() => {
           onSuccess();
         }, 100);
-      }
+      } 
     } catch (error) {
       console.error('登录异常:', error);
     } finally {

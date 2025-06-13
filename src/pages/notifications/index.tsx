@@ -1,31 +1,68 @@
 import type { GetNotificationsReq } from '@/api/notification';
+import { GetNotifications, GetUnreadCount } from '@/api/notification';
+import { NotificationItem } from '@/api/notification/types';
 import { fadeInUp } from '@/constants/animations';
+import { WebSocketState } from '@/models/websocket';
 import { BellOutlined, WifiOutlined } from '@ant-design/icons';
-import { Helmet } from '@umijs/max';
-import { Badge, Pagination, Select, Tabs, Typography } from 'antd';
+import { connect, Helmet } from '@umijs/max';
+import { Badge, message, Pagination, Select, Tabs, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import NotificationList from './components/NotificationList';
 
 const { Option } = Select;
 const { Text } = Typography;
 
 interface NotificationsPageProps {
-  notification: any;
-  dispatch: any;
-  websocket: any;
+  websocket: WebSocketState;
 }
 
-const NotificationsPage: FC<NotificationsPageProps> = ({
-  notification,
-  dispatch,
-  websocket,
-}) => {
+const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
+  const [loading, setLoading] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState<GetNotificationsReq>({
     page: 1,
     page_size: 10,
   });
+
+  // 获取通知列表
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [notificationsRes, unreadCountRes] = await Promise.all([
+        GetNotifications(filters),
+        GetUnreadCount(),
+      ]);
+
+      if (notificationsRes.code === 0) {
+        setNotifications(notificationsRes.data.list);
+        setTotal(notificationsRes.data.total);
+      }
+
+      if (unreadCountRes.code === 0) {
+        setUnreadCount(unreadCountRes.data.count);
+      }
+    } catch (error) {
+      console.error('获取通知列表失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
+  // 初始化加载
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // WebSocket 连接状态变化时刷新数据
+  useEffect(() => {
+    if (websocket.status === 'connected') {
+      fetchNotifications();
+    }
+  }, [websocket.status, fetchNotifications]);
 
   // 处理筛选变化
   const handleFilterChange = useCallback(
@@ -36,20 +73,8 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
         page: key === 'page' ? value : 1, // 除了翻页外，其他筛选都重置到第一页
       };
       setFilters(newFilters);
-
-      // 获取新的通知数据
-      dispatch({
-        type: 'notification/fetchNotifications',
-        payload: {
-          page: newFilters.page,
-          pageSize: newFilters.page_size,
-          refresh: false,
-          type: newFilters.type,
-          is_read: newFilters.is_read,
-        },
-      });
     },
-    [filters, dispatch],
+    [filters],
   );
 
   // 处理分页变化
@@ -63,8 +88,8 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
 
   // 刷新通知
   const refreshNotificationsWithFilters = useCallback(() => {
-    dispatch({ type: 'notification/refreshNotifications' });
-  }, [dispatch]);
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   // 处理Tab切换
   const handleTabChange = useCallback(
@@ -97,9 +122,7 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
       label: (
         <span className="flex items-center gap-1">
           未读
-          {notification.unreadCount > 0 && (
-            <Badge count={notification.unreadCount} size="small" />
-          )}
+          {unreadCount > 0 && <Badge count={unreadCount} size="small" />}
         </span>
       ),
       children: null,
@@ -133,9 +156,7 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
           <div className="flex items-center gap-3 mb-2">
             <BellOutlined className="text-2xl text-blue-600" />
             <h1 className="text-3xl font-bold text-gray-900">我的通知</h1>
-            {notification.unreadCount > 0 && (
-              <Badge count={notification.unreadCount} />
-            )}
+            {unreadCount > 0 && <Badge count={unreadCount} />}
           </div>
           <p className="text-gray-600">
             管理您的系统通知，包括点赞、评论、关注等消息
@@ -217,14 +238,14 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
           transition={{ delay: 0.2 }}
         >
           <NotificationList
-            notifications={notification.notifications}
-            loading={notification.loading}
+            notifications={notifications}
+            loading={loading}
             onRefresh={refreshNotificationsWithFilters}
           />
         </motion.div>
 
         {/* 分页 */}
-        {notification.total > 0 && (
+        {total > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -232,9 +253,9 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
             className="mt-8 flex justify-center"
           >
             <Pagination
-              current={notification.currentPage}
-              pageSize={notification.pageSize}
-              total={notification.total}
+              current={filters.page}
+              pageSize={filters.page_size}
+              total={total}
               onChange={handlePageChange}
               showSizeChanger
               showQuickJumper
@@ -245,32 +266,11 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
             />
           </motion.div>
         )}
-
-        {/* 统计信息 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-8 text-center"
-        >
-          {/* <div className="inline-flex items-center gap-4 px-4 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">
-            <span className="flex items-center gap-1">
-              <BellOutlined />
-              总通知: {notification.total}
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircleOutlined />
-              未读: {notification.unreadCount}
-            </span>
-            <span className="flex items-center gap-1">
-              <WifiOutlined />
-              连接: {notification.isConnected ? '已连接' : '未连接'}
-            </span>
-          </div> */}
-        </motion.div>
       </motion.div>
     </>
   );
 };
 
-export default NotificationsPage;
+export default connect(({ websocket }: { websocket: WebSocketState }) => ({
+  websocket,
+}))(NotificationsPage);

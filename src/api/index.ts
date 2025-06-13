@@ -102,6 +102,7 @@ export const request: RequestConfig = {
   ],
   errorConfig: {
     async errorHandler(error: any, opts: any) {
+      console.log(error);
       // 如果配置了跳过错误处理，直接抛出
       if (opts?.skipErrorHandler) {
         throw error;
@@ -176,7 +177,6 @@ export const request: RequestConfig = {
         message.error('网络连接失败，请检查网络');
         throw error;
       }
-
       // 业务错误
       message.error(errorMessage);
       throw error;

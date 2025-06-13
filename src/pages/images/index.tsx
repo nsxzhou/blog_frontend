@@ -255,10 +255,8 @@ const ImagesManagementPage: React.FC = () => {
           total: 0,
           current: 1,
         }));
-        message.error(response.message || '获取图片列表失败');
       }
     } catch (error) {
-      message.error('获取图片列表失败');
       console.error('获取图片列表失败:', error);
       setImages([]);
       setPagination((prev) => ({
@@ -348,11 +346,8 @@ const ImagesManagementPage: React.FC = () => {
             message.success('图片删除成功');
             fetchImages();
             fetchStatistics();
-          } else {
-            message.error(response.message || '删除图片失败');
-          }
+          } 
         } catch (error) {
-          message.error('删除图片失败');
           console.error('删除图片失败:', error);
         }
       },
@@ -383,11 +378,8 @@ const ImagesManagementPage: React.FC = () => {
             setBatchMode(false);
             fetchImages();
             fetchStatistics();
-          } else {
-            message.error(response.message || '批量删除失败');
-          }
+          } 
         } catch (error) {
-          message.error('批量删除失败');
           console.error('批量删除失败:', error);
         }
       },

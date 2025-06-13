@@ -57,20 +57,6 @@ const ContactSection: React.FC = () => {
     }
   ];
 
-  const handleSubmit = async (values: any) => {
-    setIsSubmitting(true);
-
-    // 模拟提交过程
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      message.success('消息发送成功！我会尽快回复您。');
-      form.resetFields();
-    } catch (error) {
-      message.error('发送失败，请稍后重试。');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <motion.section

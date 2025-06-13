@@ -103,10 +103,8 @@ const ArticleManagementPage: React.FC = () => {
           total: 0,
           current: 1,
         }));
-        message.error(response.message || '获取文章列表失败');
       }
     } catch (error) {
-      message.error('获取文章列表失败');
       console.error('获取文章列表失败:', error);
       setArticles([]);
     } finally {
@@ -189,11 +187,8 @@ const ArticleManagementPage: React.FC = () => {
             message.success('文章删除成功');
             fetchArticles();
             fetchStatistics();
-          } else {
-            message.error(response.message || '删除失败');
           }
         } catch (error) {
-          message.error('删除失败');
           console.error('删除文章失败:', error);
         }
       },
@@ -210,11 +205,8 @@ const ArticleManagementPage: React.FC = () => {
         message.success('状态更新成功');
         fetchArticles();
         fetchStatistics();
-      } else {
-        message.error(response.message || '状态更新失败');
       }
     } catch (error) {
-      message.error('状态更新失败');
       console.error('状态更新失败:', error);
     }
   };
@@ -229,11 +221,8 @@ const ArticleManagementPage: React.FC = () => {
       if (response.code === 0) {
         message.success('访问权限更新成功');
         fetchArticles();
-      } else {
-        message.error(response.message || '访问权限更新失败');
       }
     } catch (error) {
-      message.error('访问权限更新失败');
       console.error('访问权限更新失败:', error);
     }
   };
@@ -260,7 +249,6 @@ const ArticleManagementPage: React.FC = () => {
           fetchArticles();
           fetchStatistics();
         } catch (error) {
-          message.error('批量删除失败');
           console.error('批量删除失败:', error);
         }
       },
@@ -283,7 +271,6 @@ const ArticleManagementPage: React.FC = () => {
       fetchArticles();
       fetchStatistics();
     } catch (error) {
-      message.error('批量状态更新失败');
       console.error('批量状态更新失败:', error);
     }
   };

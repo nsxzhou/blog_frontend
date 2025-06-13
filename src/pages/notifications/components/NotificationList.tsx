@@ -55,7 +55,7 @@ const NotificationList: FC<NotificationListProps> = ({
       message.success('已标记所有通知为已读');
       onRefresh?.();
     } catch (error) {
-      message.error('操作失败');
+      console.error('标记所有通知为已读失败:', error);
     } finally {
       setActionLoading(false);
     }
@@ -68,7 +68,7 @@ const NotificationList: FC<NotificationListProps> = ({
       message.success('删除成功');
       onRefresh?.();
     } catch (error) {
-      message.error('删除失败');
+      console.error('删除通知失败:', error);
     }
   };
 
@@ -99,8 +99,8 @@ const NotificationList: FC<NotificationListProps> = ({
       setSelectedIds([]);
       onRefresh?.();
     } catch (error) {
-      message.error('批量删除失败');
-    } finally {
+      console.error('批量删除失败:', error);
+    } finally { 
       setActionLoading(false);
     }
   };

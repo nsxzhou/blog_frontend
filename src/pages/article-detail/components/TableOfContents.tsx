@@ -188,7 +188,6 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
       message.success(newLikedState ? '点赞成功' : '已取消点赞');
     } catch (error) {
       console.error('点赞操作失败:', error);
-      message.error('操作失败，请稍后重试');
     } finally {
       setActionLoading((prev) => ({ ...prev, like: false }));
     }
@@ -213,7 +212,6 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
       message.success(newBookmarkedState ? '收藏成功' : '已取消收藏');
     } catch (error) {
       console.error('收藏操作失败:', error);
-      message.error('操作失败，请稍后重试');
     } finally {
       setActionLoading((prev) => ({ ...prev, bookmark: false }));
     }

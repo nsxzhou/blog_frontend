@@ -148,11 +148,8 @@ const UserManagementPage: React.FC = () => {
         message.success('用户状态更新成功');
         fetchUsers();
         fetchStatistics();
-      } else {
-        message.error(response.message || '状态更新失败');
-      }
-    } catch (error) {
-      message.error('状态更新失败');
+      } 
+    } catch (error) { 
       console.error('状态更新失败:', error);
     }
   };
@@ -164,11 +161,8 @@ const UserManagementPage: React.FC = () => {
       });
       if (response.code === 0) {
         message.success('密码重置成功');
-      } else {
-        message.error(response.message || '密码重置失败');
-      }
-    } catch (error) {
-      message.error('密码重置失败');
+      } 
+    } catch (error) { 
       console.error('密码重置失败:', error);
     }
   };
@@ -203,11 +197,8 @@ const UserManagementPage: React.FC = () => {
             setBatchMode(false);
             fetchUsers();
             fetchStatistics();
-          } else {
-            message.error(response.message || `批量${actionMap[action]}失败`);
-          }
-        } catch (error) {
-          message.error(`批量${actionMap[action]}失败`);
+          } 
+        } catch (error) { 
           console.error(`批量${actionMap[action]}失败:`, error);
         }
       },

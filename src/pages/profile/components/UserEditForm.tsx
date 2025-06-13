@@ -139,8 +139,8 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
       });
       message.success('信息更新成功');
     } catch (error) {
-      message.error('更新失败，请重试');
-    }
+      console.error('更新失败:', error);
+    } 
   }, [onSave, selectedAvatar]);
 
   // 获取头像图片列表
@@ -157,8 +157,8 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
         setTotalImages(response.data.total);
         setCurrentPage(page);
       }
-    } catch (error) {
-      message.error('获取图片列表失败');
+    } catch (error) { 
+      console.error('获取图片列表失败:', error);
     } finally {
       setAvatarLoading(false);
     }

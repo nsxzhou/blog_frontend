@@ -326,7 +326,7 @@ export const useCommentsManage = (): UseCommentsManageState => {
         message.success('评论审核通过');
         refreshComments();
       } catch (error) {
-        message.error('操作失败');
+        console.error('评论审核失败:', error);
       }
     },
     [refreshComments],
@@ -339,7 +339,7 @@ export const useCommentsManage = (): UseCommentsManageState => {
         message.success('评论已拒绝');
         refreshComments();
       } catch (error) {
-        message.error('操作失败');
+        console.error('评论拒绝失败:', error);
       }
     },
     [refreshComments],
@@ -359,7 +359,7 @@ export const useCommentsManage = (): UseCommentsManageState => {
             message.success('评论删除成功');
             refreshComments();
           } catch (error) {
-            message.error('删除失败');
+            console.error('删除评论失败:', error);
           }
         },
       });
@@ -399,7 +399,7 @@ export const useCommentsManage = (): UseCommentsManageState => {
           refreshComments();
         }
       } catch (error) {
-        message.error('批量操作失败');
+        console.error('批量操作失败:', error);
       }
     },
     [selectedCommentIds, refreshComments],

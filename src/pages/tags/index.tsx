@@ -77,10 +77,8 @@ const TagManagementPage: React.FC = () => {
           total: 0,
           current: 1,
         }));
-        message.error(response.message || '获取标签列表失败');
       }
     } catch (error) {
-      message.error('获取标签列表失败');
       console.error('获取标签列表失败:', error);
       // 重置状态
       setTags([]);
@@ -153,11 +151,8 @@ const TagManagementPage: React.FC = () => {
           if (response.code === 0) {
             message.success('标签删除成功');
             fetchTags();
-          } else {
-            message.error(response.message || '删除标签失败');
           }
         } catch (error) {
-          message.error('删除标签失败');
           console.error('删除标签失败:', error);
         }
       },
@@ -187,8 +182,6 @@ const TagManagementPage: React.FC = () => {
     if (response.code === 0) {
       message.success('同步文章数量成功');
       fetchTags();
-    } else {
-      message.error(response.message || '同步文章数量失败');
     }
   };
   return (

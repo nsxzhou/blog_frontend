@@ -70,7 +70,6 @@ const WritePage: React.FC = () => {
       }
     } catch (error) {
       console.error('加载分类失败:', error);
-      message.error('加载分类失败');
     } finally {
       setCategoriesLoading(false);
     }
@@ -86,7 +85,6 @@ const WritePage: React.FC = () => {
       }
     } catch (error) {
       console.error('加载标签失败:', error);
-      message.error('加载标签失败');
     } finally {
       setTagsLoading(false);
     }
@@ -110,12 +108,10 @@ const WritePage: React.FC = () => {
         });
         setCurrentArticleId(article.id);
       } else {
-        message.error('加载文章失败');
         history.back();
       }
     } catch (error) {
       console.error('加载文章失败:', error);
-      message.error('加载文章失败');
       history.back();
     } finally {
       setLoading(false);
@@ -234,9 +230,6 @@ const WritePage: React.FC = () => {
         }
       } catch (error) {
         console.error('保存草稿失败:', error);
-        if (!isAutoSave) {
-          message.error('保存失败，请重试');
-        }
       } finally {
         setSaving(false);
       }
@@ -310,7 +303,6 @@ const WritePage: React.FC = () => {
       history.push('/my-articles');
     } catch (error) {
       console.error('发布文章失败:', error);
-      message.error('发布失败，请重试');
     } finally {
       setLoading(false);
     }
