@@ -7,7 +7,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { connect, useModel, useNavigate } from '@umijs/max';
+import { connect, useNavigate } from '@umijs/max';
 import { Badge, Empty, List, Popover, Spin, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
@@ -19,23 +19,24 @@ interface NotificationBellProps {
   className?: string;
   notification?: any;
   dispatch?: any;
+  currentUser?: any;
 }
 
 const NotificationBell: FC<NotificationBellProps> = ({
   className = '',
   notification,
   dispatch,
+  currentUser,
 }) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const buttonContainerRef = useRef<HTMLDivElement>(null);
-  const { initialState } = useModel('@@initialState');
-  const currentUser = initialState?.currentUser;
 
   // 从props中获取状态
   const state = notification;
   const isConnected = notification.isConnected;
   const connectionStatus = notification.connectionStatus;
+
 
   // 处理通知点击
   const handleNotificationClick = useCallback(
@@ -315,6 +316,9 @@ const NotificationBell: FC<NotificationBellProps> = ({
   );
 };
 
-export default connect(({ notification }: { notification: any }) => ({
-  notification,
-}))(NotificationBell);
+export default connect(
+  ({ notification, user }: { notification: any; user: any }) => ({
+    notification,
+    currentUser: user.currentUser,
+  }),
+)(NotificationBell);

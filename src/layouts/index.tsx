@@ -1,18 +1,18 @@
 import ProtectedRoute from '@/components/ProtectedRoute';
-import useUserModel from '@/models/user';
 import { getRouteAccess } from '@/utils/routeAccess';
-import { Outlet, useLocation } from '@umijs/max';
+import { connect, Outlet, useLocation } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import StagewiseWrapper from '../components/StagewiseWrapper';
 import { Footer, Header } from './components';
 
-const GlobalLayout: React.FC = () => {
+interface GlobalLayoutProps {
+  currentUser: any;
+}
+
+const GlobalLayout: React.FC<GlobalLayoutProps> = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-
-  // 获取当前用户信息
-  const { currentUser } = useUserModel();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -31,7 +31,6 @@ const GlobalLayout: React.FC = () => {
       {/* Stagewise Toolbar (development only) */}
       <StagewiseWrapper />
 
-      {/* 简化的背景装饰 */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
           className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/40 rounded-full blur-3xl"

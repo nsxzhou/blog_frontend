@@ -1,12 +1,7 @@
 // src/models/notification.ts
 import type { NotificationItem } from '@/api/notification';
-import {
-  GetNotifications,
-  GetUnreadCount,
-  MarkAllNotificationsAsRead,
-  MarkNotificationAsRead,
-} from '@/api/notification';
-import type { WebSocketMessage } from '@/models/websocket';
+import { GetNotifications, GetUnreadCount } from '@/api/notification';
+import type { WebSocketMessage, WebSocketStatus } from '@/models/websocket';
 import { Effect, Reducer, Subscription } from '@umijs/max';
 import { message } from 'antd';
 
@@ -36,6 +31,7 @@ export interface NotificationModelType {
     reconnectWebSocket: Effect;
     requestNotificationPermission: Effect;
     showBrowserNotification: Effect;
+    handleWebSocketStatus: Effect;
   };
   reducers: {
     setNotifications: Reducer<NotificationState>;
@@ -124,62 +120,6 @@ export default {
       }
     },
 
-    *markAsRead(
-      { payload }: { payload: any },
-      { call, put }: { call: any; put: any },
-    ): Generator<any, void, any> {
-      const id = payload;
-      try {
-        const response = yield call(MarkNotificationAsRead, id);
-        if (response.code === 0) {
-          yield put({
-            type: 'updateNotificationReadStatus',
-            payload: id,
-          });
-
-          // 广播给其他标签页
-          const event = {
-            type: 'NOTIFICATION_READ',
-            data: { id },
-            timestamp: Date.now(),
-            tabId: Math.random().toString(36).substr(2, 9),
-          };
-          localStorage.setItem('notification_broadcast', JSON.stringify(event));
-          localStorage.removeItem('notification_broadcast');
-        }
-      } catch (error) {
-        console.error('标记已读失败:', error);
-        message.error('标记已读失败');
-      }
-    },
-
-    *markAllAsRead(
-      _: any,
-      { call, put }: { call: any; put: any },
-    ): Generator<any, void, any> {
-      try {
-        const response = yield call(MarkAllNotificationsAsRead);
-        if (response.code === 0) {
-          yield put({ type: 'markAllNotificationsRead' });
-
-          // 广播给其他标签页
-          const event = {
-            type: 'ALL_NOTIFICATIONS_READ',
-            data: {},
-            timestamp: Date.now(),
-            tabId: Math.random().toString(36).substr(2, 9),
-          };
-          localStorage.setItem('notification_broadcast', JSON.stringify(event));
-          localStorage.removeItem('notification_broadcast');
-
-          message.success('已标记所有通知为已读');
-        }
-      } catch (error) {
-        console.error('标记所有已读失败:', error);
-        message.error('标记所有已读失败');
-      }
-    },
-
     *refreshNotifications(
       _: any,
       { put, select }: { put: any; select: any },
@@ -215,16 +155,6 @@ export default {
               icon: wsMessage.data.sender?.avatar,
             },
           });
-
-          // 广播给其他标签页
-          const event = {
-            type: 'NEW_NOTIFICATION',
-            data: wsMessage.data,
-            timestamp: Date.now(),
-            tabId: Math.random().toString(36).substr(2, 9),
-          };
-          localStorage.setItem('notification_broadcast', JSON.stringify(event));
-          localStorage.removeItem('notification_broadcast');
           break;
 
         case 'notification_read':
@@ -243,35 +173,6 @@ export default {
         default:
           console.log('未知消息类型:', wsMessage.type);
       }
-    },
-
-    *connectWebSocket(
-      _: any,
-      { put }: { put: any },
-    ): Generator<any, void, any> {
-      // 与websocket模型集成
-      yield put({
-        type: 'websocket/connect',
-        payload: {
-          url: `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${
-            window.location.host
-          }/api/ws/connect`,
-        },
-      });
-    },
-
-    *disconnectWebSocket(
-      _: any,
-      { put }: { put: any },
-    ): Generator<any, void, any> {
-      yield put({ type: 'websocket/disconnect' });
-    },
-
-    *reconnectWebSocket(
-      _: any,
-      { put }: { put: any },
-    ): Generator<any, void, any> {
-      yield put({ type: 'websocket/reconnect' });
     },
 
     *requestNotificationPermission(
@@ -300,10 +201,10 @@ export default {
       }
     },
 
-      *showBrowserNotification(
+    *showBrowserNotification(
       { payload }: { payload: any },
       { call }: { call: any },
-      ): Generator<any, void, any> {
+    ): Generator<any, void, any> {
       const { title, body, icon } = payload;
 
       if (Notification.permission === 'granted') {
@@ -324,6 +225,23 @@ export default {
           notification.close();
         }, 5000);
       }
+    },
+
+    *handleWebSocketStatus(
+      { payload }: { payload: WebSocketStatus },
+      { put }: { put: any },
+    ): Generator<any, void, any> {
+      // 更新连接状态
+      const isConnected = payload.status === 'connected';
+      const statusText = payload.message || '未知状态';
+
+      yield put({
+        type: 'updateConnectionStatus',
+        payload: {
+          isConnected,
+          status: statusText,
+        },
+      });
     },
   },
 
@@ -360,7 +278,10 @@ export default {
       };
     },
 
-    addNewNotification(state: NotificationState, { payload }: { payload: any }) {
+    addNewNotification(
+      state: NotificationState,
+      { payload }: { payload: any },
+    ) {
       return {
         ...state,
         notifications: [payload, ...state.notifications],
@@ -368,7 +289,10 @@ export default {
       };
     },
 
-    updateNotificationReadStatus(state: NotificationState, { payload }: { payload: any }) {
+    updateNotificationReadStatus(
+      state: NotificationState,
+      { payload }: { payload: any },
+    ) {
       const id = payload;
 
       return {
@@ -391,59 +315,15 @@ export default {
       };
     },
 
-    updateConnectionStatus(state: NotificationState, { payload }: { payload: any }) {
+    updateConnectionStatus(
+      state: NotificationState,
+      { payload }: { payload: any },
+    ) {
       return {
         ...state,
         isConnected: payload.isConnected,
         connectionStatus: payload.status,
       };
-    },
-  },
-
-  subscriptions: {
-    setup({ dispatch, history }: { dispatch: any; history: any }): void {
-      // 监听路由变化
-      history.listen(({ pathname }: { pathname: string }) => {
-        // 当用户已登录时进行初始化
-        const currentUser = localStorage.getItem('currentUser');
-        if (currentUser) {
-          dispatch({ type: 'fetchNotifications' });
-          dispatch({ type: 'fetchUnreadCount' });
-          dispatch({ type: 'requestNotificationPermission' });
-          dispatch({ type: 'connectWebSocket' });
-        }
-      });
-
-      // 跨标签页通信
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'notification_broadcast' && e.newValue) {
-          try {
-            const event = JSON.parse(e.newValue);
-
-            switch (event.type) {
-              case 'NEW_NOTIFICATION':
-                dispatch({
-                  type: 'addNewNotification',
-                  payload: event.data,
-                });
-                break;
-
-              case 'NOTIFICATION_READ':
-                dispatch({
-                  type: 'updateNotificationReadStatus',
-                  payload: event.data.id,
-                });
-                break;
-
-              case 'ALL_NOTIFICATIONS_READ':
-                dispatch({ type: 'markAllNotificationsRead' });
-                break;
-            }
-          } catch (error) {
-            console.error('解析跨标签页消息失败:', error);
-          }
-        }
-      });
     },
   },
 };

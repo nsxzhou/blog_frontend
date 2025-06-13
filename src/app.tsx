@@ -30,6 +30,7 @@ export async function getInitialState() {
     });
 
     if (response.code === 0 && response.data?.user) {
+      // 用户信息获取成功，WebSocket连接将在用户登录后或模型初始化时自动建立
       return {
         ...baseState,
         currentUser: response.data.user,

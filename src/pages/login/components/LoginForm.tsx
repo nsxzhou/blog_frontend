@@ -1,7 +1,6 @@
 import type { LoginReq } from '@/api/user';
 import { Button } from '@/components/ui';
 import { fadeInUp, hoverScale, hoverScaleSmall } from '@/constants/animations';
-import useUserModel from '@/models/user';
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -9,21 +8,21 @@ import {
   QqOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { message } from 'antd';
+import { connect } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
 interface LoginFormProps {
   onSuccess: () => void;
   onSwitchToRegister: () => void;
+  dispatch: any;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
   onSuccess,
   onSwitchToRegister,
+  dispatch,
 }) => {
-  const { login, qqLogin } = useUserModel();
-
   const [formData, setFormData] = useState<LoginReq>({
     username: '',
     password: '',
@@ -59,7 +58,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
     setLoading(true);
     try {
-      const result = await login(formData);
+      const result = await dispatch({
+        type: 'user/login',
+        payload: formData,
+      });
 
       if (result?.success) {
         // 清空表单数据
@@ -83,7 +85,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const handleQQLogin = async () => {
     setQqLoading(true);
     try {
-      await qqLogin();
+      await dispatch({
+        type: 'user/qqLogin',
+      });
     } catch (error) {
       console.error('QQ登录异常:', error);
     } finally {
@@ -260,4 +264,4 @@ const LoginForm: React.FC<LoginFormProps> = ({
   );
 };
 
-export default LoginForm;
+export default connect()(LoginForm);

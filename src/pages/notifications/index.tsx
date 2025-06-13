@@ -1,10 +1,6 @@
 import type { GetNotificationsReq } from '@/api/notification';
 import { fadeInUp } from '@/constants/animations';
-import {
-  BellOutlined,
-  CheckCircleOutlined,
-  WifiOutlined,
-} from '@ant-design/icons';
+import { BellOutlined, WifiOutlined } from '@ant-design/icons';
 import { connect, Helmet } from '@umijs/max';
 import { Badge, Pagination, Select, Tabs, Typography } from 'antd';
 import { motion } from 'framer-motion';
@@ -151,7 +147,7 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
           transition={{ delay: 0.05 }}
           className="mb-6"
         >
-          {/* <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
             <div className="flex items-center gap-3">
               <WifiOutlined className="text-blue-500" />
               <div className="flex items-center gap-2">
@@ -160,10 +156,12 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
                     notification.isConnected ? 'bg-green-500' : 'bg-red-500'
                   }`}
                 />
-                <Text type="secondary">实时连接状态: {notification.connectionStatus}</Text>
+                <Text type="secondary">
+                  实时连接状态: {notification.connectionStatus}
+                </Text>
               </div>
             </div>
-          </div> */}
+          </div>
         </motion.div>
 
         {/* 筛选区域 */}
@@ -248,7 +246,7 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
           transition={{ delay: 0.4 }}
           className="mt-8 text-center"
         >
-          <div className="inline-flex items-center gap-4 px-4 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">
+          {/* <div className="inline-flex items-center gap-4 px-4 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">
             <span className="flex items-center gap-1">
               <BellOutlined />
               总通知: {notification.total}
@@ -261,7 +259,7 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
               <WifiOutlined />
               连接: {notification.isConnected ? '已连接' : '未连接'}
             </span>
-          </div>
+          </div> */}
         </motion.div>
       </motion.div>
     </>

@@ -1,11 +1,13 @@
 import { fadeInUp } from '@/constants/animations';
-import useUserModel from '@/models/user';
-import { history } from '@umijs/max';
+import { connect, history } from '@umijs/max';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
-const QQCallback: React.FC = () => {
-  const { handleQQCallback } = useUserModel();
+interface QQCallbackProps {
+  dispatch: any;
+}
+
+const QQCallback: React.FC<QQCallbackProps> = ({ dispatch }) => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
     'loading',
   );
@@ -23,9 +25,27 @@ const QQCallback: React.FC = () => {
         // 标记为已处理
         hasProcessed.current = true;
 
-        const result = await handleQQCallback();
+        // 从URL中获取code参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
 
-        if (result.success) {
+        if (!code) {
+          setStatus('error');
+          setMessage('QQ登录授权码缺失');
+
+          // 3秒后跳转到登录页
+          setTimeout(() => {
+            history.push('/login');
+          }, 1000);
+          return;
+        }
+
+        const result = await dispatch({
+          type: 'user/handleQQCallback',
+          payload: { code },
+        });
+
+        if (result && result.success) {
           setStatus('success');
           setMessage('QQ登录成功！正在跳转...');
 
@@ -34,7 +54,7 @@ const QQCallback: React.FC = () => {
           }, 500);
         } else {
           setStatus('error');
-          setMessage(result.message || 'QQ登录失败');
+          setMessage(result?.message || 'QQ登录失败');
 
           // 3秒后跳转到登录页
           setTimeout(() => {
@@ -54,7 +74,7 @@ const QQCallback: React.FC = () => {
     };
 
     processCallback();
-  }, []); // 移除依赖数组，只在组件挂载时执行一次
+  }, [dispatch]); // 添加dispatch作为依赖
 
   const getStatusIcon = () => {
     switch (status) {
@@ -160,4 +180,4 @@ const QQCallback: React.FC = () => {
   );
 };
 
-export default QQCallback;
+export default connect()(QQCallback);

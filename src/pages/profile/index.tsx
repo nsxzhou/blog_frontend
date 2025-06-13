@@ -28,48 +28,6 @@ const mockStats = {
   following: 89,
 };
 
-// 模拟活动数据
-const mockActivities = [
-  {
-    id: '1',
-    type: 'article' as const,
-    title: '发布了新文章',
-    description: 'React 18 并发特性深度解析',
-    time: '2024-01-15T10:30:00Z',
-    target: 'React 18 并发特性深度解析',
-  },
-  {
-    id: '2',
-    type: 'like' as const,
-    title: '收到了点赞',
-    description: '您的文章《TypeScript 高级类型技巧总结》收到了新的点赞',
-    time: '2024-01-15T09:15:00Z',
-    target: 'TypeScript 高级类型技巧总结',
-  },
-  {
-    id: '3',
-    type: 'comment' as const,
-    title: '收到了评论',
-    description: '用户在您的文章下发表了评论',
-    time: '2024-01-14T16:20:00Z',
-    target: '微前端架构设计与实践',
-  },
-  {
-    id: '4',
-    type: 'follow' as const,
-    title: '新增粉丝',
-    description: '用户 张三 关注了您',
-    time: '2024-01-14T14:45:00Z',
-  },
-  {
-    id: '5',
-    type: 'edit' as const,
-    title: '更新了文章',
-    description: '编辑了文章《Node.js 性能优化实战》',
-    time: '2024-01-13T11:30:00Z',
-    target: 'Node.js 性能优化实战',
-  },
-];
 
 const ProfilePage: React.FC = () => {
   const { initialState } = useModel('@@initialState');

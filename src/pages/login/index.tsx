@@ -16,7 +16,7 @@ const AuthPage: React.FC = () => {
       navigate(decodeURIComponent(redirectPath));
     } else {
       navigate('/');
-    }
+    } 
   };
 
   const handleSwitchMode = () => {

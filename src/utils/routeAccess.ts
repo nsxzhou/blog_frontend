@@ -2,6 +2,9 @@
 export const routeAccessMap: Record<string, string> = {
   '/write': 'isAdmin',
   '/profile': 'canAccess',
+  '/notifications': 'canAccess',
+  '/favorites': 'canAccess',
+  '/reading-history': 'canAccess',
   '/my-articles': 'isAdmin',
   '/categories': 'isAdmin',
   '/tags': 'isAdmin',

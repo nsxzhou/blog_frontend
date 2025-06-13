@@ -11,7 +11,6 @@ import {
   navItemVariants,
 } from '@/constants/animations';
 import { useSearch } from '@/hooks/useSearch';
-import useUserModel from '@/models/user';
 import {
   CloseOutlined,
   EditOutlined,
@@ -22,7 +21,7 @@ import {
   UserOutlined,
   WechatOutlined,
 } from '@ant-design/icons';
-import { Link, useLocation, useNavigate } from '@umijs/max';
+import { connect, Link, useLocation, useNavigate } from '@umijs/max';
 import { Input } from 'antd';
 import {
   AnimatePresence,
@@ -34,7 +33,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import UserSidebar from '../../components/ui/UserSidebar';
 
 interface HeaderProps {
-  onMenuToggle: () => void;
+  onMenuToggle?: () => void;
+  currentUser: any;
+  dispatch: any;
 }
 
 const navigationItems = [
@@ -45,7 +46,7 @@ const navigationItems = [
   { key: '/write', label: '写作', icon: <EditOutlined /> },
 ];
 
-const Header: React.FC<HeaderProps> = () => {
+const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -55,9 +56,6 @@ const Header: React.FC<HeaderProps> = () => {
   const location = useLocation();
   const { scrollY } = useScroll();
   const navigate = useNavigate();
-
-  // 获取当前用户信息和logout方法
-  const { currentUser, logout } = useUserModel();
 
   // 搜索相关
   const { keyword, results, loading, handleSearch, clearSearch } = useSearch();
@@ -115,7 +113,7 @@ const Header: React.FC<HeaderProps> = () => {
   // 处理登出
   const handleLogout = async () => {
     try {
-      await logout();
+      dispatch({ type: 'user/logout' });
       // 跳转到首页
       navigate('/');
     } catch (error) {
@@ -152,11 +150,6 @@ const Header: React.FC<HeaderProps> = () => {
     handleCloseSearch();
   };
 
-  // 处理通知点击
-  const handleNotificationClick = () => {
-    navigate('/notifications');
-  };
-
   return (
     <motion.header
       variants={headerVariants}
@@ -191,10 +184,11 @@ const Header: React.FC<HeaderProps> = () => {
                 initial="idle"
                 whileHover="hover"
                 whileTap="tap"
-                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${location.pathname === item.key
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                  }`}
+                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${
+                  location.pathname === item.key
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                }`}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-500">{item.icon}</span>
@@ -331,4 +325,6 @@ const Header: React.FC<HeaderProps> = () => {
   );
 };
 
-export default Header;
+export default connect(({ user }: { user: any }) => ({
+  currentUser: user.currentUser,
+}))(Header);

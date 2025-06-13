@@ -1,6 +1,5 @@
 import type { RegisterReq } from '@/api/user';
 import { Button } from '@/components/ui';
-import useUserModel from '@/models/user';
 import { validation } from '@/utils/validation';
 import {
   EyeInvisibleOutlined,
@@ -10,20 +9,21 @@ import {
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import { connect } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
 interface RegisterFormProps {
   onSuccess: () => void;
   onSwitchToLogin: () => void;
+  dispatch: any;
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({
   onSuccess,
   onSwitchToLogin,
+  dispatch,
 }) => {
-  const { register } = useUserModel();
-
   const [formData, setFormData] = useState<RegisterReq>({
     username: '',
     nickname: '',
@@ -84,7 +84,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     if (!validateForm()) return;
 
     try {
-      const result = await register(formData);
+      const result = await dispatch({
+        type: 'user/register',
+        payload: formData,
+      });
 
       if (result?.success) {
         onSuccess();
@@ -362,4 +365,4 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   );
 };
 
-export default RegisterForm;
+export default connect()(RegisterForm);

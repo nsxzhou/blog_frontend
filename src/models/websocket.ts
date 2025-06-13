@@ -47,6 +47,50 @@ const initialState: WebSocketState = {
   statusCallbacks: {},
 };
 
+// 提取出来的初始化连接函数
+const initConnectionFunc = (
+  state: WebSocketState,
+  url: string,
+): WebSocketState => {
+  if (state.connections[url]) {
+    return state;
+  }
+
+  // 创建新的状态对象，确保类型正确
+  const newState: WebSocketState = {
+    ...state,
+    connections: {
+      ...state.connections,
+    },
+    messageCallbacks: {
+      ...state.messageCallbacks,
+    },
+    statusCallbacks: {
+      ...state.statusCallbacks,
+    },
+  };
+
+  // 添加新的连接
+  newState.connections[url] = {
+    socket: null,
+    status: {
+      status: 'disconnected',
+      message: '未连接',
+    },
+    reconnectAttempts: 0,
+    isManualClose: false,
+    connected: false,
+  };
+
+  // 添加回调集合
+  newState.messageCallbacks[url] = new Set<
+    (message: WebSocketMessage) => void
+  >();
+  newState.statusCallbacks[url] = new Set<(status: WebSocketStatus) => void>();
+
+  return newState;
+};
+
 export default {
   namespace: 'websocket',
 
@@ -58,19 +102,48 @@ export default {
       { put, select }: any,
     ): Generator<any, void, any> {
       const { url, options } = payload;
-      const { maxReconnectAttempts = 5, reconnectInterval = 3000 } = options;
+      const { maxReconnectAttempts = 5, reconnectInterval = 3000 } =
+        options || {};
+
+      console.log(
+        '%c[WebSocket] connect被调用',
+        'color: #4CAF50; font-weight: bold;',
+        { url, options },
+      );
 
       // 检查连接是否存在
       const connection = yield select(
         (state: any) => state.websocket.connections[url],
       );
-      if (connection?.socket?.readyState === WebSocket.OPEN) {
-        return;
+
+      // 增强连接状态检查，避免重复连接
+      if (connection) {
+        // 如果已经连接中或正在连接中，则跳过
+        if (connection.socket?.readyState === WebSocket.OPEN) {
+          console.log('%c[WebSocket] 已连接，跳过', 'color: #4CAF50');
+          return;
+        }
+
+        // 正在连接中，跳过
+        if (connection.socket?.readyState === WebSocket.CONNECTING) {
+          console.log('%c[WebSocket] 正在连接中，跳过', 'color: #4CAF50');
+          return;
+        }
+
+        // 如果在重连过程中，跳过
+        if (connection.status.status === 'reconnecting') {
+          console.log('%c[WebSocket] 正在重连中，跳过', 'color: #FF9800');
+          return;
+        }
       }
 
       try {
         const token = getTokenFromStorage();
         if (!token) {
+          console.error(
+            '%c[WebSocket] 连接失败：未找到认证token',
+            'color: #F44336; font-weight: bold',
+          );
           yield put({
             type: 'updateStatus',
             payload: {
@@ -84,6 +157,11 @@ export default {
           });
           return;
         }
+
+        console.log(
+          '%c[WebSocket] 开始连接...',
+          'color: #2196F3; font-weight: bold',
+        );
 
         // 更新状态为连接中
         yield put({
@@ -106,22 +184,47 @@ export default {
 
         // 创建WebSocket连接
         const wsUrl = `${url}?token=${encodeURIComponent(token)}`;
-        const socket = new WebSocket(wsUrl);
+        console.log('%c[WebSocket] 创建WebSocket实例', 'color: #2196F3');
 
-        // 更新socket实例
-        yield put({
-          type: 'updateConnection',
-          payload: { url, socket },
-        });
+        try {
+          const socket = new WebSocket(wsUrl);
+          console.log(wsUrl);
 
-        // 设置事件处理
-        setupSocketEvents(socket, url, put, {
-          maxReconnectAttempts,
-          reconnectInterval,
-        });
+          console.log('%c[WebSocket] WebSocket实例创建成功', 'color: #4CAF50');
+
+          // 更新socket实例
+          yield put({
+            type: 'updateConnection',
+            payload: { url, socket },
+          });
+
+          // 设置事件处理
+          setupSocketEvents(socket, url, put, {
+            maxReconnectAttempts,
+            reconnectInterval,
+          });
+
+          console.log(
+            '%c[WebSocket] 连接已初始化，等待连接结果...',
+            'color: #2196F3',
+          );
+        } catch (wsError) {
+          console.error(
+            '%c[WebSocket] 创建WebSocket实例失败:',
+            'color: #F44336; font-weight: bold',
+            wsError,
+          );
+          throw wsError;
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : '连接失败';
+        console.error(
+          '%c[WebSocket] 连接错误:',
+          'color: #F44336; font-weight: bold',
+          errorMessage,
+          error,
+        );
         yield put({
           type: 'updateStatus',
           payload: {
@@ -146,10 +249,25 @@ export default {
         (state: any) => state.websocket.connections[url],
       );
       if (connection?.socket) {
+        console.log('%c[WebSocket] 手动断开连接', 'color: #FF9800');
+
         // 标记为手动关闭
         yield put({
           type: 'updateConnection',
           payload: { url, isManualClose: true },
+        });
+
+        // 更新状态为断开连接中
+        yield put({
+          type: 'updateStatus',
+          payload: {
+            url,
+            status: {
+              status: 'disconnected',
+              message: '正在断开连接...',
+              timestamp: new Date().toLocaleTimeString(),
+            },
+          },
         });
 
         // 关闭连接
@@ -218,32 +336,7 @@ export default {
     // 初始化连接
     initConnection(state: WebSocketState, { payload }: { payload: any }) {
       const { url } = payload;
-
-      if (state.connections[url]) {
-        return state;
-      }
-
-      return {
-        ...state,
-        connections: {
-          ...state.connections,
-          [url]: {
-            socket: null,
-            status: { status: 'disconnected', message: '未连接' },
-            reconnectAttempts: 0,
-            isManualClose: false,
-            connected: false,
-          },
-        },
-        messageCallbacks: {
-          ...state.messageCallbacks,
-          [url]: new Set(),
-        },
-        statusCallbacks: {
-          ...state.statusCallbacks,
-          [url]: new Set(),
-        },
-      };
+      return initConnectionFunc(state, url);
     },
 
     // 更新连接
@@ -252,7 +345,7 @@ export default {
 
       // 如果连接不存在，先初始化
       if (!state.connections[url]) {
-        return this.initConnection(state, { payload: { url } });
+        return initConnectionFunc(state, url);
       }
 
       return {
@@ -273,7 +366,7 @@ export default {
 
       // 如果连接不存在，先初始化
       if (!state.connections[url]) {
-        state = this.initConnection(state, { payload: { url } });
+        state = initConnectionFunc(state, url);
       }
 
       // 设置连接状态
@@ -302,91 +395,6 @@ export default {
         },
       };
     },
-
-    // 添加消息回调
-    addMessageCallback(state: WebSocketState, { payload }: { payload: any }) {
-      const { url, callback } = payload;
-
-      // 如果连接不存在，先初始化
-      if (!state.messageCallbacks[url]) {
-        state = this.initConnection(state, { payload: { url } });
-      }
-
-      const callbacks = new Set(state.messageCallbacks[url]);
-      callbacks.add(callback);
-
-      return {
-        ...state,
-        messageCallbacks: {
-          ...state.messageCallbacks,
-          [url]: callbacks,
-        },
-      };
-    },
-
-    // 移除消息回调
-    removeMessageCallback(
-      state: WebSocketState,
-      { payload }: { payload: any },
-    ) {
-      const { url, callback } = payload;
-
-      if (!state.messageCallbacks[url]) {
-        return state;
-      }
-
-      const callbacks = new Set(state.messageCallbacks[url]);
-      callbacks.delete(callback);
-
-      return {
-        ...state,
-        messageCallbacks: {
-          ...state.messageCallbacks,
-          [url]: callbacks,
-        },
-      };
-    },
-
-    // 添加状态回调
-    addStatusCallback(state: WebSocketState, { payload }: { payload: any }) {
-      const { url, callback } = payload;
-
-      // 如果连接不存在，先初始化
-      if (!state.statusCallbacks[url]) {
-        state = this.initConnection(state, { payload: { url } });
-      }
-
-      const callbacks = new Set(state.statusCallbacks[url]);
-      callbacks.add(callback);
-
-      return {
-        ...state,
-        statusCallbacks: {
-          ...state.statusCallbacks,
-          [url]: callbacks,
-        },
-      };
-    },
-
-    // 移除状态回调
-    removeStatusCallback(state: WebSocketState, { payload }: { payload: any }) {
-      const { url, callback } = payload;
-
-      if (!state.statusCallbacks[url]) {
-        return state;
-      }
-
-      const callbacks = new Set(state.statusCallbacks[url]);
-      callbacks.delete(callback);
-
-      return {
-        ...state,
-        statusCallbacks: {
-          ...state.statusCallbacks,
-          [url]: callbacks,
-        },
-      };
-    },
   },
 };
 
@@ -401,6 +409,11 @@ function setupSocketEvents(
 
   // 连接打开
   socket.onopen = () => {
+    console.log(
+      '%c[WebSocket] 连接成功!',
+      'color: #4CAF50; font-weight: bold;',
+      url,
+    );
     put({
       type: 'updateStatus',
       payload: {
@@ -423,14 +436,24 @@ function setupSocketEvents(
   socket.onmessage = (event) => {
     try {
       const message = JSON.parse(event.data);
+      console.log('%c[WebSocket] 收到消息:', 'color: #2196F3', message);
       put({ type: 'handleMessage', payload: { url, message } });
     } catch (error) {
-      console.error('解析WebSocket消息失败:', error);
+      console.error(
+        '%c[WebSocket] 解析消息失败:',
+        'color: #F44336',
+        error,
+        event.data,
+      );
     }
   };
 
   // 连接关闭
   socket.onclose = (event) => {
+    console.log('%c[WebSocket] 连接关闭:', 'color: #FF9800', {
+      code: event.code,
+      reason: event.reason,
+    });
     put({
       type: 'updateConnection',
       payload: { url, socket: null },
@@ -442,6 +465,7 @@ function setupSocketEvents(
         const connection = state.websocket.connections[url];
 
         if (connection?.isManualClose) {
+          console.log('%c[WebSocket] 手动关闭连接', 'color: #FF9800');
           put({
             type: 'updateStatus',
             payload: {
@@ -454,6 +478,7 @@ function setupSocketEvents(
             },
           });
         } else {
+          console.log('%c[WebSocket] 非手动关闭，准备重连', 'color: #FF9800');
           put({
             type: 'updateStatus',
             payload: {
@@ -466,12 +491,35 @@ function setupSocketEvents(
             },
           });
 
+          // 增加判断，避免在特定情况下不必要的重连
+          // 1000: 正常关闭
+          // 1001: 端点离开 (例如服务器关闭或离开页面)
+          // 1005: 无状态码收到
+          const isCleanClosure =
+            event.code === 1000 || event.code === 1001 || event.code === 1005;
+
+          // 如果是干净的关闭并且消息表明是被新连接替换，不重连
+          if (
+            isCleanClosure &&
+            event.reason?.includes('replaced by new connection')
+          ) {
+            console.log(
+              '%c[WebSocket] 连接被新连接替换，不进行重连',
+              'color: #FF9800; font-weight: bold;',
+            );
+            return;
+          }
+
           // 尝试重连
           if (
             connection &&
             connection.reconnectAttempts < maxReconnectAttempts
           ) {
             const newAttempts = connection.reconnectAttempts + 1;
+            console.log(
+              '%c[WebSocket] 开始第' + newAttempts + '次重连尝试',
+              'color: #FF9800; font-weight: bold;',
+            );
 
             put({
               type: 'updateStatus',
@@ -493,6 +541,10 @@ function setupSocketEvents(
             // 延迟重连
             const delay = reconnectInterval * Math.pow(2, newAttempts - 1);
             const cappedDelay = Math.min(delay, 30000); // 最大延迟30秒
+            console.log(
+              '%c[WebSocket] 将在' + cappedDelay + 'ms后尝试重连',
+              'color: #FF9800',
+            );
 
             setTimeout(() => {
               put({
@@ -504,6 +556,10 @@ function setupSocketEvents(
               });
             }, cappedDelay);
           } else {
+            console.log(
+              '%c[WebSocket] 达到最大重连次数，停止重连',
+              'color: #F44336; font-weight: bold;',
+            );
             put({
               type: 'updateStatus',
               payload: {
@@ -522,7 +578,12 @@ function setupSocketEvents(
   };
 
   // 连接错误
-  socket.onerror = () => {
+  socket.onerror = (event) => {
+    console.error(
+      '%c[WebSocket] 连接错误!',
+      'color: #F44336; font-weight: bold;',
+      event,
+    );
     put({
       type: 'updateStatus',
       payload: {
@@ -539,6 +600,7 @@ function setupSocketEvents(
   // 连接超时
   setTimeout(() => {
     if (socket.readyState === WebSocket.CONNECTING) {
+      console.log('%c[WebSocket] 连接超时，关闭连接', 'color: #F44336');
       socket.close();
       put({
         type: 'updateStatus',
