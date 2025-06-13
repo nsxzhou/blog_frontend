@@ -7,8 +7,9 @@ import {
   type UserInfo,
 } from '@/api/user';
 import { containerVariants, itemVariants } from '@/constants';
+import { UserModelState } from '@/models/user';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { useModel } from '@umijs/max';
+import { connect } from '@umijs/max';
 import { message, Spin, Tabs } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
@@ -18,20 +19,8 @@ import {
   UserInfoCard,
 } from './components/index';
 
-// 模拟统计数据
-const mockStats = {
-  articles: 23,
-  views: 15623,
-  likes: 892,
-  comments: 234,
-  followers: 156,
-  following: 89,
-};
-
-
-const ProfilePage: React.FC = () => {
-  const { initialState } = useModel('@@initialState');
-  const [user, setUser] = useState<UserInfo | null>(null);
+const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(user.currentUser);
   const [loading, setLoading] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -45,13 +34,13 @@ const ProfilePage: React.FC = () => {
         setLoading(true);
         const response = await GetUserInfo();
         if (response.code === 0 && response.data) {
-          setUser(response.data.user);
+          setUserInfo(response.data.user);
         }
       } catch (error) {
         message.error('获取用户信息失败');
         // 使用初始状态中的用户信息作为后备
-        if (initialState?.currentUser) {
-          setUser(initialState.currentUser);
+        if (user) {
+          setUserInfo(user.currentUser);
         }
       } finally {
         setLoading(false);
@@ -59,7 +48,7 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchUserInfo();
-  }, [initialState?.currentUser]);
+  }, [user]);
 
   // 更新用户信息
   const handleUpdateUser = async (data: UpdateUserInfoReq) => {
@@ -67,7 +56,7 @@ const ProfilePage: React.FC = () => {
       setUpdateLoading(true);
       const response = await UpdateUserInfo(data);
       if (response.code === 0 && response.data) {
-        setUser(response.data.user);
+        setUserInfo(response.data.user);
         setIsEditing(false);
         message.success('信息更新成功');
       }
@@ -108,13 +97,13 @@ const ProfilePage: React.FC = () => {
         <div className="space-y-6">
           {isEditing ? (
             <UserEditForm
-              user={user!}
+              user={userInfo!}
               onSave={handleUpdateUser}
               onCancel={() => setIsEditing(false)}
               loading={updateLoading}
             />
           ) : (
-            <UserInfoCard user={user!} onEdit={() => setIsEditing(true)} />
+            <UserInfoCard user={userInfo!} onEdit={() => setIsEditing(true)} />
           )}
         </div>
       ),
@@ -215,4 +204,6 @@ const ProfilePage: React.FC = () => {
   );
 };
 
-export default ProfilePage;
+export default connect(({ user }: { user: UserModelState }) => ({
+  user,
+}))(ProfilePage);

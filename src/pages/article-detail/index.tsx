@@ -4,8 +4,9 @@ import { GetCommentList } from '@/api/comment';
 import type { CommentItem as ApiComment } from '@/api/comment/type';
 import { CreateReadingHistory } from '@/api/reading-history';
 import { containerVariants, pageVariants } from '@/constants/animations';
+import { UserModelState } from '@/models/user';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { history, useParams, useRequest, useModel } from '@umijs/max';
+import { connect, history, useParams, useRequest } from '@umijs/max';
 import { Button, message, Result, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
@@ -17,9 +18,8 @@ import {
 } from './components';
 import type { Article, Comment } from './types';
 
-const ArticleDetailPage: React.FC = () => {
+const ArticleDetailPage: React.FC<{ user: UserModelState }> = ({ user }) => {
   const { id } = useParams<{ id: string }>();
-  const { initialState } = useModel('@@initialState');
   const [article, setArticle] = useState<Article | null>(null);
   //const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -118,7 +118,7 @@ const ArticleDetailPage: React.FC = () => {
       setArticle(convertedArticle);
 
       // 只有在用户登录时才记录阅读历史
-      if (initialState?.isLoggedIn) {
+      if (user.isLoggedIn) {
         CreateReadingHistory({ article_id: apiArticle.id })
           .then(() => {
             console.log('阅读历史记录成功');
@@ -129,7 +129,7 @@ const ArticleDetailPage: React.FC = () => {
           });
       }
     }
-  }, [articleResponse, initialState?.isLoggedIn]);
+  }, [articleResponse, user.isLoggedIn]);
 
   // 转换相关文章数据
   // useEffect(() => {
@@ -271,7 +271,7 @@ const ArticleDetailPage: React.FC = () => {
       />
 
       {/* 文章内容 */}
-      <ArticleContent content={article.content} onContentLoaded={() => { }} />
+      <ArticleContent content={article.content} onContentLoaded={() => {}} />
 
       {/* 相关文章 */}
       {/* <RelatedArticles
@@ -298,4 +298,6 @@ const ArticleDetailPage: React.FC = () => {
   );
 };
 
-export default ArticleDetailPage;
+export default connect(({ user }: { user: UserModelState }) => ({
+  user,
+}))(ArticleDetailPage);

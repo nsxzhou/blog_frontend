@@ -7,7 +7,6 @@ export {
   DropdownMenuSeparator,
 } from './DropdownMenu';
 export { default as MermaidChart } from './MermaidChart';
-export { default as NotificationBell } from './NotificationBell';
 export { default as PageContainer } from './PageContainer';
 export { default as QRCodeModal } from './QRCodeModal';
 export { default as SearchResults } from './SearchResults';

@@ -1,19 +1,19 @@
 import { fadeInUp } from '@/constants/animations';
-import { connect, history } from '@umijs/max';
+import { connect, history, useDispatch } from '@umijs/max';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
 interface QQCallbackProps {
-  dispatch: any;
+  user: any;
 }
 
-const QQCallback: React.FC<QQCallbackProps> = ({ dispatch }) => {
+const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
     'loading',
   );
   const [message, setMessage] = useState('正在处理QQ登录...');
   const hasProcessed = useRef(false); // 防止重复处理
-
+  const dispatch = useDispatch();
   useEffect(() => {
     // 如果已经处理过，直接返回
     if (hasProcessed.current) {
@@ -40,12 +40,12 @@ const QQCallback: React.FC<QQCallbackProps> = ({ dispatch }) => {
           return;
         }
 
-        const result = await dispatch({
+        const result: any = await dispatch({
           type: 'user/handleQQCallback',
           payload: { code },
         });
 
-        if (result && result.success) {
+        if (result.success) {
           setStatus('success');
           setMessage('QQ登录成功！正在跳转...');
 
@@ -74,7 +74,7 @@ const QQCallback: React.FC<QQCallbackProps> = ({ dispatch }) => {
     };
 
     processCallback();
-  }, [dispatch]); // 添加dispatch作为依赖
+  }, [dispatch]);
 
   const getStatusIcon = () => {
     switch (status) {
@@ -180,4 +180,4 @@ const QQCallback: React.FC<QQCallbackProps> = ({ dispatch }) => {
   );
 };
 
-export default connect()(QQCallback);
+export default connect(({ user }: any) => ({ user }))(QQCallback);

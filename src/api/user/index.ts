@@ -23,6 +23,7 @@ import type {
   UpdateUserInfoRes,
 } from './type';
 
+
 // 用户注册
 export function Register(data: RegisterReq) {
   return request<baseResponse<any>>('/api/users/register', {

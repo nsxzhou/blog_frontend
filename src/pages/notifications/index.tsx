@@ -1,7 +1,7 @@
 import type { GetNotificationsReq } from '@/api/notification';
 import { fadeInUp } from '@/constants/animations';
 import { BellOutlined, WifiOutlined } from '@ant-design/icons';
-import { connect, Helmet } from '@umijs/max';
+import { Helmet } from '@umijs/max';
 import { Badge, Pagination, Select, Tabs, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
@@ -14,11 +14,13 @@ const { Text } = Typography;
 interface NotificationsPageProps {
   notification: any;
   dispatch: any;
+  websocket: any;
 }
 
 const NotificationsPage: FC<NotificationsPageProps> = ({
   notification,
   dispatch,
+  websocket,
 }) => {
   const [filters, setFilters] = useState<GetNotificationsReq>({
     page: 1,
@@ -153,11 +155,16 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
               <div className="flex items-center gap-2">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    notification.isConnected ? 'bg-green-500' : 'bg-red-500'
+                    websocket.status === 'connected'
+                      ? 'bg-green-500'
+                      : websocket.status === 'connecting' ||
+                        websocket.status === 'reconnecting'
+                      ? 'bg-orange-500'
+                      : 'bg-red-500'
                   }`}
                 />
                 <Text type="secondary">
-                  实时连接状态: {notification.connectionStatus}
+                  实时连接状态: {websocket.statusMessage}
                 </Text>
               </div>
             </div>
@@ -266,6 +273,4 @@ const NotificationsPage: FC<NotificationsPageProps> = ({
   );
 };
 
-export default connect(({ notification }: { notification: any }) => ({
-  notification,
-}))(NotificationsPage);
+export default NotificationsPage;

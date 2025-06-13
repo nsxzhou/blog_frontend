@@ -2,7 +2,6 @@ import { UploadImage } from '@/api/image';
 import { cardVariants, itemVariants } from '@/constants/animations';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { Editor } from '@toast-ui/react-editor';
-import { useModel } from '@umijs/max';
 import { Input, message } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useCallback, useRef } from 'react';
@@ -29,7 +28,6 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   onContentChange,
 }) => {
   const editorRef = useRef<Editor>(null);
-  const { initialState } = useModel('@@initialState');
 
   const handleEditorChange = () => {
     const editorInstance = editorRef.current?.getInstance();
@@ -43,12 +41,6 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   const handleImageUpload = useCallback(
     async (blob: Blob, callback: (url: string, altText?: string) => void) => {
       try {
-        // 检查用户是否登录
-        if (!initialState?.currentUser?.id) {
-          message.error('请先登录后再上传图片');
-          return;
-        }
-
         // 检查文件类型
         if (!blob.type.startsWith('image/')) {
           message.error('只能上传图片文件');
@@ -90,7 +82,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
         message.error('图片上传失败，请重试');
       }
     },
-    [initialState?.currentUser?.id],
+    [],
   );
 
   return (

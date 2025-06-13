@@ -1,47 +1,66 @@
-import { history, useAccess } from '@umijs/max';
+import { UserInfo } from '@/api/user';
+import { UserModelState } from '@/models/user';
+import { connect, history } from '@umijs/max';
 import { Button, Result } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect } from 'react';
-
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  access?: string; // 权限key
+  requiredRole?: string; // 需要的角色
+  customCheck?: (user: any) => boolean; // 自定义检查函数
   fallback?: React.ReactNode; // 自定义无权限页面
+  redirectTo?: string; // 无权限时跳转路径
+  currentUser: UserInfo | null;
+  isLoggedIn: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
-  access,
+  requiredRole,
+  customCheck,
   fallback,
+  redirectTo = '/login',
+  currentUser,
+  isLoggedIn,
 }) => {
-  const accessMap = useAccess();
-
-  // 如果没有指定权限要求，直接渲染
-  if (!access) {
-    return <>{children}</>;
-  }
-
-  // 检查权限
-  const hasPermission = accessMap[access as keyof typeof accessMap];
-
-  // 特殊处理：如果是shouldNotAccess权限且用户已登录，重定向到首页
-  useEffect(() => {
-    if (access === 'shouldNotAccess' && !hasPermission) {
-      history.push('/');
+  // 权限判断逻辑
+  const checkPermission = () => {
+    if (!requiredRole) return true; // 没有权限要求，直接放行
+    if (requiredRole === 'shouldNotAccess') {
+      return !isLoggedIn; // 只有未登录用户可以访问
     }
-  }, [access, hasPermission]);
+    if (!isLoggedIn) return false; // 其它有权限要求的页面，未登录直接拦截
+    switch (requiredRole) {
+      case 'isAdmin':
+        return currentUser?.role === 'admin';
+      case 'canAccess':
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const hasPermission = customCheck
+    ? customCheck({ currentUser, isLoggedIn })
+    : checkPermission();
+
+  const isNoLogin = !isLoggedIn && requiredRole !== 'shouldNotAccess';
+
+  useEffect(() => {
+    if (!hasPermission && isNoLogin && redirectTo && !fallback) {
+      history.push(redirectTo);
+    }
+  }, [hasPermission, redirectTo, fallback, isNoLogin]);
 
   if (!hasPermission) {
-    // 如果是shouldNotAccess权限，返回null（会被重定向）
-    if (access === 'shouldNotAccess') {
+    if (isNoLogin && redirectTo && !fallback) {
+      // 跳转时不渲染内容
       return null;
     }
-    // 如果有自定义fallback，使用它
     if (fallback) {
       return <>{fallback}</>;
     }
-
-    // 默认的403页面
+    // 已登录但权限不足，显示 403
     return (
       <motion.div
         className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50/30"
@@ -73,4 +92,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default connect(({ user }: { user: UserModelState }) => ({
+  currentUser: user.currentUser,
+  isLoggedIn: user.isLoggedIn,
+}))(ProtectedRoute);

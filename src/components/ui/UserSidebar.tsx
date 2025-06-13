@@ -168,7 +168,10 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                     登录后查看更多内容
                   </p>
                   <motion.button
-                    onClick={onLogin}
+                    onClick={() => {
+                      onLogin?.();
+                      onClose();
+                    }}
                     className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     {...hoverScale}
                   >

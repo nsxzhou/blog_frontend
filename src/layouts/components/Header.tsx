@@ -1,6 +1,6 @@
+import { Logout } from '@/api/user';
 import {
   Button,
-  NotificationBell,
   QRCodeModal,
   SearchResults,
   UserAvatar,
@@ -11,6 +11,8 @@ import {
   navItemVariants,
 } from '@/constants/animations';
 import { useSearch } from '@/hooks/useSearch';
+import { UserModelState } from '@/models/user';
+import { getRefreshTokenFromStorage, getTokenFromStorage } from '@/utils/auth';
 import {
   CloseOutlined,
   EditOutlined,
@@ -21,8 +23,14 @@ import {
   UserOutlined,
   WechatOutlined,
 } from '@ant-design/icons';
-import { connect, Link, useLocation, useNavigate } from '@umijs/max';
-import { Input } from 'antd';
+import {
+  connect,
+  Link,
+  useDispatch,
+  useLocation,
+  useNavigate,
+} from '@umijs/max';
+import { Input, message } from 'antd';
 import {
   AnimatePresence,
   motion,
@@ -34,8 +42,7 @@ import UserSidebar from '../../components/ui/UserSidebar';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
-  currentUser: any;
-  dispatch: any;
+  user: UserModelState;
 }
 
 const navigationItems = [
@@ -46,7 +53,7 @@ const navigationItems = [
   { key: '/write', label: '写作', icon: <EditOutlined /> },
 ];
 
-const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
+const Header: React.FC<HeaderProps> = ({ user }) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -56,6 +63,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
   const location = useLocation();
   const { scrollY } = useScroll();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // 搜索相关
   const { keyword, results, loading, handleSearch, clearSearch } = useSearch();
@@ -113,9 +121,16 @@ const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
   // 处理登出
   const handleLogout = async () => {
     try {
-      dispatch({ type: 'user/logout' });
-      // 跳转到首页
-      navigate('/');
+      const res = await Logout({
+        access_token: getTokenFromStorage() || '',
+        refresh_token: getRefreshTokenFromStorage() || '',
+      });
+      if (res.code === 0) {
+        dispatch({ type: 'user/clearUser' });
+        // 跳转到首页
+        message.success('登出成功');
+        navigate('/');
+      }
     } catch (error) {
       console.error('登出失败:', error);
     }
@@ -208,9 +223,6 @@ const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
             <SearchOutlined className="text-lg" />
           </Button>
 
-          {/* 通知铃铛 */}
-          <NotificationBell />
-
           <div className="flex items-center space-x-2">
             <div className="hidden md:flex items-center space-x-1">
               {[
@@ -244,11 +256,11 @@ const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
               className="p-1 rounded-lg"
               variant="ghost"
             >
-              {currentUser ? (
+              {user.currentUser ? (
                 <div className="flex items-center space-x-2">
-                  <UserAvatar user={currentUser} size="sm" />
+                  <UserAvatar user={user.currentUser} size="sm" />
                   <span className="hidden sm:block text-sm font-medium text-gray-800">
-                    {currentUser.nickname || currentUser.username}
+                    {user.currentUser.nickname || user.currentUser.username}
                   </span>
                 </div>
               ) : (
@@ -317,7 +329,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
       <UserSidebar
         isOpen={userSidebarOpen}
         onClose={() => setUserSidebarOpen(false)}
-        user={currentUser}
+        user={user.currentUser}
         onLogin={handleLogin}
         onLogout={handleLogout}
       />
@@ -325,6 +337,4 @@ const Header: React.FC<HeaderProps> = ({ currentUser, dispatch }) => {
   );
 };
 
-export default connect(({ user }: { user: any }) => ({
-  currentUser: user.currentUser,
-}))(Header);
+export default connect(({ user }: any) => ({ user }))(Header);

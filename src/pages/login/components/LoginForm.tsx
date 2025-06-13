@@ -1,6 +1,9 @@
 import type { LoginReq } from '@/api/user';
+import { GetQQLoginURL, Login } from '@/api/user';
 import { Button } from '@/components/ui';
 import { fadeInUp, hoverScale, hoverScaleSmall } from '@/constants/animations';
+import { UserModelState } from '@/models/user';
+import { setAuthTokens } from '@/utils/auth';
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -8,32 +11,30 @@ import {
   QqOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { connect } from '@umijs/max';
+import { connect, useDispatch } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
 interface LoginFormProps {
   onSuccess: () => void;
   onSwitchToRegister: () => void;
-  dispatch: any;
+  user: UserModelState;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
   onSuccess,
   onSwitchToRegister,
-  dispatch,
 }) => {
   const [formData, setFormData] = useState<LoginReq>({
     username: '',
     password: '',
     remember: false,
   });
-
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginReq>>({});
   const [loading, setLoading] = useState(false);
   const [qqLoading, setQqLoading] = useState(false);
-
   const validateForm = (): boolean => {
     const newErrors: Partial<LoginReq> = {};
 
@@ -55,15 +56,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
     e.preventDefault();
 
     if (!validateForm()) return;
-
-    setLoading(true);
     try {
-      const result = await dispatch({
-        type: 'user/login',
-        payload: formData,
-      });
-
-      if (result?.success) {
+      const res = await Login(formData);
+      if (res.code === 0) {
+        setAuthTokens(
+          res.data.access_token,
+          res.data.refresh_token,
+          res.data.expires_in,
+        );
+        dispatch({ type: 'user/setUser', payload: res.data.user });
         // 清空表单数据
         setFormData({
           username: '',
@@ -85,9 +86,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const handleQQLogin = async () => {
     setQqLoading(true);
     try {
-      await dispatch({
-        type: 'user/qqLogin',
-      });
+      const res = await GetQQLoginURL();
+      if (res.code === 0) {
+        window.location.href = res.data.url;
+      }
     } catch (error) {
       console.error('QQ登录异常:', error);
     } finally {
@@ -264,4 +266,4 @@ const LoginForm: React.FC<LoginFormProps> = ({
   );
 };
 
-export default connect()(LoginForm);
+export default connect(({ user }: any) => ({ user }))(LoginForm);

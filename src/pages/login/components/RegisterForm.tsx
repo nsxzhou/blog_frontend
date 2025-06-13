@@ -1,5 +1,6 @@
-import type { RegisterReq } from '@/api/user';
+import { Register, type RegisterReq } from '@/api/user';
 import { Button } from '@/components/ui';
+import { UserModelState } from '@/models/user';
 import { validation } from '@/utils/validation';
 import {
   EyeInvisibleOutlined,
@@ -9,20 +10,19 @@ import {
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { connect } from '@umijs/max';
+import { connect, useDispatch } from '@umijs/max';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
 interface RegisterFormProps {
   onSuccess: () => void;
   onSwitchToLogin: () => void;
-  dispatch: any;
+  user: UserModelState;
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({
   onSuccess,
   onSwitchToLogin,
-  dispatch,
 }) => {
   const [formData, setFormData] = useState<RegisterReq>({
     username: '',
@@ -37,7 +37,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   const [errors, setErrors] = useState<
     Partial<RegisterReq & { confirmPassword: string }>
   >({});
-
+  const dispatch = useDispatch();
   const validateForm = (): boolean => {
     const newErrors: Partial<RegisterReq & { confirmPassword: string }> = {};
 
@@ -84,12 +84,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     if (!validateForm()) return;
 
     try {
-      const result = await dispatch({
-        type: 'user/register',
-        payload: formData,
-      });
+      const res = await Register(formData);
 
-      if (result?.success) {
+      if (res.code === 0) {
         onSuccess();
       }
     } catch (error) {
@@ -365,4 +362,4 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   );
 };
 
-export default connect()(RegisterForm);
+export default connect(({ user }: any) => ({ user }))(RegisterForm);
