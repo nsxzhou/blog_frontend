@@ -1,17 +1,16 @@
 import { UserInfo } from '@/api/user';
-import { UserModelState } from '@/models/user';
 import { connect, history } from '@umijs/max';
 import { Button, Result } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect } from 'react';
+import { useUserStore } from '@/stores/userStore';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string; // 需要的角色
   customCheck?: (user: any) => boolean; // 自定义检查函数
   fallback?: React.ReactNode; // 自定义无权限页面
   redirectTo?: string; // 无权限时跳转路径
-  currentUser: UserInfo | null;
-  isLoggedIn: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
@@ -20,9 +19,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   customCheck,
   fallback,
   redirectTo = '/login',
-  currentUser,
-  isLoggedIn,
 }) => {
+  // 使用Zustand hooks
+  const { currentUser, isLoggedIn } = useUserStore();
+
   // 权限判断逻辑
   const checkPermission = () => {
     // 如果没有权限要求，直接放行
@@ -110,7 +110,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-export default connect(({ user }: { user: UserModelState }) => ({
-  currentUser: user.currentUser,
-  isLoggedIn: user.isLoggedIn,
-}))(ProtectedRoute);
+export default ProtectedRoute;

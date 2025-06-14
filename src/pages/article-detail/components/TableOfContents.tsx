@@ -4,7 +4,7 @@ import {
   hoverScale,
   sidebarItemVariants,
 } from '@/constants/animations';
-import { UserModelState } from '@/models/user';
+import { useUserStore } from '@/stores/userStore';
 import {
   BookFilled,
   BookOutlined,
@@ -16,7 +16,7 @@ import {
   UnorderedListOutlined,
   UpOutlined,
 } from '@ant-design/icons';
-import { connect, history } from '@umijs/max';
+import { history } from '@umijs/max';
 import { Button, Tooltip, message } from 'antd';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
@@ -35,7 +35,6 @@ interface TableOfContentsProps {
   initialFavorited?: boolean;
   onLikeUpdate?: (liked: boolean, likeCount: number) => void;
   onFavoriteUpdate?: (favorited: boolean, favoriteCount: number) => void;
-  isLoggedIn: boolean;
 }
 
 const TableOfContents: React.FC<TableOfContentsProps> = ({
@@ -46,8 +45,8 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
   initialFavorited = false,
   onLikeUpdate,
   onFavoriteUpdate,
-  isLoggedIn,
 }) => {
+  const { isLoggedIn } = useUserStore();
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>('');
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -294,11 +293,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
                 icon={isLiked ? <HeartFilled /> : <HeartOutlined />}
                 onClick={handleLike}
                 loading={actionLoading.like}
-                className={`${
-                  isLiked
+                className={`${isLiked
                     ? 'text-red-500 hover:text-red-600 bg-red-50'
                     : 'text-red-400 hover:text-red-500 hover:bg-red-50'
-                } transition-all duration-200`}
+                  } transition-all duration-200`}
               />
             </motion.div>
           </Tooltip>
@@ -311,11 +309,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
                 icon={isBookmarked ? <BookFilled /> : <BookOutlined />}
                 onClick={handleBookmark}
                 loading={actionLoading.bookmark}
-                className={`${
-                  isBookmarked
+                className={`${isBookmarked
                     ? 'text-yellow-500 hover:text-yellow-600 bg-yellow-50'
                     : 'text-yellow-400 hover:text-yellow-500 hover:bg-yellow-50'
-                } transition-all duration-200`}
+                  } transition-all duration-200`}
               />
             </motion.div>
           </Tooltip>
@@ -382,11 +379,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
                           onClick={() => scrollToHeading(item.id)}
                           className={`
                                                         w-full text-left px-3 py-2 rounded-md text-xs transition-all duration-200
-                                                        ${
-                                                          activeId === item.id
-                                                            ? 'bg-blue-50 text-blue-600 border-l-3 border-blue-500'
-                                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                                        }
+                                                        ${activeId === item.id
+                              ? 'bg-blue-50 text-blue-600 border-l-3 border-blue-500'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            }
                                                     `}
                           style={{
                             paddingLeft: `${0.75 + (item.level - 1) * 0.5}rem`,
@@ -409,6 +405,4 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
   );
 };
 
-export default connect(({ user }: { user: UserModelState }) => ({
-  isLoggedIn: user.isLoggedIn,
-}))(TableOfContents);
+export default TableOfContents;

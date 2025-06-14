@@ -2,7 +2,6 @@ import type { LoginReq } from '@/api/user';
 import { GetQQLoginURL, Login } from '@/api/user';
 import { Button } from '@/components/ui';
 import { fadeInUp, hoverScale, hoverScaleSmall } from '@/constants/animations';
-import { UserModelState } from '@/models/user';
 import { setAuthTokens } from '@/utils/auth';
 import {
   EyeInvisibleOutlined,
@@ -11,15 +10,14 @@ import {
   QqOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { connect, useDispatch } from '@umijs/max';
 import { message } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
+import { useUserStore } from '@/stores/userStore';
 
 interface LoginFormProps {
   onSuccess: () => void;
   onSwitchToRegister: () => void;
-  user: UserModelState;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
@@ -31,11 +29,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
     password: '',
     remember: false,
   });
-  const dispatch = useDispatch();
+  const { setUser } = useUserStore();
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginReq>>({});
   const [loading, setLoading] = useState(false);
   const [qqLoading, setQqLoading] = useState(false);
+
   const validateForm = (): boolean => {
     const newErrors: Partial<LoginReq> = {};
 
@@ -65,7 +64,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           res.data.refresh_token,
           res.data.expires_in,
         );
-        dispatch({ type: 'user/setUser', payload: res.data.user });
+        setUser(res.data.user);
         // 清空表单数据
         setFormData({
           username: '',
@@ -76,7 +75,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         setTimeout(() => {
           onSuccess();
         }, 100);
-      } 
+      }
     } catch (error) {
       console.error('登录异常:', error);
     } finally {
@@ -137,10 +136,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
               w-full pl-10 pr-4 py-3 border rounded-lg
               focus:border-blue-500
               transition-all duration-200 outline-none
-              ${
-                errors.username
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 bg-white'
+              ${errors.username
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-white'
               }
             `}
             placeholder="请输入用户名或邮箱"
@@ -170,10 +168,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
               w-full pl-10 pr-12 py-3 border rounded-lg
             focus:border-blue-500
               transition-all duration-200 outline-none
-              ${
-                errors.password
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 bg-white'
+              ${errors.password
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-white'
               }
             `}
             placeholder="请输入密码"
@@ -267,4 +264,4 @@ const LoginForm: React.FC<LoginFormProps> = ({
   );
 };
 
-export default connect(({ user }: any) => ({ user }))(LoginForm);
+export default LoginForm;

@@ -1,68 +1,41 @@
 import type { GetNotificationsReq } from '@/api/notification';
-import { GetNotifications, GetUnreadCount } from '@/api/notification';
-import { NotificationItem } from '@/api/notification/types';
 import { fadeInUp } from '@/constants/animations';
-import { WebSocketState } from '@/models/websocket';
 import { BellOutlined, WifiOutlined } from '@ant-design/icons';
-import { connect, Helmet } from '@umijs/max';
-import { Badge, message, Pagination, Select, Tabs, Typography } from 'antd';
+import { Helmet } from '@umijs/max';
+import { Badge, Pagination, Select, Tabs, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import NotificationList from './components/NotificationList';
+import { useWebSocketStore } from '@/stores/websocketStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 
 const { Option } = Select;
 const { Text } = Typography;
 
-interface NotificationsPageProps {
-  websocket: WebSocketState;
-}
-
-const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
-  const [loading, setLoading] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [total, setTotal] = useState(0);
+const NotificationsPage: FC = () => {
   const [filters, setFilters] = useState<GetNotificationsReq>({
     page: 1,
     page_size: 10,
   });
 
-  // 获取通知列表
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [notificationsRes, unreadCountRes] = await Promise.all([
-        GetNotifications(filters),
-        GetUnreadCount(),
-      ]);
+  // 使用Zustand hooks
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    total,
+    fetchNotifications,
+  } = useNotificationStore();
+  const { status: wsStatus, statusMessage: wsStatusMessage, init: initWebSocket } = useWebSocketStore();
 
-      if (notificationsRes.code === 0) {
-        setNotifications(notificationsRes.data.list);
-        setTotal(notificationsRes.data.total);
-      }
-
-      if (unreadCountRes.code === 0) {
-        setUnreadCount(unreadCountRes.data.count);
-      }
-    } catch (error) {
-      console.error('获取通知列表失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
-
-  // 初始化加载
+  // 初始化通知
   useEffect(() => {
-    fetchNotifications();
+    // 1. 获取最新通知
+    fetchNotifications(filters.page, filters.page_size);
+    // 2. 设置WebSocket订阅
+    initWebSocket();
   }, []);
-
-  // WebSocket 连接状态变化时刷新数据
-  useEffect(() => {
-    if (websocket.status === 'connected') {
-      fetchNotifications();
-    }
-  }, [websocket.status, fetchNotifications]);
 
   // 处理筛选变化
   const handleFilterChange = useCallback(
@@ -73,8 +46,9 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
         page: key === 'page' ? value : 1, // 除了翻页外，其他筛选都重置到第一页
       };
       setFilters(newFilters);
+      fetchNotifications(newFilters.page, newFilters.page_size);
     },
-    [filters],
+    [filters, fetchNotifications],
   );
 
   // 处理分页变化
@@ -87,9 +61,9 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
   );
 
   // 刷新通知
-  const refreshNotificationsWithFilters = useCallback(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+  const refreshNotifications = useCallback(() => {
+    fetchNotifications(filters.page, filters.page_size);
+  }, [fetchNotifications, filters]);
 
   // 处理Tab切换
   const handleTabChange = useCallback(
@@ -98,8 +72,8 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
         activeKey === 'read'
           ? true
           : activeKey === 'unread'
-          ? false
-          : undefined;
+            ? false
+            : undefined;
       handleFilterChange('is_read', is_read);
     },
     [handleFilterChange],
@@ -122,7 +96,9 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
       label: (
         <span className="flex items-center gap-1">
           未读
-          {unreadCount > 0 && <Badge count={unreadCount} size="small" />}
+          {unreadCount > 0 && (
+            <Badge count={unreadCount} size="small" />
+          )}
         </span>
       ),
       children: null,
@@ -155,7 +131,7 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
         >
           <div className="flex items-center gap-3 mb-2">
             <BellOutlined className="text-2xl text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">我的通知</h1>
+            <div className="text-3xl font-bold text-gray-900">我的通知</div>
             {unreadCount > 0 && <Badge count={unreadCount} />}
           </div>
           <p className="text-gray-600">
@@ -175,17 +151,16 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
               <WifiOutlined className="text-blue-500" />
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${
-                    websocket.status === 'connected'
-                      ? 'bg-green-500'
-                      : websocket.status === 'connecting' ||
-                        websocket.status === 'reconnecting'
+                  className={`w-2 h-2 rounded-full ${wsStatus === 'connected'
+                    ? 'bg-green-500'
+                    : wsStatus === 'connecting' ||
+                      wsStatus === 'reconnecting'
                       ? 'bg-orange-500'
                       : 'bg-red-500'
-                  }`}
+                    }`}
                 />
                 <Text type="secondary">
-                  实时连接状态: {websocket.statusMessage}
+                  实时连接状态: {wsStatusMessage}
                 </Text>
               </div>
             </div>
@@ -240,7 +215,7 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
           <NotificationList
             notifications={notifications}
             loading={loading}
-            onRefresh={refreshNotificationsWithFilters}
+            onRefresh={refreshNotifications}
           />
         </motion.div>
 
@@ -271,6 +246,4 @@ const NotificationsPage: FC<NotificationsPageProps> = ({ websocket }) => {
   );
 };
 
-export default connect(({ websocket }: { websocket: WebSocketState }) => ({
-  websocket,
-}))(NotificationsPage);
+export default NotificationsPage;

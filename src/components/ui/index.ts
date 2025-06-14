@@ -12,3 +12,4 @@ export { default as QRCodeModal } from './QRCodeModal';
 export { default as SearchResults } from './SearchResults';
 export { default as UserAvatar } from './UserAvatar';
 export { default as UserSidebar } from './UserSidebar';
+export { default as NotificationBell } from './NotificationBell';

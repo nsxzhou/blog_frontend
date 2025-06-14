@@ -12,7 +12,6 @@ import {
   navItemVariants,
 } from '@/constants/animations';
 import { useSearch } from '@/hooks/useSearch';
-import { UserModelState } from '@/models/user';
 import { getRefreshTokenFromStorage, getTokenFromStorage } from '@/utils/auth';
 import {
   CloseOutlined,
@@ -25,9 +24,7 @@ import {
   WechatOutlined,
 } from '@ant-design/icons';
 import {
-  connect,
   Link,
-  useDispatch,
   useLocation,
   useNavigate,
 } from '@umijs/max';
@@ -40,10 +37,11 @@ import {
 } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 import UserSidebar from '../../components/ui/UserSidebar';
+import { useUserStore } from '@/stores/userStore';
+import { NotificationBell } from '@/components/ui';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
-  user: UserModelState;
 }
 
 const navigationItems = [
@@ -54,7 +52,7 @@ const navigationItems = [
   { key: '/write', label: '写作', icon: <EditOutlined /> },
 ];
 
-const Header: React.FC<HeaderProps> = ({ user }) => {
+const Header: React.FC<HeaderProps> = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -64,7 +62,9 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   const location = useLocation();
   const { scrollY } = useScroll();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+
+  // 使用Zustand hooks
+  const { currentUser, clearUser } = useUserStore();
 
   // 搜索相关
   const { keyword, results, loading, handleSearch, clearSearch } = useSearch();
@@ -127,7 +127,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         refresh_token: getRefreshTokenFromStorage() || '',
       });
       if (res.code === 0) {
-        dispatch({ type: 'user/clearUser' });
+        clearUser();
         // 跳转到首页
         message.success('登出成功');
         navigate('/');
@@ -200,11 +200,10 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                 initial="idle"
                 whileHover="hover"
                 whileTap="tap"
-                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${
-                  location.pathname === item.key
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                }`}
+                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 ${location.pathname === item.key
+                  ? 'bg-gray-100 text-gray-900'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-500">{item.icon}</span>
@@ -223,6 +222,8 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
           >
             <SearchOutlined className="text-lg" />
           </Button>
+
+          <NotificationBell />
 
           <div className="flex items-center space-x-2">
             <div className="hidden md:flex items-center space-x-1">
@@ -257,11 +258,11 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
               className="p-1 rounded-lg"
               variant="ghost"
             >
-              {user.currentUser ? (
+              {currentUser ? (
                 <div className="flex items-center space-x-2">
-                  <UserAvatar user={user.currentUser} size="sm" />
+                  <UserAvatar user={currentUser} size="sm" />
                   <span className="hidden sm:block text-sm font-medium text-gray-800">
-                    {user.currentUser.nickname || user.currentUser.username}
+                    {currentUser.nickname || currentUser.username}
                   </span>
                 </div>
               ) : (
@@ -330,7 +331,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
       <UserSidebar
         isOpen={userSidebarOpen}
         onClose={() => setUserSidebarOpen(false)}
-        user={user.currentUser}
+        user={currentUser}
         onLogin={handleLogin}
         onLogout={handleLogout}
       />
@@ -338,4 +339,4 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   );
 };
 
-export default connect(({ user }: any) => ({ user }))(Header);
+export default Header;
