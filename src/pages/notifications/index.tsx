@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import type { FC } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import NotificationList from './components/NotificationList';
-import { useWebSocketStore } from '@/stores/websocketStore';
+import { useWebSocketStore, type WebSocketMessage } from '@/stores/websocketStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 
 const { Option } = Select;
@@ -27,15 +27,35 @@ const NotificationsPage: FC = () => {
     total,
     fetchNotifications,
   } = useNotificationStore();
-  const { status: wsStatus, statusMessage: wsStatusMessage, init: initWebSocket } = useWebSocketStore();
+  const {
+    status: wsStatus,
+    statusMessage: wsStatusMessage,
+    init: initWebSocket,
+    addSubscriber,
+    removeSubscriber,
+  } = useWebSocketStore();
 
   // 初始化通知
   useEffect(() => {
     // 1. 获取最新通知
-    fetchNotifications(filters.page, filters.page_size);
+    fetchNotifications(filters.page, filters.page_size, filters);
     // 2. 设置WebSocket订阅
     initWebSocket();
-  }, []);
+
+    // 3. 订阅通知消息
+    const handleNotification = (message: WebSocketMessage) => {
+      if (message.type === 'notification') {
+        // 收到新通知时，刷新当前页面的通知列表
+        fetchNotifications(filters.page, filters.page_size, filters);
+      }
+    };
+
+    addSubscriber('notification', handleNotification);
+
+    return () => {
+      removeSubscriber('notification', handleNotification);
+    };
+  }, [filters]);
 
   // 处理筛选变化
   const handleFilterChange = useCallback(
@@ -46,23 +66,25 @@ const NotificationsPage: FC = () => {
         page: key === 'page' ? value : 1, // 除了翻页外，其他筛选都重置到第一页
       };
       setFilters(newFilters);
-      fetchNotifications(newFilters.page, newFilters.page_size);
     },
-    [filters, fetchNotifications],
+    [filters],
   );
 
   // 处理分页变化
   const handlePageChange = useCallback(
     (page: number, pageSize: number) => {
-      handleFilterChange('page', page);
-      handleFilterChange('page_size', pageSize);
+      setFilters(prev => ({
+        ...prev,
+        page,
+        page_size: pageSize,
+      }));
     },
-    [handleFilterChange],
+    [],
   );
 
   // 刷新通知
   const refreshNotifications = useCallback(() => {
-    fetchNotifications(filters.page, filters.page_size);
+    fetchNotifications(filters.page, filters.page_size, filters);
   }, [fetchNotifications, filters]);
 
   // 处理Tab切换
@@ -74,9 +96,13 @@ const NotificationsPage: FC = () => {
           : activeKey === 'unread'
             ? false
             : undefined;
-      handleFilterChange('is_read', is_read);
+      setFilters(prev => ({
+        ...prev,
+        is_read,
+        page: 1, // 切换标签时重置到第一页
+      }));
     },
-    [handleFilterChange],
+    [],
   );
 
   const getActiveTab = () => {

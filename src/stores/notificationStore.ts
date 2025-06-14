@@ -1,4 +1,4 @@
-import type { NotificationItem } from '@/api/notification';
+import type { GetNotificationsReq, NotificationItem } from '@/api/notification';
 import {
   GetNotifications,
   GetUnreadCount,
@@ -25,7 +25,11 @@ interface NotificationState {
   lastCacheTime?: number;
 
   // Actions
-  fetchNotifications: (page?: number, pageSize?: number) => Promise<void>;
+  fetchNotifications: (
+    page?: number,
+    pageSize?: number,
+    filters?: Partial<GetNotificationsReq>,
+  ) => Promise<void>;
   fetchUnreadCount: () => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
   markAllAsRead: () => Promise<void>;
@@ -58,10 +62,20 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   currentPage: 1,
   pageSize: 10,
 
-  fetchNotifications: async (page = 1, pageSize = 10) => {
+  fetchNotifications: async (
+    page = 1,
+    pageSize = 10,
+    filters?: Partial<GetNotificationsReq>,
+  ) => {
     set({ loading: true });
     try {
-      const response = await GetNotifications({ page, page_size: pageSize });
+      const params: GetNotificationsReq = {
+        page,
+        page_size: pageSize,
+        ...filters,
+      };
+
+      const response = await GetNotifications(params);
       if (response.code === 0) {
         const notificationsWithPriority = response.data.list.map(
           (notification: NotificationItem) => ({
@@ -78,12 +92,14 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
           pageSize,
         });
 
-        // 缓存通知
-        const cacheData = {
-          notifications: notificationsWithPriority.slice(0, 50), // 只缓存最近50条
-          timestamp: Date.now(),
-        };
-        localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        // 只缓存第一页的数据
+        if (page === 1 && !filters?.type && filters?.is_read === undefined) {
+          const cacheData = {
+            notifications: notificationsWithPriority,
+            timestamp: Date.now(),
+          };
+          localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        }
       }
     } finally {
       set({ loading: false });
@@ -134,6 +150,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   handleRealtimeNotification: (notification: NotificationItem) => {
-    get().addNotification(notification);
+    // 收到实时通知时，直接获取最新数据而不是手动更新状态
+    get().fetchNotifications(1, 10);
   },
 }));

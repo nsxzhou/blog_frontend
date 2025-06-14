@@ -155,11 +155,14 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
           console.log('WebSocket收到消息:', msg);
 
           if (msg.type !== 'pong') {
-            handleMessage({
+            // 确保消息格式正确
+            const message: WebSocketMessage = {
               type: msg.type,
-              payload: msg,
+              // 如果是通知类型，保留完整的通知数据结构
+              payload: msg.type === 'notification' ? msg.data : msg,
               timestamp: Date.now(),
-            });
+            };
+            handleMessage(message);
           }
         } catch (e: any) {
           console.error('解析 WebSocket 消息失败:', e);

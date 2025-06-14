@@ -2,6 +2,7 @@ import { Button, UserAvatar } from '@/components/ui';
 import { fadeInUp, scaleIn } from '@/constants/animations';
 import { useUserStore } from '@/stores/userStore';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useWebSocketStore, type WebSocketMessage } from '@/stores/websocketStore';
 import type { NotificationItem } from '@/api/notification';
 import {
   BellOutlined,
@@ -14,7 +15,7 @@ import { useNavigate } from '@umijs/max';
 import { Badge, Empty, List, Popover, Spin, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 
 const { Text, Title } = Typography;
 
@@ -25,6 +26,7 @@ interface NotificationBellProps {
 const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
+  const [initialized, setInitialized] = useState(false);
   const buttonContainerRef = useRef<HTMLDivElement>(null);
 
   // 使用 Zustand stores
@@ -36,7 +38,58 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
     fetchNotifications,
     markAsRead,
     markAllAsRead,
+    handleRealtimeNotification,
   } = useNotificationStore();
+  const { init: initWebSocket, addSubscriber, removeSubscriber } = useWebSocketStore();
+
+  // 在组件挂载时获取通知数据和初始化WebSocket
+  useEffect(() => {
+    if (isLoggedIn && currentUser && !initialized) {
+      try {
+        // 1. 获取初始通知数据（只获取最新的10条）
+        fetchNotifications(1, 10);
+
+        // 2. 初始化WebSocket连接
+        initWebSocket();
+
+        setInitialized(true);
+      } catch (error) {
+        console.error('初始化通知数据失败:', error);
+      }
+    }
+  }, [isLoggedIn, currentUser, initialized, fetchNotifications, initWebSocket]);
+
+  // WebSocket订阅
+  useEffect(() => {
+    if (!isLoggedIn || !initialized) return;
+
+    // 订阅通知消息
+    const handleNotification = (message: WebSocketMessage) => {
+      if (message.type === 'notification' && message.payload) {
+        handleRealtimeNotification(message.payload);
+      }
+    };
+
+    addSubscriber('notification', handleNotification);
+
+    // 清理函数
+    return () => {
+      removeSubscriber('notification', handleNotification);
+    };
+  }, [isLoggedIn, initialized, addSubscriber, removeSubscriber, handleRealtimeNotification]);
+
+  // 定期刷新通知数据（每5分钟）
+  useEffect(() => {
+    if (!isLoggedIn || !initialized) return;
+
+    const refreshInterval = setInterval(() => {
+      fetchNotifications(1, 10, { is_read: false });
+    }, 5 * 60 * 1000);
+
+    return () => {
+      clearInterval(refreshInterval);
+    };
+  }, [isLoggedIn, initialized, fetchNotifications]);
 
   // 处理通知点击
   const handleNotificationClick = useCallback(
@@ -130,7 +183,7 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => fetchNotifications()}
+            onClick={() => fetchNotifications(1, 10)}
             className="p-2 hover:text-blue-500"
           >
             <ReloadOutlined className="text-sm" />
@@ -151,6 +204,11 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
         {loading ? (
           <div className="flex justify-center py-8">
             <Spin size="small" />
+          </div>
+        ) : !initialized ? (
+          <div className="flex justify-center py-8">
+            <Spin size="small" />
+            <Text type="secondary" className="ml-2">正在初始化...</Text>
           </div>
         ) : notifications.length === 0 ? (
           <div className="py-8">
