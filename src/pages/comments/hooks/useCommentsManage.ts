@@ -122,53 +122,51 @@ export const useCommentsManage = (): UseCommentsManageState => {
   );
 
   // 获取全局评论统计 - 优化为只获取基本统计信息
-  useRequest(
-    async () => {
-      // 获取各种状态的评论数量
-      const [approvedData, pendingData, rejectedData] = await Promise.all([
-        GetCommentList({
-          page: 1,
-          page_size: 1, // 只获取第一条来获取总数
-          status: 'approved',
-          order_by: 'created_at',
-          order: 'desc',
-        }),
-        GetCommentList({
-          page: 1,
-          page_size: 1,
-          status: 'pending',
-          order_by: 'created_at',
-          order: 'desc',
-        }),
-        GetCommentList({
-          page: 1,
-          page_size: 1,
-          status: 'rejected',
-          order_by: 'created_at',
-          order: 'desc',
-        }),
-      ]);
-
-      // 获取总评论数
-      const totalData = await GetCommentList({
+  useRequest(async () => {
+    // 获取各种状态的评论数量
+    const [approvedData, pendingData, rejectedData] = await Promise.all([
+      GetCommentList({
         page: 1,
-        page_size: 1,
+        page_size: 1, // 只获取第一条来获取总数
+        status: 'approved',
         order_by: 'created_at',
         order: 'desc',
-      });
+      }),
+      GetCommentList({
+        page: 1,
+        page_size: 1,
+        status: 'pending',
+        order_by: 'created_at',
+        order: 'desc',
+      }),
+      GetCommentList({
+        page: 1,
+        page_size: 1,
+        status: 'rejected',
+        order_by: 'created_at',
+        order: 'desc',
+      }),
+    ]);
 
-      const stats = {
-        total: totalData.data?.total || 0,
-        approved: approvedData.data?.total || 0,
-        pending: pendingData.data?.total || 0,
-        rejected: rejectedData.data?.total || 0,
-        likes: 0,
-      };
+    // 获取总评论数
+    const totalData = await GetCommentList({
+      page: 1,
+      page_size: 1,
+      order_by: 'created_at',
+      order: 'desc',
+    });
 
-      setGlobalStats(stats);
-      return stats;
-    }
-  );
+    const stats = {
+      total: totalData.data?.total || 0,
+      approved: approvedData.data?.total || 0,
+      pending: pendingData.data?.total || 0,
+      rejected: rejectedData.data?.total || 0,
+      likes: 0,
+    };
+
+    setGlobalStats(stats);
+    return stats;
+  });
 
   // 获取特定文章的评论
   const {
@@ -218,8 +216,7 @@ export const useCommentsManage = (): UseCommentsManageState => {
         ...comment,
         articleTitle: selectedArticle.title,
         articleId: comment.article_id,
-        user_name:
-          comment.user?.nickname || comment.user?.username || '匿名用户',
+        user_name: comment.user?.username,
         user_email: comment.user?.username || '',
       }),
     );

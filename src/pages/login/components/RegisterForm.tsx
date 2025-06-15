@@ -1,13 +1,12 @@
 import { Register, type RegisterReq } from '@/api/user';
 import { Button } from '@/components/ui';
-import { UserModelState } from '@/models/user';
 import { validation } from '@/utils/validation';
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
   LockOutlined,
   MailOutlined,
-  TeamOutlined,
+  PhoneOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { connect, useDispatch } from '@umijs/max';
@@ -17,7 +16,6 @@ import React, { useState } from 'react';
 interface RegisterFormProps {
   onSuccess: () => void;
   onSwitchToLogin: () => void;
-  user: UserModelState;
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({
@@ -26,9 +24,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<RegisterReq>({
     username: '',
-    nickname: '',
     email: '',
     password: '',
+    phone: '',
   });
 
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,14 +45,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       newErrors.username = usernameResult.error;
     }
 
-    // 昵称验证
-    const nicknameResult = validation.nickname.validate(formData.nickname);
-    if (!nicknameResult.isValid) {
-      newErrors.nickname = nicknameResult.error;
+    // 手机号验证
+    const phoneResult = formData.phone
+      ? validation.phone.validate(formData.phone)
+      : { isValid: true };
+    if (!phoneResult.isValid) {
+      newErrors.phone = phoneResult.error;
     }
 
     // 邮箱验证（使用更严格的验证）
-    const emailResult = validation.email.validate(formData.email);
+    const emailResult = formData.email
+      ? validation.email.validate(formData.email)
+      : { isValid: true };
     if (!emailResult.isValid) {
       newErrors.email = emailResult.error;
     }
@@ -140,10 +142,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               w-full pl-10 pr-4 py-3 border rounded-lg
             focus:border-blue-500
               transition-all duration-200 outline-none
-              ${
-                errors.username
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 bg-white'
+              ${errors.username
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-white'
               }
             `}
             placeholder="请输入用户名"
@@ -162,33 +163,32 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         )}
       </motion.div>
 
-      {/* 昵称输入 */}
+      {/* 手机号输入 */}
       <motion.div custom={1}>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          昵称
+          手机号 <span className="text-gray-400 text-xs">(选填)</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <TeamOutlined className="text-gray-400" />
+            <PhoneOutlined className="text-gray-400" />
           </div>
           <motion.input
             type="text"
-            value={formData.nickname}
-            onChange={(e) => handleInputChange('nickname', e.target.value)}
+            value={formData.phone}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
             className={`
               w-full pl-10 pr-4 py-3 border rounded-lg
               focus:border-blue-500
               transition-all duration-200 outline-none
-              ${
-                errors.nickname
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 bg-white'
+              ${errors.phone
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-white'
               }
             `}
-            placeholder="请输入昵称"
+            placeholder="请输入手机号（选填）"
           />
         </div>
-        {errors.nickname && (
+        {errors.phone && (
           <motion.p
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -196,7 +196,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             className="mt-1 text-sm text-red-600"
             transition={{ duration: 0.2 }}
           >
-            {errors.nickname}
+            {errors.phone}
           </motion.p>
         )}
       </motion.div>
@@ -204,7 +204,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       {/* 邮箱输入 */}
       <motion.div custom={2}>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          邮箱
+          邮箱 <span className="text-gray-400 text-xs">(选填)</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -218,13 +218,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               w-full pl-10 pr-4 py-3 border rounded-lg
               focus:border-blue-500
               transition-all duration-200 outline-none
-              ${
-                errors.email
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 bg-white'
+              ${errors.email
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-white'
               }
             `}
-            placeholder="请输入邮箱地址"
+            placeholder="请输入邮箱地址（选填）"
           />
         </div>
         {errors.email && (
@@ -257,10 +256,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               w-full pl-10 pr-12 py-3 border rounded-lg
               focus:border-blue-500
               transition-all duration-200 outline-none
-              ${
-                errors.password
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 bg-white'
+              ${errors.password
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-white'
               }
             `}
             placeholder="请输入密码"
@@ -307,10 +305,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               w-full pl-10 pr-12 py-3 border rounded-lg
                 focus:border-blue-500
               transition-all duration-200 outline-none
-              ${
-                errors.confirmPassword
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 bg-white'
+              ${errors.confirmPassword
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-white'
               }
             `}
             placeholder="请再次输入密码"

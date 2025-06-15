@@ -3,9 +3,7 @@ import React from 'react';
 
 interface UserInfo {
   avatar?: string;
-  nickname?: string;
   username?: string;
-  name?: string;
 }
 
 interface AvatarProps {
@@ -26,7 +24,7 @@ const sizeClasses = {
 
 const getDisplayName = (user?: UserInfo): string => {
   if (!user) return '';
-  return user.nickname || user.username || user.name || '';
+  return user.username || '';
 };
 
 const getAvatarUrl = (user?: UserInfo): string | undefined => {

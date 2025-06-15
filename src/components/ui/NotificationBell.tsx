@@ -236,7 +236,7 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
                     user={notification.sender}
                     size="sm"
                     className={!notification.is_read ? 'ring-2 ring-blue-300 ring-offset-1' : ''}
-                    fallback={notification.sender?.nickname?.[0] || 'N'}
+                    fallback={notification.sender?.username?.[0]}
                   />
 
                   <div className="flex-1 min-w-0">

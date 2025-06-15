@@ -193,42 +193,12 @@ export const phoneValidation = {
   },
 };
 
-// 昵称验证
-export const nicknameValidation = {
-  validate: (nickname: string): { isValid: boolean; error?: string } => {
-    if (!nickname || !nickname.trim()) {
-      return { isValid: false, error: '请输入昵称' };
-    }
-
-    const trimmedNickname = nickname.trim();
-
-    if (trimmedNickname.length < 2) {
-      return { isValid: false, error: '昵称至少2位字符' };
-    }
-
-    if (trimmedNickname.length > 20) {
-      return { isValid: false, error: '昵称不能超过20位字符' };
-    }
-
-    // 允许中文、英文、数字、下划线、短横线
-    if (!/^[a-zA-Z0-9\u4e00-\u9fa5_-]+$/.test(trimmedNickname)) {
-      return {
-        isValid: false,
-        error: '昵称只能包含中英文、数字、下划线和短横线',
-      };
-    }
-
-    return { isValid: true };
-  },
-};
-
 // 通用验证函数
 export const validation = {
   email: emailValidation,
   username: usernameValidation,
   password: passwordValidation,
   phone: phoneValidation,
-  nickname: nicknameValidation,
 
   // 确认密码验证
   confirmPassword: (

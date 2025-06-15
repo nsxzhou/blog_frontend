@@ -137,28 +137,28 @@ const UserTable: React.FC<UserTableProps> = ({
     // 批量选择列
     ...(batchMode
       ? [
-          {
-            title: '选择',
-            dataIndex: 'selection',
-            key: 'selection',
-            width: 60,
-            render: (_: any, record: UserInfo) => (
-              <motion.div {...hoverScale}>
-                <input
-                  type="checkbox"
-                  checked={selectedUsers.includes(record.id)}
-                  onChange={(e) => {
-                    const newSelected = e.target.checked
-                      ? [...selectedUsers, record.id]
-                      : selectedUsers.filter((id) => id !== record.id);
-                    onSelectionChange(newSelected);
-                  }}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-              </motion.div>
-            ),
-          },
-        ]
+        {
+          title: '选择',
+          dataIndex: 'selection',
+          key: 'selection',
+          width: 60,
+          render: (_: any, record: UserInfo) => (
+            <motion.div {...hoverScale}>
+              <input
+                type="checkbox"
+                checked={selectedUsers.includes(record.id)}
+                onChange={(e) => {
+                  const newSelected = e.target.checked
+                    ? [...selectedUsers, record.id]
+                    : selectedUsers.filter((id) => id !== record.id);
+                  onSelectionChange(newSelected);
+                }}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              />
+            </motion.div>
+          ),
+        },
+      ]
       : []),
 
     // 用户信息列
@@ -186,7 +186,7 @@ const UserTable: React.FC<UserTableProps> = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-sm font-medium text-gray-900 truncate">
-                {record.nickname || record.username}
+                {record.username}
               </h3>
               {record.role === 'admin' && (
                 <CrownOutlined className="text-orange-500 text-xs" />

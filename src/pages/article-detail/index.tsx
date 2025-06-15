@@ -1,7 +1,7 @@
 ﻿import { GetArticleDetail } from '@/api/article';
-import type { Article as ApiArticle } from '@/api/article/type';
+import type { Article } from '@/api/article/type';
 import { GetCommentList } from '@/api/comment';
-import type { CommentItem as ApiComment } from '@/api/comment/type';
+import type { CommentItem, CommentItem as ApiComment } from '@/api/comment/type';
 import { CreateReadingHistory } from '@/api/reading-history';
 import { containerVariants, pageVariants } from '@/constants/animations';
 import { useUserStore } from '@/stores/userStore';
@@ -16,14 +16,11 @@ import {
   CommentSection,
   TableOfContents,
 } from './components';
-import type { Article, Comment } from './types';
-
 const ArticleDetailPage: React.FC = () => {
   const { currentUser, isLoggedIn } = useUserStore();
   const { id } = useParams<{ id: string }>();
   const [article, setArticle] = useState<Article | null>(null);
-  //const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<CommentItem[]>([]);
   const [tocVisible, setTocVisible] = useState(false);
 
   // 获取文章详情
@@ -65,6 +62,12 @@ const ArticleDetailPage: React.FC = () => {
     },
   );
 
+  useEffect(() => {
+    if (commentsResponse?.list) {
+      setComments(commentsResponse.list);
+    }
+  }, [commentsResponse]);
+
   // 获取相关文章
   // const { data: relatedResponse } = useRequest(
   //   async () => {
@@ -92,33 +95,11 @@ const ArticleDetailPage: React.FC = () => {
   // 转换API数据为组件所需格式
   useEffect(() => {
     if (articleResponse) {
-      const apiArticle: ApiArticle = articleResponse;
-
-      const convertedArticle: Article = {
-        id: apiArticle.id,
-        title: apiArticle.title,
-        content: apiArticle.content,
-        excerpt: apiArticle.summary,
-        coverImage: apiArticle.cover_image,
-        author: {
-          name: apiArticle.author_name,
-          avatar: apiArticle.author_avatar,
-          bio: '', // API中没有bio字段，使用空字符串
-        },
-        publishDate: apiArticle.published_at || apiArticle.created_at,
-        views: apiArticle.view_count,
-        likes: apiArticle.like_count,
-        comments: apiArticle.comment_count,
-        tags: apiArticle.tags.map((tag) => tag.name),
-        category: apiArticle.category_name,
-        featured: apiArticle.is_top === 1,
-      };
-
-      setArticle(convertedArticle);
+      setArticle(articleResponse);
 
       // 只有在用户登录时才记录阅读历史
       if (isLoggedIn) {
-        CreateReadingHistory({ article_id: apiArticle.id })
+        CreateReadingHistory({ article_id: articleResponse.id })
           .then(() => {
             console.log('阅读历史记录成功');
           })
@@ -130,65 +111,6 @@ const ArticleDetailPage: React.FC = () => {
     }
   }, [articleResponse, isLoggedIn]);
 
-  // 转换相关文章数据
-  // useEffect(() => {
-  //   if (relatedResponse?.data?.list) {
-  //     // 过滤掉当前文章
-  //     const filtered = relatedResponse.data.list.filter(
-  //       (item: ArticleListItem) => item.id !== parseInt(id || '0'),
-  //     );
-  //     const convertedRelated: RelatedArticle[] = filtered
-  //       .slice(0, 3)
-  //       .map((item: ArticleListItem) => ({
-  //         id: item.id,
-  //         title: item.title,
-  //         excerpt: item.summary,
-  //         image: item.cover_image,
-  //         date: item.published_at
-  //           ? new Date(item.published_at).toISOString().split('T')[0]
-  //           : new Date().toISOString().split('T')[0],
-  //         views: item.view_count,
-  //         readTime: Math.ceil(item.word_count / 200),
-  //         category: item.category_name,
-  //         tags: item.tags.map((tag) => tag.name),
-  //       }));
-
-  //     setRelatedArticles(convertedRelated);
-  //   }
-  // }, [relatedResponse, id]);
-
-  // 转换评论数据
-  useEffect(() => {
-    if (commentsResponse?.list) {
-      const convertedComments: Comment[] = commentsResponse.list.map(
-        (item: ApiComment) => ({
-          id: item.id,
-          author: {
-            name: item.user.nickname || item.user.username,
-            avatar: item.user.avatar,
-          },
-          content: item.content,
-          date: new Date(item.created_at).toLocaleString('zh-CN'),
-          likes: item.like_count,
-          isLiked: item.liked_by_me,
-          replies:
-            item.children?.map((child) => ({
-              id: child.id,
-              author: {
-                name: child.user.nickname || child.user.username,
-                avatar: child.user.avatar,
-              },
-              content: child.content,
-              date: new Date(child.created_at).toLocaleString('zh-CN'),
-              likes: child.like_count,
-              isLiked: false, // API中children没有liked_by_me字段
-            })) || [],
-        }),
-      );
-
-      setComments(convertedComments);
-    }
-  }, [commentsResponse]);
 
   // 返回按钮
   const handleBack = () => {
@@ -259,14 +181,17 @@ const ArticleDetailPage: React.FC = () => {
       {/* 文章头部 */}
       <ArticleHeader
         title={article.title}
-        author={article.author}
-        publishDate={article.publishDate}
-        views={article.views}
-        likes={article.likes}
-        comments={article.comments}
-        tags={article.tags}
-        category={article.category}
-        coverImage={article.coverImage}
+        author={{
+          name: article.author_name,
+          avatar: article.author_avatar,
+        }}
+        publishDate={article.published_at}
+        views={article.view_count}
+        likes={article.like_count}
+        comments={article.comment_count}
+        tags={article.tags.map((tag) => tag.name)}
+        category={article.category_name}
+        coverImage={article.cover_image}
       />
 
       {/* 文章内容 */}

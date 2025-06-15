@@ -1,4 +1,4 @@
-import { CreateComment, LikeComment, ReplyComment } from '@/api/comment';
+import { CommentItem, CreateComment, LikeComment, ReplyComment } from '@/api/comment';
 import {
   containerVariants,
   fadeInUp,
@@ -16,24 +16,15 @@ import { useRequest } from '@umijs/max';
 import { Avatar, Button, Input, message } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
+import UserAvatar from '@/components/ui/UserAvatar';
+
 
 const { TextArea } = Input;
 
-interface Comment {
-  id: number;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  content: string;
-  date: string;
-  likes: number;
-  isLiked: boolean;
-  replies?: Comment[];
-}
+
 
 interface CommentSectionProps {
-  comments: Comment[];
+  comments: CommentItem[];
   articleId: number;
   onCommentUpdate?: () => void; // 评论更新回调，用于刷新评论列表
 }
@@ -163,14 +154,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   // 开始回复评论
   const handleStartReply = (
-    comment: Comment,
+    comment: CommentItem,
     isReply: boolean,
     parentId?: number,
   ) => {
     setReplyingTo(comment.id);
     if (isReply) {
       // 对子评论的回复
-      setReplyingToUser(comment.author.name);
+      setReplyingToUser(comment.user.username);
       setParentCommentId(parentId || comment.id);
       setReplyText('');
     } else {
@@ -183,7 +174,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   // 渲染单条评论
   const renderComment = (
-    comment: Comment,
+    comment: CommentItem,
     isReply = false,
     parentCommentId?: number,
   ) => (
@@ -196,12 +187,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div className="flex gap-3">
           {/* 头像 */}
           <div className="flex-shrink-0">
-            <Avatar
-              src={comment.author.avatar}
-              icon={<UserOutlined />}
-              size={40}
-              className="bg-gray-100"
-            />
+            <UserAvatar user={comment.user} />
           </div>
 
           {/* 评论内容 */}
@@ -209,9 +195,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             {/* 用户信息 */}
             <div className="flex items-baseline gap-2 mb-2">
               <span className="font-medium text-gray-900 text-sm">
-                {comment.author.name}
+                {comment.user.username}
               </span>
-              <span className="text-xs text-gray-500">{comment.date}</span>
+              <span className="text-xs text-gray-500">{comment.created_at}</span>
             </div>
 
             {/* 评论文本 */}
@@ -226,14 +212,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               <motion.button
                 {...hoverScale}
                 onClick={() => handleLikeComment(comment.id)}
-                className={`flex items-center gap-1 text-xs transition-colors ${
-                  comment.isLiked
-                    ? 'text-red-500'
-                    : 'text-gray-500 hover:text-red-500'
-                }`}
+                className={`flex items-center gap-1 text-xs transition-colors ${comment.liked_by_me
+                  ? 'text-red-500'
+                  : 'text-gray-500 hover:text-red-500'
+                  }`}
               >
-                {comment.isLiked ? <LikeFilled /> : <LikeOutlined />}
-                <span>{comment.likes}</span>
+                {comment.liked_by_me ? <LikeFilled /> : <LikeOutlined />}
+                <span>{comment.like_count}</span>
               </motion.button>
 
               <motion.button
@@ -299,9 +284,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             )}
 
             {/* 回复列表 */}
-            {comment.replies && comment.replies.length > 0 && (
+            {comment.children && comment.children.length > 0 && (
               <div className="mt-4">
-                {comment.replies.map((reply) =>
+                {comment.children.map((reply) =>
                   renderComment(reply, true, comment.id),
                 )}
               </div>

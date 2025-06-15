@@ -1,7 +1,7 @@
 // 注册请求参数
 export interface RegisterReq {
-  email: string;
-  nickname: string;
+  email?: string;
+  phone?: string;
   password: string;
   username: string;
 }
@@ -43,19 +43,18 @@ export interface LogoutReq {
 export interface UserInfo {
   id: number;
   username: string;
-  nickname: string;
   email: string;
-  phone?: string;
-  avatar?: string;
-  bio?: string;
+  phone: string;
+  avatar: string;
+  bio: string;
   role: string;
-  status?: number; // 0: 禁用, 1: 启用
+  status: number; // 0: 禁用, 1: 启用
   created_at: string;
   updated_at: string;
-  followers_count?: number; // 粉丝数
-  following_count?: number; // 关注数
-  articles_count?: number; // 文章数
-  is_following?: boolean; // 是否已关注该用户
+  followers_count: number; // 粉丝数
+  following_count: number; // 关注数
+  articles_count: number; // 文章数
+  is_following: boolean; // 是否已关注该用户
 }
 
 // 获取用户信息响应数据
@@ -65,7 +64,7 @@ export interface GetUserInfoRes {
 
 // 更新用户信息请求参数
 export interface UpdateUserInfoReq {
-  nickname?: string;
+  username: string;
   email?: string;
   phone?: string;
   avatar?: string;
@@ -134,7 +133,7 @@ export interface GetUsersReq {
   keyword?: string;
   role?: 'admin' | 'user' | ''; // admin: 管理员, user: 普通用户, 空: 全部
   status?: 0 | 1 | 2; //0: 禁用, 1: 启用 2: 全部
-  order_by?: 'created_at' | 'last_login_at'; // created_at: 创建时间, last_login_at: 最后登录时间 
+  order_by?: 'created_at' | 'last_login_at'; // created_at: 创建时间, last_login_at: 最后登录时间
   order?: 'asc' | 'desc';
 }
 

@@ -105,7 +105,7 @@ const NotificationItem: FC<NotificationItemProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-medium text-gray-900">
-              {notification.sender.nickname}
+              {notification.sender.username}
             </span>
             <span
               className={`px-2 py-1 text-xs rounded-full ${getNotificationTypeColor(

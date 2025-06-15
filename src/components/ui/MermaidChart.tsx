@@ -128,7 +128,7 @@ const MermaidChart: React.FC<MermaidChartProps> = ({ chart, className = '' }) =>
         // 统一节点样式
         const rectElements = svgElement.querySelectorAll('rect');
         rectElements.forEach((rect) => {
-            const width = parseFloat(rect.getAttribute('width') || '0');
+            const width = parseFloat(rect.getAttribute('width') || '0'  );
             const height = parseFloat(rect.getAttribute('height') || '0');
 
             if (width > 0 && width < 80) rect.setAttribute('width', '80');

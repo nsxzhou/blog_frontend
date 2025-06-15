@@ -11,7 +11,6 @@ export interface Comment {
   user: {
     id: number;
     username: string;
-    nickname: string;
     avatar: string;
   };
   like_count: number;
@@ -41,7 +40,6 @@ export interface CommentDetail {
   user: {
     id: number;
     username: string;
-    nickname: string;
     avatar: string;
   };
   parent: {
@@ -53,7 +51,6 @@ export interface CommentDetail {
     user: {
       id: number;
       username: string;
-      nickname: string;
       avatar: string;
     };
     like_count: number;
@@ -82,7 +79,6 @@ export interface CommentItemChildren {
   user: {
     id: number;
     username: string;
-    nickname: string;
     avatar: string;
   };
   like_count: number;
@@ -100,10 +96,9 @@ export interface CommentItem {
   user: {
     id: number;
     username: string;
-    nickname: string;
     avatar: string;
   };
-  children: CommentItemChildren[];
+  children: CommentItem[];
   like_count: number;
   liked_by_me: boolean;
 }
@@ -169,14 +164,13 @@ export interface UpdateCommentStatus {
       updated_at: string;
       username: string;
       email: string;
+      is_email_verified: number;
       avatar: string;
-      nickname: string;
       bio: string;
       role: string;
       status: number;
       last_login_at: string;
       last_login_ip: string;
-      is_verified: number;
       phone: string;
       is_phone_verified: number;
     };
@@ -198,13 +192,12 @@ export interface UpdateCommentStatus {
     username: string;
     email: string;
     avatar: string;
-    nickname: string;
     bio: string;
     role: string;
     status: number;
     last_login_at: string;
     last_login_ip: string;
-    is_verified: number; 
+    is_email_verified: number;
     phone: string;
     is_phone_verified: number;
   };

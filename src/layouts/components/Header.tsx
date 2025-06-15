@@ -262,7 +262,7 @@ const Header: React.FC<HeaderProps> = () => {
                 <div className="flex items-center space-x-2">
                   <UserAvatar user={currentUser} size="sm" />
                   <span className="hidden sm:block text-sm font-medium text-gray-800">
-                    {currentUser.nickname || currentUser.username}
+                    {currentUser.username}
                   </span>
                 </div>
               ) : (

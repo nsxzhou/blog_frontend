@@ -140,7 +140,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
       message.success('信息更新成功');
     } catch (error) {
       console.error('更新失败:', error);
-    } 
+    }
   }, [onSave, selectedAvatar]);
 
   // 获取头像图片列表
@@ -157,7 +157,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
         setTotalImages(response.data.total);
         setCurrentPage(page);
       }
-    } catch (error) { 
+    } catch (error) {
       console.error('获取图片列表失败:', error);
     } finally {
       setAvatarLoading(false);
@@ -218,7 +218,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
         form={form}
         layout="vertical"
         initialValues={{
-          nickname: user.nickname,
+          username: user.username,
           email: user.email,
           phone: user.phone,
           bio: user.bio,
@@ -230,21 +230,20 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <Form.Item
-              label="昵称"
-              name="nickname"
+              label="用户名"
+              name="username"
               rules={[
-                { required: true, message: '请输入昵称' },
-                { min: 2, max: 20, message: '昵称长度应在2-20个字符之间' },
+                { required: true, message: '请输入用户名' },
+                { min: 2, max: 20, message: '用户名长度应在2-20个字符之间' },
               ]}
             >
-              <Input placeholder="请输入昵称" size="large" />
+              <Input placeholder="请输入用户名" size="large" />
             </Form.Item>
 
             <Form.Item
               label="邮箱"
               name="email"
               rules={[
-                { required: true, message: '请输入邮箱' },
                 { type: 'email', message: '请输入有效的邮箱地址' },
               ]}
             >

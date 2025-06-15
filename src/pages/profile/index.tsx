@@ -7,9 +7,7 @@ import {
   type UserInfo,
 } from '@/api/user';
 import { containerVariants, itemVariants } from '@/constants';
-import { UserModelState } from '@/models/user';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { connect } from '@umijs/max';
 import { message, Spin, Tabs } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
@@ -18,9 +16,12 @@ import {
   UserEditForm,
   UserInfoCard,
 } from './components/index';
+import { useUserStore } from '@/stores/userStore';
 
-const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(user.currentUser);
+const ProfilePage: React.FC = () => {
+  const { currentUser, clearUser } = useUserStore();
+
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(currentUser);
   const [loading, setLoading] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -39,8 +40,8 @@ const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
       } catch (error) {
         console.error('获取用户信息失败:', error);
         // 使用初始状态中的用户信息作为后备
-        if (user) {
-          setUserInfo(user.currentUser);
+        if (currentUser) {
+          setUserInfo(currentUser);
         }
       } finally {
         setLoading(false);
@@ -48,7 +49,7 @@ const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
     };
 
     fetchUserInfo();
-  }, [user]);
+  }, [currentUser]);
 
   // 更新用户信息
   const handleUpdateUser = async (data: UpdateUserInfoReq) => {
@@ -156,7 +157,7 @@ const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
     );
   }
 
-  if (!user) {
+  if (!currentUser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -204,6 +205,4 @@ const ProfilePage: React.FC<{ user: UserModelState }> = ({ user }) => {
   );
 };
 
-export default connect(({ user }: { user: UserModelState }) => ({
-  user,
-}))(ProfilePage);
+export default ProfilePage
