@@ -98,6 +98,11 @@ export default defineConfig({
       target: 'http://localhost:8080',
       changeOrigin: true,
     },
+    '/api/ws': {
+      target: 'ws://localhost:8080',
+      changeOrigin: true,
+      ws: true,
+    },
   },
   tailwindcss: {},
   esbuildMinifyIIFE: true,
