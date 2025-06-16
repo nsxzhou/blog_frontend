@@ -21,6 +21,62 @@ interface RefreshTokenRes {
   expires_at: number;
 }
 
+class TokenManager {
+  private static instance: TokenManager;
+  private refreshPromise: Promise<string | null> | null = null;
+
+  private constructor() {}
+
+  static getInstance(): TokenManager {
+    if (!TokenManager.instance) {
+      TokenManager.instance = new TokenManager();
+    }
+    return TokenManager.instance;
+  }
+
+  async refreshToken(): Promise<string | null> {
+    // 如果已经在刷新，返回现有的Promise
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    const refreshTokenValue = getRefreshTokenFromStorage();
+    if (!refreshTokenValue) {
+      return null;
+    }
+
+    // 创建新的刷新Promise
+    this.refreshPromise = (async () => {
+      try {
+        const response = await umiRequest<baseResponse<RefreshTokenRes>>(
+          '/api/users/refresh',
+          {
+            method: 'POST',
+            data: { refresh_token: refreshTokenValue },
+            skipErrorHandler: true,
+          },
+        );
+
+        if (response.code === 0 && response.data) {
+          const { access_token, refresh_token, expires_at } = response.data;
+          setAuthTokens(access_token, refresh_token, expires_at);
+          return access_token;
+        }
+        return null;
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        return null;
+      } finally {
+        this.refreshPromise = null;
+      }
+    })();
+
+    return this.refreshPromise;
+  }
+}
+
+const tokenManager = TokenManager.getInstance();
+
 const redirectToLogin = () => {
   console.log('清除token并跳转到登录页');
   clearAuthTokens();
@@ -145,7 +201,7 @@ export const request: RequestConfig = {
         isRefreshing = true;
 
         try {
-          const newToken = await refreshToken();
+          const newToken = await tokenManager.refreshToken();
 
           // 刷新成功，处理队列中的请求
           processQueue(null, newToken);

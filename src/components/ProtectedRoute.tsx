@@ -1,5 +1,4 @@
-import { UserInfo } from '@/api/user';
-import { connect, history } from '@umijs/max';
+import { history } from '@umijs/max';
 import { Button, Result } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect } from 'react';
@@ -61,8 +60,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   useEffect(() => {
     if (shouldRedirect && redirectTo && !fallback) {
-      const currentPath = window.location.pathname;
-      history.push(`${redirectTo}?redirect=${encodeURIComponent(currentPath)}`);
+      const currentPath = window.location.pathname + window.location.search;
+      // 检查当前路径是否安全
+      const isSafePath = !currentPath.includes('javascript:') && !currentPath.includes('data:');
+      if (isSafePath) {
+        const encodedRedirect = encodeURIComponent(currentPath);
+        const redirectPath = `${redirectTo}?redirect=${encodedRedirect}`;
+        // 避免循环重定向
+        if (!window.location.pathname.startsWith(redirectTo)) {
+          history.push(redirectPath);
+        }
+      } else {
+        // 如果路径不安全，直接重定向到登录页
+        history.push(redirectTo);
+      }
     }
   }, [shouldRedirect, redirectTo, fallback]);
 
@@ -90,10 +101,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               <Button
                 type="primary"
                 onClick={() => {
-                  const currentPath = window.location.pathname;
-                  history.push(
-                    `${redirectTo}?redirect=${encodeURIComponent(currentPath)}`,
-                  );
+                  const currentPath = window.location.pathname + window.location.search;
+                  const encodedRedirect = encodeURIComponent(currentPath);
+                  history.push(`${redirectTo}?redirect=${encodedRedirect}`);
                 }}
                 className="bg-blue-500 hover:bg-blue-600"
               >

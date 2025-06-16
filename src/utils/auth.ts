@@ -17,7 +17,7 @@ export const getRefreshTokenFromStorage = (): string | null => {
 // 从localStorage获取token过期时间
 export const getTokenExpiresAt = (): number | null => {
   if (typeof window === 'undefined') return null;
-  const expiresAt = localStorage.getItem('token_expires_at');
+  const expiresAt = localStorage.getItem('token_expires_in');
   return expiresAt ? parseInt(expiresAt, 10) : null;
 };
 
@@ -32,7 +32,7 @@ export const setAuthTokens = (
   localStorage.setItem('refresh_token', refreshToken);
   if (expiresIn) {
     const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
-    localStorage.setItem('token_expires_at', expiresAt.toString());
+    localStorage.setItem('token_expires_in', expiresIn.toString());
   }
 };
 
@@ -41,7 +41,7 @@ export const clearAuthTokens = (): void => {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('token');
   localStorage.removeItem('refresh_token');
-  localStorage.removeItem('token_expires_at');
+  localStorage.removeItem('token_expires_in');
 };
 
 // 检查token是否已过期
