@@ -72,9 +72,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
           remember: false,
         });
 
+        // 增加延迟，确保状态更新完成
         setTimeout(() => {
           onSuccess();
-        }, 100);
+        }, 500);
       }
     } catch (error) {
       console.error('登录异常:', error);

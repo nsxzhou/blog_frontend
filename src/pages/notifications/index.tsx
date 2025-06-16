@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import type { FC } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import NotificationList from './components/NotificationList';
-import { useWebSocketStore, type WebSocketMessage } from '@/stores/websocketStore';
+import { useWebSocket, type NotificationMessage } from '@/hooks/useWebSocket';
 import { useNotificationStore } from '@/stores/notificationStore';
 
 const { Option } = Select;
@@ -27,35 +27,21 @@ const NotificationsPage: FC = () => {
     total,
     fetchNotifications,
   } = useNotificationStore();
-  const {
-    status: wsStatus,
-    statusMessage: wsStatusMessage,
-    init: initWebSocket,
-    addSubscriber,
-    removeSubscriber,
-  } = useWebSocketStore();
+  // WebSocket消息处理
+  const handleWebSocketMessage = useCallback((message: NotificationMessage) => {
+    if (message.type === 'notification') {
+      // 收到新通知时，刷新当前页面的通知列表
+      fetchNotifications(filters.page, filters.page_size, filters);
+    }
+  }, [fetchNotifications, filters]);
+
+  const { status: wsStatus, statusMessage: wsStatusMessage } = useWebSocket(handleWebSocketMessage);
 
   // 初始化通知
   useEffect(() => {
-    // 1. 获取最新通知
+    // 获取最新通知
     fetchNotifications(filters.page, filters.page_size, filters);
-    // 2. 设置WebSocket订阅
-    initWebSocket();
-
-    // 3. 订阅通知消息
-    const handleNotification = (message: WebSocketMessage) => {
-      if (message.type === 'notification') {
-        // 收到新通知时，刷新当前页面的通知列表
-        fetchNotifications(filters.page, filters.page_size, filters);
-      }
-    };
-
-    addSubscriber('notification', handleNotification);
-
-    return () => {
-      removeSubscriber('notification', handleNotification);
-    };
-  }, [filters]);
+  }, [filters, fetchNotifications]);
 
   // 处理筛选变化
   const handleFilterChange = useCallback(

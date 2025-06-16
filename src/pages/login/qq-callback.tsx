@@ -1,21 +1,18 @@
 import { QQLoginCallback } from '@/api/user';
 import { fadeInUp } from '@/constants/animations';
 import { setAuthTokens } from '@/utils/auth';
-import { connect, history, useDispatch } from '@umijs/max';
+import { history } from '@umijs/max';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import { useUserStore } from '@/stores/userStore';
 
-interface QQCallbackProps {
-  user: any;
-}
-
-const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
+const QQCallback: React.FC = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
     'loading',
   );
   const [message, setMessage] = useState('正在处理QQ登录...');
   const hasProcessed = useRef(false); // 防止重复处理
-  const dispatch = useDispatch();
+  const { setUser } = useUserStore();
   useEffect(() => {
     // 如果已经处理过，直接返回
     if (hasProcessed.current) {
@@ -35,7 +32,7 @@ const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
           setStatus('error');
           setMessage('QQ登录授权码缺失');
 
-          // 3秒后跳转到登录页
+          // 3秒后跳转到登录页l
           setTimeout(() => {
             history.push('/login');
           }, 1000);
@@ -50,13 +47,14 @@ const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
             res.data.refresh_token,
             res.data.expires_in,
           );
-          dispatch({ type: 'user/setUser', payload: res.data.user });
+          setUser(res.data.user);
           setStatus('success');
           setMessage('QQ登录成功！正在跳转...');
 
+          // 增加延迟，确保状态更新完成
           setTimeout(() => {
             history.push('/');
-          }, 500);
+          }, 800); // 增加延迟时间以确保状态完全更新
         } else {
           setStatus('error');
           setMessage(res.message || 'QQ登录失败');
@@ -79,7 +77,7 @@ const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
     };
 
     processCallback();
-  }, [dispatch]);
+  }, [setUser]);
 
   const getStatusIcon = () => {
     switch (status) {
@@ -185,4 +183,4 @@ const QQCallback: React.FC<QQCallbackProps> = ({ user }) => {
   );
 };
 
-export default connect(({ user }: any) => ({ user }))(QQCallback);
+export default QQCallback;

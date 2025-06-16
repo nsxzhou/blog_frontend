@@ -2,7 +2,7 @@ import { Button, UserAvatar } from '@/components/ui';
 import { fadeInUp, scaleIn } from '@/constants/animations';
 import { useUserStore } from '@/stores/userStore';
 import { useNotificationStore } from '@/stores/notificationStore';
-import { useWebSocketStore, type WebSocketMessage } from '@/stores/websocketStore';
+import { useWebSocket, type NotificationMessage } from '@/hooks/useWebSocket';
 import type { NotificationItem } from '@/api/notification';
 import {
   BellOutlined,
@@ -40,43 +40,29 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
     markAllAsRead,
     handleRealtimeNotification,
   } = useNotificationStore();
-  const { init: initWebSocket, addSubscriber, removeSubscriber } = useWebSocketStore();
 
-  // 在组件挂载时获取通知数据和初始化WebSocket
+  // WebSocket连接处理
+  const handleWebSocketMessage = useCallback((message: NotificationMessage) => {
+    if (message.type === 'notification' && message.data) {
+      handleRealtimeNotification(message.data);
+    }
+  }, [handleRealtimeNotification]);
+
+  // 使用WebSocket处理实时通知
+  useWebSocket(isLoggedIn ? handleWebSocketMessage : undefined);
+
+  // 在组件挂载时获取通知数据
   useEffect(() => {
     if (isLoggedIn && currentUser && !initialized) {
       try {
-        // 1. 获取初始通知数据（只获取最新的10条）
+        // 获取初始通知数据（只获取最新的10条）
         fetchNotifications(1, 10);
-
-        // 2. 初始化WebSocket连接
-        initWebSocket();
-
         setInitialized(true);
       } catch (error) {
         console.error('初始化通知数据失败:', error);
       }
     }
-  }, [isLoggedIn, currentUser, initialized, fetchNotifications, initWebSocket]);
-
-  // WebSocket订阅
-  useEffect(() => {
-    if (!isLoggedIn || !initialized) return;
-
-    // 订阅通知消息
-    const handleNotification = (message: WebSocketMessage) => {
-      if (message.type === 'notification' && message.payload) {
-        handleRealtimeNotification(message.payload);
-      }
-    };
-
-    addSubscriber('notification', handleNotification);
-
-    // 清理函数
-    return () => {
-      removeSubscriber('notification', handleNotification);
-    };
-  }, [isLoggedIn, initialized, addSubscriber, removeSubscriber, handleRealtimeNotification]);
+  }, [isLoggedIn, currentUser, initialized, fetchNotifications]);
 
   // 定期刷新通知数据（每5分钟）
   useEffect(() => {
@@ -298,7 +284,7 @@ const NotificationBell: FC<NotificationBellProps> = ({ className = '' }) => {
       content={isLoggedIn ? notificationContent : notLoggedInContent}
       trigger="click"
       placement="bottomRight"
-      overlayClassName="notification-popover"
+
       open={visible}
       onOpenChange={setVisible}
       arrow={false}

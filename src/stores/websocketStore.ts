@@ -1,48 +1,61 @@
-import { getWebSocketURL } from '@/utils/websocket';
+import { getTokenFromStorage } from '@/utils/auth';
 import { create } from 'zustand';
 
-// 定义WebSocket消息类型
-export interface WebSocketMessage {
-  type: string;
-  payload: any;
+// 后端消息格式（与后端保持一致）
+export interface NotificationMessage {
+  type: 'notification';
+  data: any; // 通知数据
   timestamp: number;
+  message_id?: string;
 }
 
-// 定义错误类型
-export interface WebSocketError {
-  code: number;
-  message: string;
-  timestamp: number;
-}
+// WebSocket连接状态
+export type WebSocketStatus =
+  | 'disconnected'
+  | 'connecting'
+  | 'connected'
+  | 'reconnecting';
 
-// 定义订阅者回调函数类型
-export type SubscriberCallback = (message: WebSocketMessage) => void;
+// 消息处理器类型
+export type MessageHandler = (message: NotificationMessage) => void;
 
 interface WebSocketState {
-  status: 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+  // 连接状态
+  status: WebSocketStatus;
   statusMessage: string;
+
+  // 重连配置
   reconnectAttempts: number;
   maxReconnectAttempts: number;
   reconnectInterval: number;
-  latestNotification?: WebSocketMessage;
-  subscribers: { [key: string]: SubscriberCallback[] };
-  errors: WebSocketError[];
 
-  // Actions
-  init: (url?: string) => void;
-  sendMessage: (payload: any) => void;
-  close: () => void;
-  addSubscriber: (topic: string, callback: SubscriberCallback) => void;
-  removeSubscriber: (topic: string, callback: SubscriberCallback) => void;
+  // 消息处理器
+  messageHandlers: Set<MessageHandler>;
+
+  // 操作方法
+  connect: () => void;
+  disconnect: () => void;
+  addMessageHandler: (handler: MessageHandler) => void;
+  removeMessageHandler: (handler: MessageHandler) => void;
+  isConnected: () => boolean;
 }
 
-// 将核心变量提升到store外部，确保全局单例
+// 全局WebSocket实例
 let ws: WebSocket | null = null;
 let heartbeatTimer: NodeJS.Timeout | null = null;
 let reconnectTimer: NodeJS.Timeout | null = null;
 
+// 获取WebSocket URL
+const getWebSocketURL = (): string => {
+  const token = getTokenFromStorage();
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${protocol}://localhost:8080/api/ws/connect?token=${encodeURIComponent(
+    token || '',
+  )}`;
+};
+
 export const useWebSocketStore = create<WebSocketState>((set, get) => {
-  // 辅助函数
+  // 清理资源
   const cleanup = () => {
     if (heartbeatTimer) {
       clearInterval(heartbeatTimer);
@@ -64,203 +77,169 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
         try {
           ws.close();
         } catch (e) {
-          console.error('关闭旧 WebSocket 时出错:', e);
+          console.error('关闭WebSocket连接时出错:', e);
         }
       }
       ws = null;
     }
   };
 
+  // 启动心跳
   const startHeartbeat = () => {
     if (heartbeatTimer) clearInterval(heartbeatTimer);
     heartbeatTimer = setInterval(() => {
       if (ws && ws.readyState === WebSocket.OPEN) {
-        console.log('发送 ping...');
-        ws.send(JSON.stringify({ type: 'ping' }));
+        ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
       }
-    }, 30000);
+    }, 30000); // 30秒心跳
   };
 
-  const handleMessage = (message: WebSocketMessage) => {
+  // 处理接收到的消息
+  const handleMessage = (rawMessage: any) => {
     const state = get();
-    const subscribers = state.subscribers[message.type] || [];
 
-    // 通知所有相关订阅者
-    subscribers.forEach((callback) => {
+    // 忽略心跳响应
+    if (rawMessage.type === 'pong') {
+      return;
+    }
+
+    // 构造标准消息格式
+    const message: NotificationMessage = {
+      type: 'notification',
+      data: rawMessage.data || rawMessage,
+      timestamp: rawMessage.timestamp || Date.now(),
+      message_id: rawMessage.message_id,
+    };
+
+    // 通知所有消息处理器
+    state.messageHandlers.forEach((handler) => {
       try {
-        callback(message);
-      } catch (error: any) {
-        console.error('执行订阅者回调时出错:', error);
-        set((state) => ({
-          errors: [
-            ...state.errors,
-            {
-              code: 1001,
-              message: `订阅者回调执行失败: ${error.message}`,
-              timestamp: Date.now(),
-            },
-          ],
-        }));
+        handler(message);
+      } catch (error) {
+        console.error('消息处理器执行失败:', error);
       }
     });
+  };
 
-    // 更新最新通知
-    set({ latestNotification: message });
+  // 连接WebSocket
+  const connectWebSocket = () => {
+    // 防止重复连接
+    if (
+      ws &&
+      (ws.readyState === WebSocket.OPEN ||
+        ws.readyState === WebSocket.CONNECTING)
+    ) {
+      console.log('WebSocket已连接或正在连接');
+      return;
+    }
+
+    // 检查token
+    const token = getTokenFromStorage();
+    if (!token) {
+      console.error('未找到认证token');
+      set({ status: 'disconnected', statusMessage: '未登录' });
+      return;
+    }
+
+    cleanup();
+
+    const wsUrl = getWebSocketURL();
+    ws = new WebSocket(wsUrl);
+
+    set({ status: 'connecting', statusMessage: '正在连接...' });
+
+    ws.onopen = () => {
+      console.log('WebSocket连接成功');
+      set({
+        status: 'connected',
+        statusMessage: '已连接',
+        reconnectAttempts: 0,
+      });
+      startHeartbeat();
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const rawMessage = JSON.parse(event.data);
+        handleMessage(rawMessage);
+      } catch (error) {
+        console.error('解析WebSocket消息失败:', error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket连接错误:', error);
+      set({ status: 'reconnecting', statusMessage: '连接错误' });
+    };
+
+    ws.onclose = (event) => {
+      console.log(`WebSocket连接关闭: ${event.code} - ${event.reason}`);
+      const currentState = get();
+
+      if (currentState.status !== 'disconnected') {
+        // 自动重连
+        if (
+          currentState.reconnectAttempts < currentState.maxReconnectAttempts
+        ) {
+          const nextAttempt = currentState.reconnectAttempts + 1;
+          set({
+            status: 'reconnecting',
+            statusMessage: `重连中 (${nextAttempt}/${currentState.maxReconnectAttempts})`,
+            reconnectAttempts: nextAttempt,
+          });
+
+          reconnectTimer = setTimeout(() => {
+            connectWebSocket();
+          }, currentState.reconnectInterval);
+        } else {
+          set({
+            status: 'disconnected',
+            statusMessage: '连接失败',
+          });
+        }
+      }
+    };
   };
 
   return {
-    // State
+    // 状态
     status: 'disconnected',
     statusMessage: '未连接',
     reconnectAttempts: 0,
     maxReconnectAttempts: 5,
     reconnectInterval: 3000,
-    subscribers: {},
-    errors: [],
+    messageHandlers: new Set<MessageHandler>(),
 
-    // Actions
-    init: (url?: string) => {
-      const state = get();
-      if (
-        ws &&
-        (state.status === 'connected' || state.status === 'connecting')
-      ) {
-        console.log('WebSocket 正在连接或已连接，阻止重复初始化。');
-        return;
-      }
+    // 方法
+    connect: connectWebSocket,
 
-      cleanup();
-
-      const wsUrl = url || getWebSocketURL();
-      ws = new window.WebSocket(wsUrl);
-
-      set({
-        status: 'connecting',
-        statusMessage: '正在连接...',
-      });
-
-      ws.onopen = () => {
-        console.log('WebSocket连接成功');
-        set({
-          status: 'connected',
-          statusMessage: '已连接',
-          reconnectAttempts: 0,
-        });
-        startHeartbeat();
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          console.log('WebSocket收到消息:', msg);
-
-          if (msg.type !== 'pong') {
-            // 确保消息格式正确
-            const message: WebSocketMessage = {
-              type: msg.type,
-              // 如果是通知类型，保留完整的通知数据结构
-              payload: msg.type === 'notification' ? msg.data : msg,
-              timestamp: Date.now(),
-            };
-            handleMessage(message);
-          }
-        } catch (e: any) {
-          console.error('解析 WebSocket 消息失败:', e);
-          set((state) => ({
-            errors: [
-              ...state.errors,
-              {
-                code: 1000,
-                message: `WebSocket消息解析失败: ${e.message}`,
-                timestamp: Date.now(),
-              },
-            ],
-          }));
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.log('WebSocket连接异常:', error);
-        set({
-          status: 'reconnecting',
-          statusMessage: '连接异常',
-        });
-      };
-
-      ws.onclose = (event) => {
-        console.log(
-          `WebSocket连接关闭，代码: ${event.code}, 原因: ${event.reason}`,
-        );
-        const state = get();
-
-        if (
-          state.status !== 'disconnected' ||
-          state.statusMessage !== '已手动断开'
-        ) {
-          if (state.reconnectAttempts < state.maxReconnectAttempts) {
-            const nextAttempt = state.reconnectAttempts + 1;
-            set((state) => ({
-              status: 'reconnecting',
-              statusMessage: `连接已断开，正在进行第 ${nextAttempt} 次重连...`,
-              reconnectAttempts: nextAttempt,
-            }));
-            reconnectTimer = setTimeout(
-              () => get().init(url),
-              state.reconnectInterval,
-            );
-          } else {
-            set({
-              status: 'disconnected',
-              statusMessage: '重连失败，已达到最大尝试次数',
-            });
-            cleanup();
-          }
-        } else {
-          cleanup();
-        }
-      };
-    },
-
-    sendMessage: (payload: any) => {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(payload));
-      } else {
-        console.error('WebSocket 未连接，无法发送消息');
-      }
-    },
-
-    close: () => {
-      console.log('用户手动关闭 WebSocket 连接');
+    disconnect: () => {
       cleanup();
       set({
         status: 'disconnected',
-        statusMessage: '已手动断开',
+        statusMessage: '已断开',
         reconnectAttempts: 0,
       });
     },
 
-    addSubscriber: (topic: string, callback: SubscriberCallback) => {
+    addMessageHandler: (handler: MessageHandler) => {
       set((state) => {
-        const subscribers = state.subscribers[topic] || [];
-        return {
-          subscribers: {
-            ...state.subscribers,
-            [topic]: [...subscribers, callback],
-          },
-        };
+        const newHandlers = new Set(state.messageHandlers);
+        newHandlers.add(handler);
+        return { messageHandlers: newHandlers };
       });
     },
 
-    removeSubscriber: (topic: string, callback: SubscriberCallback) => {
+    removeMessageHandler: (handler: MessageHandler) => {
       set((state) => {
-        const subscribers = state.subscribers[topic] || [];
-        return {
-          subscribers: {
-            ...state.subscribers,
-            [topic]: subscribers.filter((cb) => cb !== callback),
-          },
-        };
+        const newHandlers = new Set(state.messageHandlers);
+        newHandlers.delete(handler);
+        return { messageHandlers: newHandlers };
       });
+    },
+
+    isConnected: () => {
+      return get().status === 'connected';
     },
   };
 });
