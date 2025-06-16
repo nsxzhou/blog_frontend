@@ -34,7 +34,7 @@ export class PermissionChecker {
     permission: RoutePermission,
     user: UserInfo | null,
     isLoggedIn: boolean,
-    customRedirectTo?: string
+    customRedirectTo?: string,
   ): PermissionCheckResult {
     const defaultRedirectTo = customRedirectTo || '/login';
 
@@ -140,10 +140,10 @@ export class PermissionChecker {
     customCheck: (user: UserInfo | null, isLoggedIn: boolean) => boolean,
     user: UserInfo | null,
     isLoggedIn: boolean,
-    customRedirectTo?: string
+    customRedirectTo?: string,
   ): PermissionCheckResult {
     const hasPermission = customCheck(user, isLoggedIn);
-    
+
     if (hasPermission) {
       return {
         hasPermission: true,
