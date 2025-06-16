@@ -6,6 +6,7 @@ export default defineConfig({
   initialState: {},
   request: {},
   routes: [
+    // 公开页面
     {
       path: '/',
       component: '@/pages/home',
@@ -19,21 +20,15 @@ export default defineConfig({
       component: '@/pages/about',
     },
     {
-      path: '/my-articles',
-      component: '@/pages/my-articles',
-    },
-    // {
-    //   path: '/rss',
-    //   component: '@/pages/rss',
-    // },
-    {
-      path: '/articles',
-      component: '@/pages/articles',
+      path: '/article-detail/:id',
+      component: '@/pages/article-detail',
     },
     {
-      path: '/reading-history',
-      component: '@/pages/reading-history',
+      path: '/403',
+      component: '@/pages/403',
     },
+
+    // 仅未登录用户可访问
     {
       path: '/login',
       component: '@/pages/login',
@@ -42,14 +37,8 @@ export default defineConfig({
       path: '/qq/callback',
       component: '@/pages/login/qq-callback',
     },
-    {
-      path: '/write',
-      component: '@/pages/write',
-    },
-    {
-      path: '/article-detail/:id',
-      component: '@/pages/article-detail',
-    },
+
+    // 需要登录的页面
     {
       path: '/profile',
       component: '@/pages/profile',
@@ -58,6 +47,16 @@ export default defineConfig({
       path: '/notifications',
       component: '@/pages/notifications',
     },
+    {
+      path: '/reading-history',
+      component: '@/pages/reading-history',
+    },
+    {
+      path: '/favorites',
+      component: '@/pages/favorites',
+    },
+
+    // 管理员专用页面
     {
       path: '/categories',
       component: '@/pages/categories',
@@ -79,13 +78,17 @@ export default defineConfig({
       component: '@/pages/users',
     },
     {
-      path: '/favorites',
-      component: '@/pages/favorites',
+      path: '/write',
+      component: '@/pages/write',
     },
     {
-      path: '/403',
-      component: '@/pages/403',
-    }
+      path: '/articles',
+      component: '@/pages/articles',
+    },
+    {
+      path: '/my-articles',
+      component: '@/pages/my-articles',
+    },
   ],
   npmClient: 'pnpm',
   dva: {},

@@ -61,7 +61,7 @@ const GlobalLayout: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // 使用Zustand hooks
-  const { setUser, setInitialized } = useUserStore();
+  const { setUser, clearUser, setInitialized } = useUserStore();
   const { connect: connectWebSocket } = useWebSocketStore();
 
   // 用户信息初始化
@@ -70,8 +70,7 @@ const GlobalLayout: React.FC = () => {
       const token = getTokenFromStorage();
       try {
         if (!token) {
-          setUser(null as any);
-          setInitialized(true);
+          clearUser();
           setIsLoading(false);
           return;
         }
@@ -80,10 +79,13 @@ const GlobalLayout: React.FC = () => {
         if (res.code === 0) {
           setUser(res.data.user);
           connectWebSocket();
+        } else {
+          console.error('获取用户信息失败:', res);
+          clearUser();
         }
       } catch (error) {
         console.error('获取用户信息失败:', error);
-        setUser(null as any);
+        clearUser();
       } finally {
         setInitialized(true);
         setIsLoading(false);
@@ -91,7 +93,7 @@ const GlobalLayout: React.FC = () => {
     };
 
     fetchUserInfo();
-  }, [setUser, setInitialized, connectWebSocket]);
+  }, [setUser, clearUser, setInitialized, connectWebSocket]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative">
