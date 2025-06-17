@@ -1,24 +1,22 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { history } from '@umijs/max';
-import {
-  CalendarOutlined,
-  EyeOutlined,
-  HeartOutlined,
-  CommentOutlined,
-  FireOutlined,
-} from '@ant-design/icons';
+import type { ArticleListItem } from '@/api/article/type';
 import { UserAvatar } from '@/components/ui';
 import {
-  itemVariants,
   cardHover,
-  scaleIn,
-  hoverScale,
   imageVariants,
+  itemVariants,
+  overlayVariants,
   titleVariants,
-  overlayVariants
 } from '@/constants/animations';
-import type { ArticleListItem } from '@/api/article/type';
+import {
+  CalendarOutlined,
+  CommentOutlined,
+  EyeOutlined,
+  FireOutlined,
+  HeartOutlined,
+} from '@ant-design/icons';
+import { history } from '@umijs/max';
+import { motion } from 'framer-motion';
+import React from 'react';
 
 interface BlogCardProps {
   post: ArticleListItem;
@@ -42,11 +40,12 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
         variants={cardHover}
         initial="rest"
         whileHover="hover"
-        className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${post.is_top ? 'ring-2 ring-blue-200' : ''
-          }`}
+        className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${
+          post.is_top === 1 ? 'ring-2 ring-blue-200' : ''
+        }`}
       >
-        {/* 特色标签 */}
-        {post.is_top && (
+        {/* 置顶标签 */}
+        {post.is_top === 1 && (
           <div className="absolute top-4 left-4 z-10">
             <motion.div
               initial={{ scale: 0 }}
@@ -54,11 +53,10 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
               className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
             >
               <FireOutlined />
-              热门
+              置顶
             </motion.div>
           </div>
         )}
-
         {/* 文章图片 */}
         <div className="relative h-48 overflow-hidden">
           <motion.img
@@ -107,8 +105,8 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
                 key={tagIndex}
                 className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 cursor-pointer"
                 whileHover={{
-                  backgroundColor: "#e5e7eb",
-                  transition: { duration: 0.1 }
+                  backgroundColor: '#e5e7eb',
+                  transition: { duration: 0.1 },
                 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -150,4 +148,4 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
   );
 };
 
-export default BlogCard; 
+export default BlogCard;
