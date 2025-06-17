@@ -49,7 +49,8 @@ let reconnectTimer: NodeJS.Timeout | null = null;
 const getWebSocketURL = (): string => {
   const token = getTokenFromStorage();
   const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  return `${protocol}://localhost:8080/api/ws/connect?token=${encodeURIComponent(
+  const host = window.location.host;
+  return `${protocol}://${host}/api/ws/connect?token=${encodeURIComponent(
     token || '',
   )}`;
 };

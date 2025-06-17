@@ -48,3 +48,18 @@ export function onRouteChange({ location }: { location: { pathname: string } }) 
         return;
     }
 };
+
+
+// 在 src/app.tsx 文件中
+export function render(oldRender: () => void) {
+    // 创建 CSP meta 标签
+    const meta = document.createElement('meta');
+    meta.httpEquiv = 'Content-Security-Policy';
+    // 修改 CSP 策略，添加 ws: 和 wss: 协议
+    meta.content = "default-src 'self' http: https: ws: wss: data: blob: 'unsafe-inline'";
+    // 添加到文档头部
+    document.head.appendChild(meta);
+
+    // 继续原始渲染
+    oldRender();
+}

@@ -22,7 +22,7 @@
     "@toast-ui/react-editor": "^3.2.3",
     "@uiw/react-markdown-preview": "^5.1.4",
     "@uiw/react-md-editor": "^4.0.7",
-    "@umijs/max": "^4.4.11",
+    "@umijs/max": "^4.4.12",
     "antd": "^5.4.0",
     "clsx": "^2.1.1",
     "core-js": "^3.34.0",
