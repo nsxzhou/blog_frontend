@@ -3,37 +3,16 @@ import { Button } from '@/components/ui';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import BlogCard from '@/pages/blog/components/BlogCard';
 import EmptyState from '@/pages/blog/components/EmptyState';
-import type { BlogPost } from '@/pages/blog/components/types';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { message, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from '@umijs/max';
 
-/**
- * 将API返回的文章数据转换为BlogPost格式
- */
-const transformArticleToPost = (article: ArticleListItem): BlogPost => {
-  return {
-    id: article.id,
-    title: article.title,
-    excerpt: article.summary,
-    image: article.cover_image,
-    date: article.published_at,
-    views: article.view_count,
-    likes: article.like_count,
-    comments: article.comment_count,
-    tags: article.tags.map((tag) => tag.name),
-    category: article.category_name,
-    author: {
-      name: article.author_name,
-    },
-    featured: article.is_top === 1,
-  };
-};
+
 
 const BlogSection: React.FC = () => {
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogPosts, setBlogPosts] = useState<ArticleListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -55,8 +34,7 @@ const BlogSection: React.FC = () => {
         const articles = response.data.list || [];
 
         if (articles.length > 0) {
-          const transformedPosts = articles.map(transformArticleToPost);
-          setBlogPosts(transformedPosts);
+          setBlogPosts(articles);
         } else {
           setBlogPosts([]);
         }

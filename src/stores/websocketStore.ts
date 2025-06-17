@@ -133,11 +133,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => {
       console.log('WebSocket已连接或正在连接');
       return;
     }
-
     // 检查token
     const token = getTokenFromStorage();
     if (!token) {
-      console.error('未找到认证token');
       set({ status: 'disconnected', statusMessage: '未登录' });
       return;
     }

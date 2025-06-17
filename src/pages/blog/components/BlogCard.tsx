@@ -18,10 +18,10 @@ import {
   titleVariants,
   overlayVariants
 } from '@/constants/animations';
-import type { BlogPost } from './types';
+import type { ArticleListItem } from '@/api/article/type';
 
 interface BlogCardProps {
-  post: BlogPost;
+  post: ArticleListItem;
   index: number;
 }
 
@@ -42,11 +42,11 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
         variants={cardHover}
         initial="rest"
         whileHover="hover"
-        className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${post.featured ? 'ring-2 ring-blue-200' : ''
+        className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${post.is_top ? 'ring-2 ring-blue-200' : ''
           }`}
       >
         {/* 特色标签 */}
-        {post.featured && (
+        {post.is_top && (
           <div className="absolute top-4 left-4 z-10">
             <motion.div
               initial={{ scale: 0 }}
@@ -62,7 +62,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
         {/* 文章图片 */}
         <div className="relative h-48 overflow-hidden">
           <motion.img
-            src={post.image}
+            src={post.cover_image}
             alt={post.title}
             className="w-full h-full object-cover"
             variants={imageVariants}
@@ -77,12 +77,12 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
           {/* 分类标签 */}
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
-              {post.category}
+              {post.category_name}
             </span>
             <div className="flex items-center gap-3 text-xs text-gray-500">
               <span className="flex items-center gap-1">
                 <CalendarOutlined />
-                {post.date}
+                {post.published_at}
               </span>
             </div>
           </div>
@@ -97,7 +97,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
 
           {/* 文章摘要 */}
           <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3 text-sm">
-            {post.excerpt}
+            {post.summary}
           </p>
 
           {/* 标签 */}
@@ -112,7 +112,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
                 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {tag}
+                {tag.name}
               </motion.span>
             ))}
           </div>
@@ -121,23 +121,26 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div className="flex items-center gap-2">
               <UserAvatar
-                user={post.author}
+                user={{
+                  avatar: '',
+                  username: post.author_name,
+                }}
                 className="w-6 h-6 rounded-full object-cover"
               />
-              <span className="text-sm text-gray-600">{post.author.name}</span>
+              <span className="text-sm text-gray-600">{post.author_name}</span>
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <EyeOutlined />
-                {post.views}
+                {post.view_count}
               </span>
               <span className="flex items-center gap-1">
                 <HeartOutlined />
-                {post.likes}
+                {post.like_count}
               </span>
               <span className="flex items-center gap-1">
                 <CommentOutlined />
-                {post.comments}
+                {post.comment_count}
               </span>
             </div>
           </div>

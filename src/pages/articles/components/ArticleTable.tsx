@@ -32,7 +32,7 @@ import {
     StarOutlined,
     PushpinOutlined,
 } from '@ant-design/icons';
-import { type ArticleListItem } from '@/api/article';
+import { type ArticleListItem } from '@/api/article/type';
 import { fadeInUp, hoverScale, itemVariants } from '@/constants/animations';
 import { type StatusConfig, type AccessConfig } from '../types';
 

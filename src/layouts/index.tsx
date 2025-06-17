@@ -74,7 +74,6 @@ const GlobalLayout: React.FC = () => {
           setIsLoading(false);
           return;
         }
-
         const res = await GetUserInfo();
         if (res.code === 0) {
           setUser(res.data.user);

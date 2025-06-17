@@ -96,7 +96,7 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
         onRefresh?.();
       },
       onError: (error) => {
-        console.error('状态更新失败:', error); 
+        console.error('状态更新失败:', error);
       },
     },
   );
@@ -133,9 +133,8 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
   const handleStatusChange = (status: 'draft' | 'published') => {
     Modal.confirm({
       title: `确认${status === 'published' ? '发布' : '转为草稿'}？`,
-      content: `您确定要将文章${
-        status === 'published' ? '发布' : '转为草稿'
-      }吗？`,
+      content: `您确定要将文章${status === 'published' ? '发布' : '转为草稿'
+        }吗？`,
       onOk: () => updateStatus(status),
     });
     setShowActions(false);
@@ -154,7 +153,7 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
 
   const handlePasswordSubmit = () => {
     if (!password.trim()) {
-      message.error('请输入密码'); 
+      message.error('请输入密码');
       return;
     }
     updateAccess('password', password);
@@ -263,9 +262,8 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
           variants={cardHover}
           initial="rest"
           whileHover="hover"
-          className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${
-            article.is_top === 1 ? 'ring-2 ring-blue-200' : ''
-          }`}
+          className={`overflow-hidden h-full bg-white rounded-lg border border-gray-200 shadow-md ${article.is_top === 1 ? 'ring-2 ring-blue-200' : ''
+            }`}
         >
           {/* 置顶标签 */}
           {article.is_top === 1 && (
@@ -466,7 +464,7 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2">
                 <UserAvatar
-                  user={{ name: article.author_name }}
+                  user={{ username: article.author_name, avatar: '' }}
                   className="w-6 h-6 rounded-full object-cover"
                 />
                 <span className="text-sm text-gray-600">

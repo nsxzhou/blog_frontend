@@ -4,7 +4,7 @@ import { Spin, Button, Pagination } from 'antd';
 import BlogCard from './BlogCard';
 import EmptyState from './EmptyState';
 import { containerVariants } from '@/constants/animations';
-import type { BlogPost } from './types';
+import type { ArticleListItem } from '@/api/article/type';
 
 interface PaginationConfig {
   current: number;
@@ -17,7 +17,7 @@ interface PaginationConfig {
 }
 
 interface BlogListProps {
-  filteredPosts: BlogPost[];  
+  filteredPosts: ArticleListItem[];  
   filterKey: string;
   loading?: boolean;
   error?: string | null;

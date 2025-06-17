@@ -15,30 +15,7 @@ import {
   BlogHeader,
   BlogList,
   BlogSearch,
-  type BlogPost,
 } from './components';
-
-/**
- * 将API返回的文章数据转换为BlogPost格式
- */
-const transformArticleToPost = (article: ArticleListItem): BlogPost => {
-  return {
-    id: article.id,
-    title: article.title,
-    excerpt: article.summary,
-    image: article.cover_image,
-    date: article.published_at,
-    views: article.view_count,
-    likes: article.like_count,
-    comments: article.comment_count,
-    tags: article.tags.map((tag) => tag.name),
-    category: article.category_name,
-    author: {
-      name: article.author_name,
-    },
-    featured: article.is_top === 1,
-  };
-};
 
 const BlogPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -50,7 +27,7 @@ const BlogPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // 数据状态
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogPosts, setBlogPosts] = useState<ArticleListItem[]>([]);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [allTags, setAllTags] = useState<TagInfo[]>([]);
 
@@ -175,8 +152,7 @@ const BlogPage: React.FC = () => {
 
         if (response.code === 0 && response.data) {
           const articles = response.data.list || [];
-          const transformedPosts = articles.map(transformArticleToPost);
-          setBlogPosts(transformedPosts);
+          setBlogPosts(articles);
           setTotal(response.data.total || 0);
 
           if (resetPage) {
