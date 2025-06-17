@@ -15,11 +15,10 @@ alwaysApply: true
 - `src/components/` - 可复用组件
 - `src/layouts/` - 布局组件
 - `src/api/` - API 接口定义
-- `src/models/` - 数据模型和状态管理
+- `src/stores/` - 状态管理
 - `src/utils/` - 工具函数
 - `src/hooks/` - 自定义 React Hooks
 - `src/constants/` - 常量定义
-- `src/styles/` - 样式文件
 - `src/assets/` - 静态资源
 
 ## 核心配置文件

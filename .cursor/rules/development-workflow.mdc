@@ -20,12 +20,12 @@ const fetchData = async () => {
   try {
     // 直接使用返回的数据，错误已在拦截器中处理
     const response = await ai.getPosts();
-    if(response.code===0) {
-        setData(response.data);
+    if (response.code === 0) {
+      setData(response.data);
     }
   } catch (error) {
     // 仅处理组件特定的错误逻辑
-    console.error('获取数据失败:', error);
+    console.error("获取数据失败:", error);
   }
 };
 ```

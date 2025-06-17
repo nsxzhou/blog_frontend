@@ -56,6 +56,5 @@ export default Component;
 ### 状态管理
 
 1. 简单状态使用 `useState`
-2. 复杂状态使用 Umi 的 `useModel`
-3. 全局状态放在 `src/models/` 目录下
-4. API 调用使用 Umi 的 `useRequest`
+2. 复杂状态使用 `zustand`
+3. 全局状态放在 `src/store/` 目录下
